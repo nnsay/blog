@@ -61,12 +61,20 @@
                 <span class="nav-text">Home</span>
             </a>
         
+            <a class="nav-item" href="/blog/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
             <a class="nav-item" href="/blog/archives">
                 <span class="nav-text">Archives</span>
             </a>
         
             <a class="nav-item" href="/blog/atom.xml">
                 <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/blog/about">
+                <span class="nav-text">About</span>
             </a>
         
     </nav>
@@ -90,7 +98,7 @@
             </div>
             
             <div class="author-name">Jimmy Wang</div>
-            <div class="author-work">DevOps</div>
+            <div class="author-work">DevOps Engineer</div>
             <div class="author-location">
                 <i class="icon-location vm"></i>
                 <span class="vm">Beijign, China</span>
@@ -120,6 +128,66 @@
         <div id="content" class="content">
             <div id="wrapper" class="wrapper" style="max-width: 800px">
                 
+    <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            <a href="/blog/2019/10/21/sprint-graph/">sprint-graph</a>
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="/blog/2019/10/21/sprint-graph/">
+    
+    <i class="icon-calendar"></i>
+    
+    <time datetime="2019-10-20T17:12:25.000Z" itemprop="datePublished">2019-10-21</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag"></i>
+    <a class="article-tag-link" href="/blog/tags/%E6%95%88%E7%8E%87/" rel="tag">效率</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h3 id="Sprint"><a href="#Sprint" class="headerlink" title="Sprint"></a>Sprint</h3><pre class="mermaid">graph LR
+
+A(Idea) --> | Discussed | B(Requirements)
+B --> | Plan | C(Backlog)
+C --> | Sprint | D(In-Progress)
+D --> | Sprint | E(QA/Review)
+E --> | Sprint | D
+E --> | Sprint | F(Close)
+F --> | QA | G(Test)
+G --> | Ops | H(In Production)
+H --> | BugFix | D
+H --> | HotFix | G
+H --> | Rollback | E</pre>
+<p>敏捷实践心得体会:</p>
+<ul>
+<li>周期要短, 不超过2周</li>
+<li>需求要明确, 不确定/不可细化/不可验证的不做</li>
+<li>提早细化需求确定技术方案</li>
+<li>开发依赖前置</li>
+<li>测试用例前置</li>
+<li>风险及时暴露, 尽快决策</li>
+<li>迭代中期巡检</li>
+<li>开发自测</li>
+<li>CodeReview</li>
+<li>反馈机制</li>
+</ul>
+
+        
+    </section>
+</article>
+
+
     <article class="article" itemscope itemprop="blogPost">
     
     <header class="article-header">
@@ -331,6 +399,14 @@
     Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
 
     
+    
+        <script src='https://unpkg.com/mermaid@7.1.2/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script>
+      
 </footer>
 
     </main>

@@ -6,7 +6,7 @@
   <link href="/blog/atom.xml" rel="self"/>
   
   <link href="https://nnsay.github.io/"/>
-  <updated>2019-10-20T14:42:29.928Z</updated>
+  <updated>2019-10-20T18:01:24.869Z</updated>
   <id>https://nnsay.github.io/</id>
   
   <author>
@@ -15,6 +15,33 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>sprint-graph</title>
+    <link href="https://nnsay.github.io/2019/10/21/sprint-graph/"/>
+    <id>https://nnsay.github.io/2019/10/21/sprint-graph/</id>
+    <published>2019-10-20T17:12:25.000Z</published>
+    <updated>2019-10-20T18:01:24.869Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h3 id=&quot;Sprint&quot;&gt;&lt;a href=&quot;#Sprint&quot; class=&quot;headerlink&quot; title=&quot;Sprint&quot;&gt;&lt;/a&gt;Sprint&lt;/h3&gt;&lt;pre class=&quot;mermaid&quot;&gt;graph LR
+
+A(Idea) --&gt; | Discussed |
+        
+      
+    
+    </summary>
+    
+    
+    
+      <category term="效率" scheme="https://nnsay.github.io/tags/%E6%95%88%E7%8E%87/"/>
+    
+  </entry>
   
   <entry>
     <title>ES6 详解</title>

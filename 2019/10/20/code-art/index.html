@@ -61,12 +61,20 @@
                 <span class="nav-text">Home</span>
             </a>
         
+            <a class="nav-item" href="/blog/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
             <a class="nav-item" href="/blog/archives">
                 <span class="nav-text">Archives</span>
             </a>
         
             <a class="nav-item" href="/blog/atom.xml">
                 <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/blog/about">
+                <span class="nav-text">About</span>
             </a>
         
     </nav>
@@ -433,6 +441,25 @@
 
 
 
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "nnsay.github.io",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "2019/10/20/code-art",
+        distractionFreeMode: true,
+        title: "编写可读性代码的艺术",
+        body: "https://nnsay.github.io/2019/10/20/code-art/",
+        labels: ["代码"]
+    }).render('comments');
+    </script>
+</div>
+
 
             </div>
         </div>
@@ -440,6 +467,14 @@
     Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
 
     
+    
+        <script src='https://unpkg.com/mermaid@7.1.2/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script>
+      
 </footer>
 
     </main>

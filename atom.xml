@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Jimmy&#39;s Blog</title>
+  <icon>https://nnsay.github.io/icon.png</icon>
+  <subtitle>learning, thinking, shareing</subtitle>
+  <link href="/blog/atom.xml" rel="self"/>
+  
+  <link href="https://nnsay.github.io/"/>
+  <updated>2019-10-20T14:42:29.928Z</updated>
+  <id>https://nnsay.github.io/</id>
+  
+  <author>
+    <name>Jimmy Wang</name>
+    
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>ES6 详解</title>
+    <link href="https://nnsay.github.io/2019/10/20/es6/"/>
+    <id>https://nnsay.github.io/2019/10/20/es6/</id>
+    <published>2019-10-20T14:14:45.000Z</published>
+    <updated>2019-10-20T14:42:29.928Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;1-块级作用域&quot;&gt;&lt;a href=&quot;#1-块级作用域&quot; class=&quot;headerlink&quot; title=&quot;1. 块级作用域&quot;&gt;&lt;/a&gt;1. 块级作用域&lt;/h2&gt;&lt;p&gt;&lt;code&gt;var 说明:&lt;/code&gt; &lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;var在方法中自动提升声明位置;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;for循环的时候引用共享的变量;&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;var可以重复定义;&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;code&gt;新定义:&lt;/code&gt;&lt;/p&gt;
+    
+    </summary>
+    
+    
+    
+      <category term="代码" scheme="https://nnsay.github.io/tags/%E4%BB%A3%E7%A0%81/"/>
+    
+      <category term="JavaScript" scheme="https://nnsay.github.io/tags/JavaScript/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>编写可读性代码的艺术</title>
+    <link href="https://nnsay.github.io/2019/10/20/code-art/"/>
+    <id>https://nnsay.github.io/2019/10/20/code-art/</id>
+    <published>2019-10-20T14:08:50.000Z</published>
+    <updated>2019-10-20T14:42:22.593Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;第一部分-表面层次的改进&quot;&gt;&lt;a href=&quot;#第一部分-表面层次的改进&quot; class=&quot;headerlink&quot; title=&quot;第一部分 表面层次的改进&quot;&gt;&lt;/a&gt;第一部分 表面层次的改进&lt;/h1&gt;&lt;h2 id=&quot;第一章-代码应当易于理解&quot;&gt;&lt;a href=&quot;#第一章-代码应当易于理解&quot; class=&quot;headerlink&quot; title=&quot;第一章 代码应当易于理解&quot;&gt;&lt;/a&gt;第一章 代码应当易于理解&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;可以用标准写法就用标准写法如: for循环&lt;/li&gt;
+&lt;li&gt;三元运算符不宜嵌套使用, 太长不好易理解&lt;/li&gt;
+&lt;li&gt;可读性基本原则: &lt;code&gt;代码的写法应当使别人理解它所需要的时间最小化&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;代码的长短应该以好理解为目标而不是一味追求最短最少的代码&lt;/li&gt;
+&lt;li&gt;添加必要的注释&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+    
+    </summary>
+    
+    
+    
+      <category term="代码" scheme="https://nnsay.github.io/tags/%E4%BB%A3%E7%A0%81/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>OKR工作法</title>
+    <link href="https://nnsay.github.io/2019/10/20/okr/"/>
+    <id>https://nnsay.github.io/2019/10/20/okr/</id>
+    <published>2019-10-20T14:08:07.000Z</published>
+    <updated>2019-10-20T14:42:36.902Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h3 id=&quot;无法达成目标的5个关键因素&quot;&gt;&lt;a href=&quot;#无法达成目标的5个关键因素&quot; class=&quot;headerlink&quot; title=&quot;无法达成目标的5个关键因素&quot;&gt;&lt;/a&gt;无法达成目标的5个关键因素&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;没有给目标设置优先级&lt;/li&gt;
+&lt;li&gt;缺乏充分的沟通, 导致没有能准确的理解目标&lt;/li&gt;
+&lt;li&gt;没有计划&lt;/li&gt;
+&lt;li&gt;没有把时间花在重要的事情上&lt;/li&gt;
+&lt;li&gt;轻易的放弃&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&quot;OKR的基本原理&quot;&gt;&lt;a href=&quot;#OKR的基本原理&quot; class=&quot;headerlink&quot; title=&quot;OKR的基本原理&quot;&gt;&lt;/a&gt;OKR的基本原理&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;原则1: 目标要明确并且鼓舞人心&lt;/li&gt;
+&lt;li&gt;原则2: 目标要有时间期限&lt;/li&gt;
+&lt;li&gt;原则3: 有独立的团队来执行目标
+    
+    </summary>
+    
+    
+    
+      <category term="效率" scheme="https://nnsay.github.io/tags/%E6%95%88%E7%8E%87/"/>
+    
+      <category term="OKR" scheme="https://nnsay.github.io/tags/OKR/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>命令行查看天气</title>
+    <link href="https://nnsay.github.io/2019/10/20/shell-weather/"/>
+    <id>https://nnsay.github.io/2019/10/20/shell-weather/</id>
+    <published>2019-10-20T14:03:23.000Z</published>
+    <updated>2019-10-20T14:43:08.549Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h3 id=&quot;1-说明介绍&quot;&gt;&lt;a href=&quot;#1-说明介绍&quot; class=&quot;headerlink&quot; title=&quot;1. 说明介绍&quot;&gt;&lt;/a&gt;1. 说明介绍&lt;/h3&gt;&lt;p&gt;程序开发人员最长用的工具就是命令行的终端了, 如果可以快捷的从命令行获取天气信息则是一件比较极客和有效率操作了. 现在介绍一个极为简单的方式实现命令行获取天气信息, 并且有以下几个特点:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;无需安装依赖&lt;/li&gt;
+&lt;li&gt;自定义程度较高&lt;/li&gt;
+&lt;li&gt;配置简单&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&quot;2-安装配置&quot;&gt;&lt;a href=&quot;#2-安装配置&quot; class=&quot;headerlink&quot; title=&quot;2. 安装配置&quot;&gt;&lt;/a&gt;2. 安装配置&lt;/h3&gt;&lt;h4 id=&quot;2-1-添加shell方法&quot;&gt;&lt;a href=&quot;#2-1-添加shell方法&quot; class=&quot;headerlink&quot; title=&quot;2.1 添加shell方法&quot;&gt;&lt;/a&gt;2.1 添加shell方法&lt;/h4&gt;&lt;p&gt;根据自己的需要在~/.zshrc或者~/.bashrc中添加如下方法:&lt;/p&gt;
+&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;fweather()&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  curl -H &amp;quot;Accept-Language: zh&amp;quot; &amp;quot;http://wttr.in/$&amp;#123;1-beijing&amp;#125;?m&amp;amp;$&amp;#123;2-3&amp;#125;&amp;quot;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
+    
+    </summary>
+    
+    
+    
+      <category term="工具" scheme="https://nnsay.github.io/tags/%E5%B7%A5%E5%85%B7/"/>
+    
+      <category term="Shell" scheme="https://nnsay.github.io/tags/Shell/"/>
+    
+  </entry>
+  
+</feed>

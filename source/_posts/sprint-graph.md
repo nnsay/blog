@@ -1,10 +1,11 @@
 ---
-title: sprint-graph
+title: 敏捷开发流程
 date: 2019-10-21 01:12:25
 tags: 
 - 效率
 ---
-### Sprint
+
+回看敏捷开发过程带来了的一些思考:
 
 ```mermaid
 graph LR

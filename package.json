@@ -3,9 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "hexo generate && echo nnsay.cn > CNAME",
+    "build": "hexo generate",
     "clean": "hexo clean",
-    "deploy": "echo nnsay.cn > CNAME && hexo deploy",
+    "deploy": "hexo deploy",
     "server": "hexo server"
   },
   "hexo": {

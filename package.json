@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "hexo generate",
+    "build": "hexo generate && echo nnsay.cn > CNAME",
     "clean": "hexo clean",
     "deploy": "echo nnsay.cn > CNAME && hexo deploy",
     "server": "hexo server"

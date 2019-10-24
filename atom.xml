@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://nnsay.github.io/"/>
-  <updated>2019-10-21T01:41:41.432Z</updated>
+  <updated>2019-10-24T16:04:21.863Z</updated>
   <id>https://nnsay.github.io/</id>
   
   <author>
@@ -17,11 +17,11 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>sprint-graph</title>
-    <link href="https://nnsay.github.io/2019/10/21/sprint-graph/"/>
-    <id>https://nnsay.github.io/2019/10/21/sprint-graph/</id>
-    <published>2019-10-20T17:12:25.000Z</published>
-    <updated>2019-10-21T01:41:41.432Z</updated>
+    <title>shell 脚本传参</title>
+    <link href="https://nnsay.github.io/2019/10/24/shell-script-pass-parameter/"/>
+    <id>https://nnsay.github.io/2019/10/24/shell-script-pass-parameter/</id>
+    <published>2019-10-24T15:40:00.000Z</published>
+    <updated>2019-10-24T16:04:21.863Z</updated>
     
     <summary type="html">
     
@@ -29,9 +29,68 @@
       
         
         
-          &lt;h3 id=&quot;Sprint&quot;&gt;&lt;a href=&quot;#Sprint&quot; class=&quot;headerlink&quot; title=&quot;Sprint&quot;&gt;&lt;/a&gt;Sprint&lt;/h3&gt;&lt;pre class=&quot;mermaid&quot;&gt;graph LR
+          &lt;h3 id=&quot;1-如何在-Shell-脚本间传递参数&quot;&gt;&lt;a href=&quot;#1-如何在-Shell-脚本间传递参数&quot; class=&quot;headerlink&quot; title=&quot;1. 如何在 Shell 脚本间传递参数&quot;&gt;&lt;/a&gt;1. 如何在 Shell
+        
+      
+    
+    </summary>
+    
+    
+    
+      <category term="技巧" scheme="https://nnsay.github.io/tags/%E6%8A%80%E5%B7%A7/"/>
+    
+      <category term="Shell" scheme="https://nnsay.github.io/tags/Shell/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>如何本地针对多个Github秘钥并行使用</title>
+    <link href="https://nnsay.github.io/2019/10/21/multi-key-for-git/"/>
+    <id>https://nnsay.github.io/2019/10/21/multi-key-for-git/</id>
+    <published>2019-10-21T03:18:10.000Z</published>
+    <updated>2019-10-24T16:05:32.054Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h3 id=&quot;1-背景介绍&quot;&gt;&lt;a href=&quot;#1-背景介绍&quot; class=&quot;headerlink&quot; title=&quot;1. 背景介绍&quot;&gt;&lt;/a&gt;1. 背景介绍&lt;/h3&gt;&lt;p&gt;大部分情况下开发者会同时有个人项目和公司项目, 如果公司和个人的仓库都在同一个平台比如GitHub,
+        
+      
+    
+    </summary>
+    
+    
+    
+      <category term="技巧" scheme="https://nnsay.github.io/tags/%E6%8A%80%E5%B7%A7/"/>
+    
+      <category term="Git" scheme="https://nnsay.github.io/tags/Git/"/>
+    
+      <category term="工具" scheme="https://nnsay.github.io/tags/%E5%B7%A5%E5%85%B7/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>敏捷开发流程</title>
+    <link href="https://nnsay.github.io/2019/10/21/sprint-graph/"/>
+    <id>https://nnsay.github.io/2019/10/21/sprint-graph/</id>
+    <published>2019-10-20T17:12:25.000Z</published>
+    <updated>2019-10-21T03:22:36.491Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;p&gt;回看敏捷开发过程带来了的一些思考:&lt;/p&gt;
+&lt;pre class=&quot;mermaid&quot;&gt;graph LR
 
-A(Idea) --&gt; | Discussed |
+A(Idea) --&gt; | Discussed | B(Requirements)
+B --&gt; | Plan | C(Backlog)
+C --&gt; | Sprint
         
       
     

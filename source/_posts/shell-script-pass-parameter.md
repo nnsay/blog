@@ -11,7 +11,7 @@ tags:
 - 通过脚本执行环境变量
 
 ### 2. 具体实现
-假设有两个脚本: exe.sh 和 exe2.sh, 前者调用后者, 并且需要传递一个平台参数, 例如:w代表window, m代表mac. 另外这两脚本都是经过 `chmod +x` 操作后的, 所以直接可以运行.
+假设有两个脚本: exe.sh 和 exe1.sh, 前者调用后者, 并且需要传递一个平台参数, 例如:w代表window, m代表mac. 另外这两脚本都是经过 `chmod +x` 操作后的, 所以直接可以运行.
 
 #### 2.1 通过脚本执行参数
 将需要的信息参数当成可执行脚本的命令行参数传入, 具体如下:
@@ -24,21 +24,21 @@ else
   P=$1
 fi
 
-./exe2.sh $P
+./exe1.sh $P
 ```
 
 `exe1.sh`
 ```sh
 #!/usr/bin/env bash
-echo "method 1 in exe2 shell:" $1
+echo "method 1 in exe1 shell:" $1
 ```
 执行结果:
 ```sh
 ./exe.sh
-method 1 in exe2 shell: w
+method 1 in exe1 shell: w
 
 ./exe.sh m
-method 1 in exe2 shell: m
+method 1 in exe1 shell: m
 ```
 
 #### 2.2 通过脚本执行环境变量
@@ -52,21 +52,21 @@ else
   P=$1
 fi
 
-PLATFORM=$P ./exe2.sh
+PLATFORM=$P ./exe1.sh
 ```
 
 `exe1.sh`
 ```sh
 #!/usr/bin/env bash
-echo "method 2 in exe2 shell:" $PLATFORM
+echo "method 2 in exe1 shell:" $PLATFORM
 ```
 执行结果:
 ```sh
 ./exe.sh
-method 2 in exe2 shell: w
+method 2 in exe1 shell: w
 
 ./exe.sh m
-method 2 in exe2 shell: m
+method 2 in exe1 shell: m
 ```
 
 ### 3. 思考

@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://nnsay.github.io/"/>
-  <updated>2019-10-24T16:04:21.863Z</updated>
+  <updated>2019-11-18T09:02:12.991Z</updated>
   <id>https://nnsay.github.io/</id>
   
   <author>
@@ -15,6 +15,35 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>软删除</title>
+    <link href="https://nnsay.github.io/2019/11/18/soft-delete/"/>
+    <id>https://nnsay.github.io/2019/11/18/soft-delete/</id>
+    <published>2019-11-18T07:41:30.000Z</published>
+    <updated>2019-11-18T09:02:12.991Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h3 id=&quot;1-什么是软删除&quot;&gt;&lt;a href=&quot;#1-什么是软删除&quot; class=&quot;headerlink&quot; title=&quot;1. 什么是软删除?&quot;&gt;&lt;/a&gt;1. 什么是软删除?&lt;/h3&gt;&lt;p&gt;软删(soft delete)除是相对于常见的数据库删除命令 DELETE
+        
+      
+    
+    </summary>
+    
+    
+    
+      <category term="技巧" scheme="https://nnsay.github.io/tags/%E6%8A%80%E5%B7%A7/"/>
+    
+      <category term="代码" scheme="https://nnsay.github.io/tags/%E4%BB%A3%E7%A0%81/"/>
+    
+      <category term="数据库" scheme="https://nnsay.github.io/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/"/>
+    
+  </entry>
   
   <entry>
     <title>shell 脚本传参</title>
@@ -137,7 +166,7 @@ C --&gt; | Sprint
     <link href="https://nnsay.github.io/2019/10/20/code-art/"/>
     <id>https://nnsay.github.io/2019/10/20/code-art/</id>
     <published>2019-10-20T14:08:50.000Z</published>
-    <updated>2019-10-21T01:41:41.429Z</updated>
+    <updated>2019-10-25T00:50:11.815Z</updated>
     
     <summary type="html">
     

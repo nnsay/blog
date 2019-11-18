@@ -2,6 +2,20 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://nnsay.github.io/2019/11/18/soft-delete/</loc>
+    
+    <lastmod>2019-11-18T09:02:12.991Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2019/10/20/code-art/</loc>
+    
+    <lastmod>2019-10-25T00:50:11.815Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>https://nnsay.github.io/2019/10/21/multi-key-for-git/</loc>
     
     <lastmod>2019-10-24T16:05:32.054Z</lastmod>
@@ -37,14 +51,14 @@
   </url>
   
   <url>
-    <loc>https://nnsay.github.io/2019/10/20/shell-weather/</loc>
+    <loc>https://nnsay.github.io/2019/10/20/okr/</loc>
     
     <lastmod>2019-10-21T01:41:41.431Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://nnsay.github.io/2019/10/20/okr/</loc>
+    <loc>https://nnsay.github.io/2019/10/20/shell-weather/</loc>
     
     <lastmod>2019-10-21T01:41:41.431Z</lastmod>
     
@@ -54,13 +68,6 @@
     <loc>https://nnsay.github.io/2019/10/20/es6/</loc>
     
     <lastmod>2019-10-21T01:41:41.430Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2019/10/20/code-art/</loc>
-    
-    <lastmod>2019-10-21T01:41:41.429Z</lastmod>
     
   </url>
   

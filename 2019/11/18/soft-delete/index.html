@@ -170,6 +170,25 @@
 
 
 
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "2019/11/18/soft-delete",
+        distractionFreeMode: true,
+        title: "软删除",
+        body: "https://nnsay.github.io/2019/11/18/soft-delete/",
+        labels: ["技巧","代码","数据库"]
+    }).render('comments');
+    </script>
+</div>
+
 
             </div>
         </div>

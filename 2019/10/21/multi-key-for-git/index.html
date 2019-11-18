@@ -158,6 +158,25 @@
 
 
 
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "2019/10/21/multi-key-for-git",
+        distractionFreeMode: true,
+        title: "如何本地针对多个Github秘钥并行使用",
+        body: "https://nnsay.github.io/2019/10/21/multi-key-for-git/",
+        labels: ["技巧","Git","工具"]
+    }).render('comments');
+    </script>
+</div>
+
 
             </div>
         </div>

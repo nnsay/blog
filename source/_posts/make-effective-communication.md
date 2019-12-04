@@ -1,5 +1,5 @@
 ---
-title: make-effective-communication
+title: Make effective communication
 date: 2019-12-04 11:35:00
 tags:
 - 工作

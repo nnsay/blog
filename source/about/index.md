@@ -8,6 +8,7 @@ date: 2019-10-21 00:37:18
 - address: Beijing, China
 - job: DevOps Engineer
 - programe language: JavaScript/Nodejs
+- history blog address: https://my.oschina.net/jimmywa
 
 ### My Other Share 
 - [OSChina](https://my.oschina.net/jimmywa)

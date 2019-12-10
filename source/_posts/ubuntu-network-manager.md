@@ -7,7 +7,7 @@ tags:
 - 工作
 ---
 
-### 0. Gogals
+### 0. Goals
 - manage network on Ubuntu without GUI.
 - which kind of network type
     - ethernet

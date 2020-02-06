@@ -103,5 +103,5 @@ How to verify the result:
 ```
 // step1 start the server
 ts-node stream-download-v3.ts
-// step2 vist http://localhost:3000 in browser
+// step2 visit http://localhost:3000 in browser
 ```

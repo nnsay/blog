@@ -133,6 +133,424 @@
     <header class="article-header">
         
         <h1 itemprop="name">
+            <a href="/2020/02/07/s3-file-zip-download-by-stream/">s3 file zip download by stream</a>
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="/2020/02/07/s3-file-zip-download-by-stream/">
+    
+    <i class="icon-calendar"></i>
+    
+    <time datetime="2020-02-06T17:46:10.000Z" itemprop="datePublished">2020-02-07</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag"></i>
+    <a class="article-tag-link" href="/tags/%E4%BB%A3%E7%A0%81/" rel="tag">代码</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h3 id="1-Basic"><a href="#1-Basic" class="headerlink" title="1. Basic"></a>1. Basic</h3><pre class="mermaid">graph LR
+S3 -->|read stream| ZIP
+ZIP -->|write stream| DownloadAPI</pre>
+<ul>
+<li>S3 file produce a readable stream</li>
+<li>combine multiple readable stream into one zip stream</li>
+<li>transform writeable stream to api for download</li>
+</ul>
+<h3 id="2-Research"><a href="#2-Research" class="headerlink" title="2. Research"></a>2. Research</h3><ul>
+<li><p>Does S3 support stream reading?</p>
+<p>  get the signed url to get the response stream </p>
+</li>
+<li><p>How to combine multiple readable stream in one zip stream?</p>
+<ul>
+<li>combined-stream to combine multiple read stream or use the archiver <code>append</code> function with multiple times</li>
+<li>archiver</li>
+</ul>
+</li>
+<li><p>How to trasnform writable stream as a REST api?</p>
+<ul>
+<li>make zip steram to response directly</li>
+<li>set the response with stream header</li>
+</ul>
+</li>
+<li><p>More think</p>
+<ul>
+<li>performence</li>
+<li>impact on existing service</li>
+</ul>
+</li>
+</ul>
+<h3 id="3-Code"><a href="#3-Code" class="headerlink" title="3. Code"></a>3. Code</h3><ul>
+<li>source code reference<ul>
+<li><a href="https://github.com/orangewise/s3-zip" target="_blank" rel="noopener">s3-zip</a></li>
+<li><a href="https://github.com/orangewise/s3-files" target="_blank" rel="noopener">s3-files</a></li>
+</ul>
+</li>
+</ul>
+<p>stream-download-v3.ts:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line">import http from &apos;http&apos;;</span><br><span class="line">import &#123; getAWSS3 &#125; from &apos;./src/lib/aws&apos;;</span><br><span class="line">import archiver from &apos;archiver&apos;;</span><br><span class="line">import &#123; Readable &#125; from &apos;stream&apos;;</span><br><span class="line"></span><br><span class="line">http.createServer(async (req, res) =&gt; &#123;</span><br><span class="line">  // Step1: create origin readable stream</span><br><span class="line">  const s3 = getAWSS3();</span><br><span class="line">  const bucket = &apos;dev-ng-main&apos;;</span><br><span class="line">  type FileData = &#123;</span><br><span class="line">    [key: string]: string;</span><br><span class="line">  &#125;;</span><br><span class="line">  const allFiles: FileData = &#123;</span><br><span class="line">    &apos;ngiq-app-desktop-1.2.0-20191217_155304.1493b47.AppImage&apos;: &apos;nomal.AppImage&apos;,</span><br><span class="line">    &apos;test/some_obj.dmg&apos;: &apos;test/some.dmg&apos;,</span><br><span class="line">    &apos;ngiq-app-desktop-test-control-fullscreen.AppImage&apos;: &apos;test2/control.AppImage&apos;,</span><br><span class="line">  &#125;;</span><br><span class="line">  const keys = Object.keys(allFiles);</span><br><span class="line">  type KeyToVirtualPath = &#123;</span><br><span class="line">    [key: string]: Readable;</span><br><span class="line">  &#125;;</span><br><span class="line">  const virtualPathRS: KeyToVirtualPath = &#123;&#125;;</span><br><span class="line">  for (const key of keys) &#123;</span><br><span class="line">    const readStream = s3.getObject(&#123; Bucket: bucket, Key: key &#125;).createReadStream();</span><br><span class="line">    virtualPathRS[allFiles[key]] = readStream;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  // Step2: combine all readable into one zip transform stream</span><br><span class="line">  const zip = archiver(&apos;zip&apos;)</span><br><span class="line">    .on(&apos;error&apos;, (err) =&gt; &#123;</span><br><span class="line">      console.error(err);</span><br><span class="line">      res.end();</span><br><span class="line">    &#125;);</span><br><span class="line">  const allVirtualPath = Object.keys(virtualPathRS);</span><br><span class="line">  let readStreamEndCount = 0;</span><br><span class="line">  for (const vp of allVirtualPath) &#123;</span><br><span class="line">    const readStream = virtualPathRS[vp];</span><br><span class="line">    zip.append(readStream, &#123; name: vp &#125;);</span><br><span class="line">    readStream</span><br><span class="line">      .on(&apos;end&apos;, async () =&gt; &#123;</span><br><span class="line">        readStreamEndCount++;</span><br><span class="line">        console.log(&apos;end stream&apos;, vp);</span><br><span class="line">        if (readStreamEndCount === allVirtualPath.length) &#123;</span><br><span class="line">          await zip.finalize();</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;)</span><br><span class="line">      .on(&apos;error&apos;, (err) =&gt; &#123;</span><br><span class="line">        zip.emit(&apos;error&apos;, err);</span><br><span class="line">      &#125;);</span><br><span class="line">  &#125;</span><br><span class="line">  // Step3: zip file stream to response stream</span><br><span class="line">  const zipName = &apos;test.zip&apos;;</span><br><span class="line">  res.setHeader(&apos;Content-Type&apos;, &apos;application/octet-stream&apos;);</span><br><span class="line">  res.setHeader(&apos;Content-Disposition&apos;, &apos;attachment; filename=&apos; + zipName);</span><br><span class="line"></span><br><span class="line">  zip.pipe(res);</span><br><span class="line"></span><br><span class="line">&#125;).listen(3000, () =&gt; &#123;</span><br><span class="line">  console.log(&apos;listening at 3000&apos;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>How to verify the result:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">// step1 start the server</span><br><span class="line">ts-node stream-download-v3.ts</span><br><span class="line">// step2 visit http://localhost:3000 in browser</span><br></pre></td></tr></table></figure>
+        
+    </section>
+</article>
+
+
+    <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            <a href="/2019/12/10/ubuntu-network-manager/">Manage Network on Ubuntu Without GUI</a>
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="/2019/12/10/ubuntu-network-manager/">
+    
+    <i class="icon-calendar"></i>
+    
+    <time datetime="2019-12-10T10:51:03.000Z" itemprop="datePublished">2019-12-10</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag"></i>
+    <a class="article-tag-link" href="/tags/Ubuntu/" rel="tag">Ubuntu</a>, <a class="article-tag-link" href="/tags/%E5%B7%A5%E4%BD%9C/" rel="tag">工作</a>, <a class="article-tag-link" href="/tags/%E5%B7%A5%E5%85%B7/" rel="tag">工具</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h3 id="0-Goals"><a href="#0-Goals" class="headerlink" title="0. Goals"></a>0. Goals</h3><ul>
+<li>manage network on Ubuntu without GUI.</li>
+<li>which kind of network type<ul>
+<li>ethernet</li>
+<li>wifi</li>
+</ul>
+</li>
+</ul>
+<p>The topic is useful for developer who want develop a linux application, for example snap application in ubuntu.</p>
+<h3 id="1-Network-Manager-On-Ubuntu"><a href="#1-Network-Manager-On-Ubuntu" class="headerlink" title="1. Network Manager On Ubuntu"></a>1. Network Manager On Ubuntu</h3><p>Use the <a href="https://docs.ubuntu.com/core/en/stacks/network/network-manager/docs/" target="_blank" rel="noopener">NetworkManager</a> to manage the network device and connections. NetworkManager can manage network types:</p>
+<ul>
+<li>ethenet</li>
+<li>wifi</li>
+<li>mobile boardband(WWAN)</li>
+<li>PPPoE device for VPN</li>
+</ul>
+<h3 id="2-Usage-Of-NetworkManager"><a href="#2-Usage-Of-NetworkManager" class="headerlink" title="2. Usage Of NetworkManager"></a>2. Usage Of NetworkManager</h3><h4 id="2-1-Install-NetworkManager"><a href="#2-1-Install-NetworkManager" class="headerlink" title="2.1 Install NetworkManager"></a>2.1 <a href="https://docs.ubuntu.com/core/en/stacks/network/network-manager/docs/installation" target="_blank" rel="noopener">Install NetworkManager</a></h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># a. find the application</span><br><span class="line">snap find network-manager</span><br><span class="line"># b. install</span><br><span class="line">snap install network-manager</span><br><span class="line"># c. view the plugs</span><br><span class="line">snap interfaces network-manager</span><br><span class="line"># d. check the service status</span><br><span class="line">systemctl status network-manager</span><br></pre></td></tr></table></figure>
+<p>when execute the command <code>c</code> the output looks like:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">name:    network-manager</span><br><span class="line">summary: allows operating as the NetworkManager service</span><br><span class="line">plugs:</span><br><span class="line">  - network-manager:nmcli</span><br><span class="line">slots:</span><br><span class="line">  - core</span><br><span class="line">  - network-manager:service</span><br></pre></td></tr></table></figure>
+<p>we can find that the network manager command-line interface(nmcli) will be installed. the <code>nmcli</code> is key command what is used to manage network. If you wan to learn more about <code>nmcli</code>, you can use <code>nmcli help</code> command.</p>
+<h4 id="2-2-Manage-WIFI"><a href="#2-2-Manage-WIFI" class="headerlink" title="2.2 Manage WIFI"></a>2.2 <a href="https://docs.ubuntu.com/core/en/stacks/network/network-manager/docs/configure-wifi-connections" target="_blank" rel="noopener">Manage WIFI</a></h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"># check whether the wifi is open</span><br><span class="line">nmcli radio wifi</span><br><span class="line"># if return `disabled`, please enable the wifi radio</span><br><span class="line">nmcli radio wifi on</span><br><span class="line"># list available wifi</span><br><span class="line">nmcli device wifi list</span><br><span class="line"># connect to wifi</span><br><span class="line">nmcli d wifi connect my_wifi password &lt;password&gt;</span><br><span class="line"># check the connection</span><br><span class="line">nmcli connection show</span><br></pre></td></tr></table></figure>
+<p>Other wifi configuration:</p>
+<ul>
+<li>powersave option(0: default, 1: ignore, 2: disable, 3: enable)<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmcli c modify &lt;name&gt; 802-11-wireless.powersave 2</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h3 id="2-3-Manage-Ethernet"><a href="#2-3-Manage-Ethernet" class="headerlink" title="2.3 Manage Ethernet"></a>2.3 <a href="">Manage Ethernet</a></h3><p>before modify the Ethernet, backup the contents of /etc/netplan is a best practice.</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># check whether support enthernet by network manager</span></span><br><span class="line">sudo snap get network-manager ethernet.enable</span><br><span class="line"><span class="comment"># if return `false`, please enable ethernet support</span></span><br><span class="line">snap <span class="built_in">set</span> network-manager ethernet.enable=<span class="literal">true</span></span><br><span class="line">sudo reboot</span><br></pre></td></tr></table></figure>
+<p>after the reboot, you can edit the ethernet with <code>nmcli</code>. There two way to midfy the ethernet:</p>
+<ul>
+<li>interactive console: print/set/save</li>
+<li>connection modify command</li>
+</ul>
+<p>We choose the second way because it can be warpped as shell script or api.</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># list all connection</span></span><br><span class="line">nmcli connection show</span><br><span class="line"><span class="comment"># show detail a connection</span></span><br><span class="line">nmcli connection show &lt;myconnection name or uuid&gt;</span><br><span class="line"><span class="comment"># change the connection name</span></span><br><span class="line">nmcli connection modify myconnection connection.id myconn</span><br></pre></td></tr></table></figure>
+<p>You can get usage detail by executing <code>nmcli connection modify help</code>, looks like below:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">Usage: nmcli connection modify &#123; ARGUMENTS | help &#125;</span><br><span class="line"></span><br><span class="line">ARGUMENTS := [id | uuid | path] &lt;ID&gt; ([+|-]&lt;setting&gt;.&lt;property&gt; &lt;value&gt;)+</span><br><span class="line"></span><br><span class="line">Modify one or more properties of the connection profile.</span><br><span class="line">The profile is identified by its name, UUID or D-Bus path. For multi-valued</span><br><span class="line">properties you can use optional &apos;+&apos; or &apos;-&apos; prefix to the property name.</span><br><span class="line">The &apos;+&apos; sign allows appending items instead of overwriting the whole value.</span><br><span class="line">The &apos;-&apos; sign allows removing selected items instead of the whole value.</span><br><span class="line"></span><br><span class="line">Examples:</span><br><span class="line">nmcli con mod home-wifi wifi.ssid rakosnicek</span><br><span class="line">nmcli con mod em1-1 ipv4.method manual ipv4.addr &quot;192.168.1.2/24, 10.10.1.5/8&quot;</span><br><span class="line">nmcli con mod em1-1 +ipv4.dns 8.8.4.4</span><br><span class="line">nmcli con mod em1-1 -ipv4.dns 1</span><br><span class="line">nmcli con mod em1-1 -ipv6.addr &quot;abbe::cafe/56&quot;</span><br><span class="line">nmcli con mod bond0 +bond.options mii=500</span><br><span class="line">nmcli con mod bond0 -bond.options downdelay</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-Program"><a href="#3-Program" class="headerlink" title="3. Program"></a>3. Program</h3><ul>
+<li><a href="https://github.com/seveas/python-networkmanager" target="_blank" rel="noopener">python-networkmanager</a>: Easy communication with NetworkManager</li>
+<li><a href="https://github.com/LGSInnovations/node-dbus-network-manager" target="_blank" rel="noopener">dbus-network-manager</a>: A node.js API to interact with NetworkManager via DBus. This is currently extremely new and incomplete</li>
+</ul>
+
+        
+    </section>
+</article>
+
+
+    <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            <a href="/2019/12/05/kiosk-research/">Kiosk Research</a>
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="/2019/12/05/kiosk-research/">
+    
+    <i class="icon-calendar"></i>
+    
+    <time datetime="2019-12-05T10:29:13.000Z" itemprop="datePublished">2019-12-05</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag"></i>
+    <a class="article-tag-link" href="/tags/Linux/" rel="tag">Linux</a>, <a class="article-tag-link" href="/tags/%E5%B7%A5%E4%BD%9C/" rel="tag">工作</a>, <a class="article-tag-link" href="/tags/%E7%A0%94%E7%A9%B6/" rel="tag">研究</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h3 id="1-Requirements-of-Kiosk"><a href="#1-Requirements-of-Kiosk" class="headerlink" title="1. Requirements of Kiosk"></a>1. Requirements of Kiosk</h3><ul>
+<li>basic<ul>
+<li>limited usage<ul>
+<li>only ourself desktop application</li>
+</ul>
+</li>
+<li>system management<ul>
+<li>wifi config</li>
+<li>file share</li>
+<li>network config</li>
+</ul>
+</li>
+<li>platform<ul>
+<li>linux: best</li>
+<li>windows: not bad</li>
+<li>android/ios: none</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>advance<ul>
+<li>remote control</li>
+<li>report &amp; alert<ul>
+<li>battery level alert: Get device battery percentage (%) alerts for the selected time range of a day.</li>
+<li>location report: Location history reports for each device or group of devices.</li>
+<li>data usage alert: Receive a notification when the device exceeds the data limit set by you.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="2-Kiosk-Solution"><a href="#2-Kiosk-Solution" class="headerlink" title="2. Kiosk Solution"></a>2. Kiosk Solution</h3><h4 id="2-1-commerce-windows"><a href="#2-1-commerce-windows" class="headerlink" title="2.1 commerce(windows)"></a>2.1 commerce(windows)</h4><ul>
+<li><a href="https://scalefusion.com/windows-10-kiosk-mode" target="_blank" rel="noopener">scalefusion windows 10 kiosk mode</a><ul>
+<li>custom branding</li>
+<li>configure wifi setting</li>
+<li>app blacklisting</li>
+<li>location tracking</li>
+<li>restrict peripherals</li>
+<li>mail configuration</li>
+<li>enforce passcode policy</li>
+<li>edge brower management</li>
+</ul>
+</li>
+<li><a href="https://www.kioware.com/windows.aspx" target="_blank" rel="noopener">kioware for windows</a><ul>
+<li>keyboard filtering</li>
+<li>clears user data</li>
+<li>file download blocking</li>
+<li>device orgnazition</li>
+<li>content management</li>
+<li>remote monitoring</li>
+<li>device usage statistics</li>
+<li>reporting</li>
+</ul>
+</li>
+<li><a href="http://techgenix.com/windows-kiosk-mode-solutions/" target="_blank" rel="noopener">other windows solution</a></li>
+</ul>
+<h4 id="2-2-open-source-linux"><a href="#2-2-open-source-linux" class="headerlink" title="2.2 open source (linux)"></a>2.2 <a href="http://tuxdiary.com/2014/11/05/linux-distros-for-kiosks/" target="_blank" rel="noopener">open source (linux)</a></h4><ul>
+<li><p><a href="http://porteus-kiosk.org/" target="_blank" rel="noopener">Porteus kiosk</a></p>
+<p>  The mini distro Porteus has a dedicated mod to support kiosk mode. Provides options to customize as need on first boot.Porteus Kiosk is a free to use, lightweight Linux operating system which has been restricted to allow only use of the web browser.</p>
+</li>
+<li><p><a href="http://www.ubuntu.com/" target="_blank" rel="noopener">Ubuntu Guest login</a></p>
+<p>  Normal Ubuntu installation allows guest access from the login prompt. A perfect solution for kiosks. Login into guest mode with restricted permissions but non-restricted browser. Works from USB too.</p>
+</li>
+<li><p>Scientific Linux 6 and CentOS 6</p>
+<p>  Both the distros can be configured into kiosk-mode automatically by running this <a href="http://www.marcinwilk.eu/sl/make-kiosk.sh" target="_blank" rel="noopener">script</a>.</p>
+</li>
+<li><p>Kiosk conversion script</p>
+<p>  Redditor rawfan shared his script (<a href="https://gist.github.com/5bba6c9b6425a42b4ea1" target="_blank" rel="noopener">create_kiosk.sh</a>) to convert Ubuntu into a kiosk. It is untested and should not be run directly on your workstation as it modifies lightdm behaviour. Test first. It does the following:</p>
+<ul>
+<li><p>create a kiosk user with limited rights</p>
+</li>
+<li><p>the user gets an empty password (mkpasswd ”) with a password-policy that it can’t be changed</p>
+</li>
+<li><p>mount a union file system on top of the kiosk users $HOME (aufs) so that the user can’t actually change anything</p>
+</li>
+<li><p>wipe the aufs on login, logout and boot</p>
+</li>
+<li><p>display a warning on login that users need to save their stuff to USB keys because everything gets wiped clean</p>
+</li>
+<li><p>log the user out after a couple of minutes of inactivity</p>
+</li>
+<li><p>lightdm only displays the kiosk user and the option to enter a custom username and a message to press enter to log in</p>
+</li>
+<li><p>set up unattended upgrades for all packages</p>
+<p>If you test it out, don’t forget to leave a feedback on how the script performs.</p>
+</li>
+</ul>
+</li>
+<li><p><a href="https://tutorials.ubuntu.com/tutorial/secure-ubuntu-kiosk#0" target="_blank" rel="noopener">Ubuntu Kiosk</a></p>
+</li>
+</ul>
+<h4 id="2-3-other-article"><a href="#2-3-other-article" class="headerlink" title="2.3 other article"></a>2.3 other article</h4><ul>
+<li><a href="https://www.how2shout.com/tools/free-open-source-linux-kiosk-distros-browsers.html" target="_blank" rel="noopener">other linux kiosk distros and browsers tools</a></li>
+</ul>
+<h3 id="3-Ubuntu-kiosk"><a href="#3-Ubuntu-kiosk" class="headerlink" title="3. Ubuntu kiosk"></a>3. Ubuntu kiosk</h3><p>take a deep research for below targets:</p>
+<ul>
+<li>how to work</li>
+<li>how to setup</li>
+<li>how to deploy</li>
+<li>does it support basic system config</li>
+<li>does it support for multiple application</li>
+</ul>
+<h4 id="3-1-basic-knowledge"><a href="#3-1-basic-knowledge" class="headerlink" title="3.1 basic knowledge"></a>3.1 basic knowledge</h4><p>We use Wayland as the primary display interface. We will use Mir to manage the display and support connections from Wayland clients. Snapd will confine the applications and enable Wayland protocol interactions through Mir, securely.</p>
+<p>Your graphics approach largely depends on the toolkit your application uses:</p>
+<ul>
+<li><p>GTK3/4 and Qt5 - have native support for Wayland<br>This is the simplest case, as the application can talk Wayland to Mir directly.</p>
+</li>
+<li><p>GTK2, Qt4, Java - do not have Wayland support<br>This is a more complex case, as the toolkits require a legacy X11 server to function. To enable these applications we will embed a tiny X11 server into your application package, which translates X11 calls to Wayland ones.</p>
+</li>
+<li><p>Electron, HTML5, Chromium - do not have Wayland support<br>We will need to use the embedded browser together with a tiny embedded X11 server to handle the translation.</p>
+</li>
+</ul>
+<p><img src="kiosk-structure.png" alt="kiosk-structure"></p>
+<p>If our descktop app base on electron, so the third option should be choosed.</p>
+<h4 id="3-2-make-a-HTML-Electron-based-kiosk-snap"><a href="#3-2-make-a-HTML-Electron-based-kiosk-snap" class="headerlink" title="3.2 make a HTML/Electron-based kiosk snap"></a>3.2 <a href="https://tutorials.ubuntu.com/tutorial/electron-kiosk#0" target="_blank" rel="noopener">make a HTML/Electron-based kiosk snap</a></h4><ul>
+<li>prepare<ul>
+<li>install mir<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo snap install --devmode mir-kiosk -y</span><br><span class="line">sudo mir-kiosk</span><br></pre></td></tr></table></figure></li>
+<li>install snacraft<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install snapcraft -y</span><br></pre></td></tr></table></figure></li>
+<li>install node<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># install nvm</span><br><span class="line">wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.1/install.sh | bash</span><br><span class="line"># enable nvm command</span><br><span class="line">command -v nvm</span><br><span class="line"># install nodejs(the version should support the async/await)</span><br><span class="line">nvm install v12.13.1</span><br></pre></td></tr></table></figure></li>
+<li>build &amp; install &amp; run<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"># 1. create a test workspace</span><br><span class="line">mkdir demo &amp;&amp; cd demo</span><br><span class="line"># 2. init a project</span><br><span class="line">snapcraft init</span><br><span class="line"># 3. edit the snapcraft.yaml use the demo application config: https://github.com/nnsay/blog/wiki/Ubuntu-Kiosk-Electron-Snap-Config</span><br><span class="line">gedit snap/snapcraft.yaml</span><br><span class="line"># 4. build</span><br><span class="line">snapcraft</span><br><span class="line"># 5. install</span><br><span class="line">sudo snap install --dangerous ./electron-hello-world-kiosk_0.1_amd64.snap</span><br><span class="line"># 6. connect to brower support</span><br><span class="line">sudo snap connect electron-hello-world-kiosk:wayland</span><br><span class="line"># 7. run(optional)</span><br><span class="line">sudo snap restart electron-hello-world-kiosk</span><br></pre></td></tr></table></figure>
+the app will show in the <code>Mir On X</code>:<br><img src="kiosk-result.png" alt="kiosk-result"></li>
+</ul>
+</li>
+</ul>
+<h4 id="3-3-summary"><a href="#3-3-summary" class="headerlink" title="3.3 summary"></a>3.3 summary</h4><ul>
+<li>ubuntu kiosk use wayland and mir to guarantee the security</li>
+<li>ubuntu kiosk is not a good way for system config</li>
+<li>no found the information about how to implement multiple application within kiosk</li>
+</ul>
+<h3 id="4-QA"><a href="#4-QA" class="headerlink" title="4. QA"></a>4. QA</h3><h4 id="4-1-how-to-set-the-version-of-snapcraft-nodejs-plugin"><a href="#4-1-how-to-set-the-version-of-snapcraft-nodejs-plugin" class="headerlink" title="4.1  how to set the version of snapcraft nodejs plugin?"></a>4.1  how to set the version of snapcraft nodejs plugin?</h4><p>check <a href="https://github.com/search?q=filename%3Asnapcraft.yaml+%22plugin%3A+nodejs%22&type=Code" target="_blank" rel="noopener">here</a>, set the <code>node-engine</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">parts:</span><br><span class="line">  hmon:</span><br><span class="line">    plugin: nodejs</span><br><span class="line">    node-engine: 12.13.1</span><br></pre></td></tr></table></figure>
+        
+    </section>
+</article>
+
+
+    <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            <a href="/2019/12/04/make-effective-communication/">Make effective communication</a>
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="/2019/12/04/make-effective-communication/">
+    
+    <i class="icon-calendar"></i>
+    
+    <time datetime="2019-12-04T03:35:00.000Z" itemprop="datePublished">2019-12-04</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag"></i>
+    <a class="article-tag-link" href="/tags/%E5%B7%A5%E4%BD%9C/" rel="tag">工作</a>, <a class="article-tag-link" href="/tags/%E6%95%88%E7%8E%87/" rel="tag">效率</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h3 id="1-What-is-the-best-result"><a href="#1-What-is-the-best-result" class="headerlink" title="1. What is the best result"></a>1. What is the best result</h3><ul>
+<li>the best publish time is yesterday.</li>
+<li>the best code is that has not been written yet.</li>
+</ul>
+<h3 id="2-About-design-solution"><a href="#2-About-design-solution" class="headerlink" title="2. About design/solution"></a>2. About design/solution</h3><p>the factors for a better design:</p>
+<ul>
+<li>layered<ul>
+<li>basic targets</li>
+<li>optional targets</li>
+</ul>
+</li>
+<li>benefits</li>
+<li>drawbacks</li>
+</ul>
+<p>when talk about the <code>benefits</code> and <code>drawbacks</code>, we can evaluate from the following aspects:</p>
+<ul>
+<li>compliance</li>
+<li>performance</li>
+<li>extensionable</li>
+<li>understandable</li>
+<li>devops</li>
+<li>implement time</li>
+</ul>
+<h3 id="3-How-to-discuss-about-the-design"><a href="#3-How-to-discuss-about-the-design" class="headerlink" title="3. How to discuss about the design"></a>3. How to discuss about the design</h3><p>Sometime we need to discuss your design or solution with other people. In order to save time, a good steps you can follow:</p>
+<p>3.1 Does other people have known the background about the design?</p>
+<ul>
+<li>no, stop</li>
+<li>yes, go on</li>
+</ul>
+<p>3.2 Do your have same design <code>basic targets</code>?</p>
+<ul>
+<li>no, try to make a common target</li>
+<li>yes, go on</li>
+</ul>
+<p>3.3 Design clarification</p>
+<ul>
+<li>you give your desgin, basic targets/optional targets/code  …</li>
+<li>other people give their design, idea/sugguestion/code …</li>
+<li>keep the same part, find out the different part, list the the different part</li>
+<li>foreach the different part list<ul>
+<li>what is the other pepole design benefit?</li>
+<li>do you agree?<ul>
+<li>yes, adopt<ul>
+<li>do the new suggestion bring out new probleme?</li>
+</ul>
+</li>
+<li>no, discuss</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>summary the sugguests what the both sides agree with</li>
+<li>reimplement</li>
+<li>checking</li>
+</ul>
+<h3 id="4-The-skill-for-communication"><a href="#4-The-skill-for-communication" class="headerlink" title="4. The skill for communication"></a>4. The skill for communication</h3><ul>
+<li>make some samll and core questions about you design to confirm the other people whether understands your design.</li>
+<li>ask for the drawback of your design  or the benifit of other people’s design</li>
+<li>ask question to make the other people think instead of always explaining the yourself design</li>
+<li>invite a third part to join the discussion</li>
+<li>summary the common thoughts</li>
+</ul>
+<h3 id="5-Summary-the-common-thoughts"><a href="#5-Summary-the-common-thoughts" class="headerlink" title="5. Summary the common thoughts"></a>5. Summary the common thoughts</h3><ul>
+<li>batch processing should a fault-tolerant, eg: batch deleting</li>
+<li>replace the trick with a common way, eg: async load config before user module</li>
+<li>keep the code as simple as possible but be not a magic for everything</li>
+</ul>
+
+        
+    </section>
+</article>
+
+
+    <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
             <a href="/2019/11/18/soft-delete/">软删除</a>
         </h1>
         
@@ -459,108 +877,11 @@ H --> | Rollback | E</pre>
 </article>
 
 
-    <article class="article" itemscope itemprop="blogPost">
-    
-    <header class="article-header">
-        
-        <h1 itemprop="name">
-            <a href="/2019/10/20/okr/">OKR工作法</a>
-        </h1>
-        
-        <div class="article-meta clearfix">
-            <a class="article-date" href="/2019/10/20/okr/">
-    
-    <i class="icon-calendar"></i>
-    
-    <time datetime="2019-10-20T14:08:07.000Z" itemprop="datePublished">2019-10-20</time>
-</a>
-
-            
-<div class="article-tag-list">
-    <i class="icon-tag"></i>
-    <a class="article-tag-link" href="/tags/OKR/" rel="tag">OKR</a>, <a class="article-tag-link" href="/tags/%E6%95%88%E7%8E%87/" rel="tag">效率</a>
-</div>
 
 
-        </div>
-    </header>
-    
-    <section class="article-body markdown-body">
-        
-        <h3 id="无法达成目标的5个关键因素"><a href="#无法达成目标的5个关键因素" class="headerlink" title="无法达成目标的5个关键因素"></a>无法达成目标的5个关键因素</h3><ul>
-<li>没有给目标设置优先级</li>
-<li>缺乏充分的沟通, 导致没有能准确的理解目标</li>
-<li>没有计划</li>
-<li>没有把时间花在重要的事情上</li>
-<li>轻易的放弃</li>
-</ul>
-<h3 id="OKR的基本原理"><a href="#OKR的基本原理" class="headerlink" title="OKR的基本原理"></a>OKR的基本原理</h3><ul>
-<li>原则1: 目标要明确并且鼓舞人心</li>
-<li>原则2: 目标要有时间期限</li>
-<li>原则3: 有独立的团队来执行目标
-        
-        <p class="article-more-link">
-            <a href="/2019/10/20/okr/#more">
-                <span class="vm">read more</span>
-                <i class="icon-arrow-double-right vm"></i>    
-            </a>
-        </p>
-        
-        
-    </section>
-</article>
-
-
-    <article class="article" itemscope itemprop="blogPost">
-    
-    <header class="article-header">
-        
-        <h1 itemprop="name">
-            <a href="/2019/10/20/shell-weather/">命令行查看天气</a>
-        </h1>
-        
-        <div class="article-meta clearfix">
-            <a class="article-date" href="/2019/10/20/shell-weather/">
-    
-    <i class="icon-calendar"></i>
-    
-    <time datetime="2019-10-20T14:03:23.000Z" itemprop="datePublished">2019-10-20</time>
-</a>
-
-            
-<div class="article-tag-list">
-    <i class="icon-tag"></i>
-    <a class="article-tag-link" href="/tags/Shell/" rel="tag">Shell</a>, <a class="article-tag-link" href="/tags/%E5%B7%A5%E5%85%B7/" rel="tag">工具</a>
-</div>
-
-
-        </div>
-    </header>
-    
-    <section class="article-body markdown-body">
-        
-        <h3 id="1-说明介绍"><a href="#1-说明介绍" class="headerlink" title="1. 说明介绍"></a>1. 说明介绍</h3><p>程序开发人员最长用的工具就是命令行的终端了, 如果可以快捷的从命令行获取天气信息则是一件比较极客和有效率操作了. 现在介绍一个极为简单的方式实现命令行获取天气信息, 并且有以下几个特点:</p>
-<ul>
-<li>无需安装依赖</li>
-<li>自定义程度较高</li>
-<li>配置简单</li>
-</ul>
-<h3 id="2-安装配置"><a href="#2-安装配置" class="headerlink" title="2. 安装配置"></a>2. 安装配置</h3><h4 id="2-1-添加shell方法"><a href="#2-1-添加shell方法" class="headerlink" title="2.1 添加shell方法"></a>2.1 添加shell方法</h4><p>根据自己的需要在~/.zshrc或者~/.bashrc中添加如下方法:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">fweather()</span><br><span class="line">&#123;</span><br><span class="line">  curl -H &quot;Accept-Language: zh&quot; &quot;http://wttr.in/$&#123;1-beijing&#125;?m&amp;$&#123;2-3&#125;&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-        
-        <p class="article-more-link">
-            <a href="/2019/10/20/shell-weather/#more">
-                <span class="vm">read more</span>
-                <i class="icon-arrow-double-right vm"></i>    
-            </a>
-        </p>
-        
-        
-    </section>
-</article>
-
-
-
+<nav class="page-nav">
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &amp;raquo;</a>
+</nav>
 
 
 

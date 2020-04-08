@@ -2,107 +2,107 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>https://nnsay.github.io/tags/index.html</loc>
+    <loc>https://nnsay.github.io/2019/10/20/shell-weather/</loc>
     
-    <lastmod>2020-04-08T14:47:46.703Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/about/index.html</loc>
-    
-    <lastmod>2020-04-08T14:47:46.703Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2019/12/04/make-effective-communication/</loc>
-    
-    <lastmod>2020-04-08T14:47:46.699Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2019/10/21/multi-key-for-git/</loc>
-    
-    <lastmod>2020-04-08T14:47:46.699Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2019/10/20/okr/</loc>
-    
-    <lastmod>2020-04-08T14:47:46.699Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2020/02/06/s3-file-zip-download-by-stream/</loc>
-    
-    <lastmod>2020-04-08T14:47:46.699Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2019/10/24/shell-script-pass-parameter/</loc>
-    
-    <lastmod>2020-04-08T14:47:46.699Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2019/12/05/kiosk-research/</loc>
-    
-    <lastmod>2020-04-08T14:47:46.699Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2019/11/18/soft-delete/</loc>
-    
-    <lastmod>2020-04-08T14:47:46.699Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2019/10/20/sprint-graph/</loc>
-    
-    <lastmod>2020-04-08T14:47:46.699Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2019/12/10/ubuntu-network-manager/</loc>
-    
-    <lastmod>2020-04-08T14:47:46.699Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2019/10/20/code-art/</loc>
-    
-    <lastmod>2020-04-08T14:47:46.699Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2019/10/20/es6/</loc>
-    
-    <lastmod>2020-04-08T14:47:46.699Z</lastmod>
+    <lastmod>2020-04-08T14:51:10.871Z</lastmod>
     
   </url>
   
   <url>
     <loc>https://nnsay.github.io/2020/04/08/appImage-auto-upgrade-failure/</loc>
     
-    <lastmod>2020-04-08T14:47:46.699Z</lastmod>
+    <lastmod>2020-04-08T14:51:10.871Z</lastmod>
     
   </url>
   
   <url>
-    <loc>https://nnsay.github.io/2019/10/20/shell-weather/</loc>
+    <loc>https://nnsay.github.io/2019/12/04/make-effective-communication/</loc>
     
-    <lastmod>2020-04-08T14:47:46.699Z</lastmod>
+    <lastmod>2020-04-08T14:51:10.871Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2019/10/21/multi-key-for-git/</loc>
+    
+    <lastmod>2020-04-08T14:51:10.871Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2019/10/20/okr/</loc>
+    
+    <lastmod>2020-04-08T14:51:10.871Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2020/02/06/s3-file-zip-download-by-stream/</loc>
+    
+    <lastmod>2020-04-08T14:51:10.871Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2019/10/24/shell-script-pass-parameter/</loc>
+    
+    <lastmod>2020-04-08T14:51:10.871Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2019/12/05/kiosk-research/</loc>
+    
+    <lastmod>2020-04-08T14:51:10.871Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2019/11/18/soft-delete/</loc>
+    
+    <lastmod>2020-04-08T14:51:10.871Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2019/10/20/sprint-graph/</loc>
+    
+    <lastmod>2020-04-08T14:51:10.871Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2019/12/10/ubuntu-network-manager/</loc>
+    
+    <lastmod>2020-04-08T14:51:10.871Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2019/10/20/code-art/</loc>
+    
+    <lastmod>2020-04-08T14:51:10.871Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2019/10/20/es6/</loc>
+    
+    <lastmod>2020-04-08T14:51:10.871Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/about/index.html</loc>
+    
+    <lastmod>2020-04-08T14:51:10.871Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/tags/index.html</loc>
+    
+    <lastmod>2020-04-08T14:51:10.871Z</lastmod>
     
   </url>
   

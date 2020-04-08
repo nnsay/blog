@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://nnsay.github.io/"/>
-  <updated>2020-02-06T17:58:22.427Z</updated>
+  <updated>2020-04-08T14:20:42.419Z</updated>
   <id>https://nnsay.github.io/</id>
   
   <author>
@@ -15,6 +15,35 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>AppImage Auto-Upgrade Failure Because of APPIMAGE NO Found</title>
+    <link href="https://nnsay.github.io/2020/04/08/appImage-auto-upgrade-failure/"/>
+    <id>https://nnsay.github.io/2020/04/08/appImage-auto-upgrade-failure/</id>
+    <published>2020-04-08T14:19:44.000Z</published>
+    <updated>2020-04-08T14:20:42.419Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;h3 id=&quot;1-What-hanppened&quot;&gt;&lt;a href=&quot;#1-What-hanppened&quot; class=&quot;headerlink&quot; title=&quot;1. What hanppened?&quot;&gt;&lt;/a&gt;1. What hanppened?&lt;/h3&gt;&lt;p&gt;We build
+        
+      
+    
+    </summary>
+    
+    
+    
+      <category term="工作" scheme="https://nnsay.github.io/tags/%E5%B7%A5%E4%BD%9C/"/>
+    
+      <category term="Linux" scheme="https://nnsay.github.io/tags/Linux/"/>
+    
+      <category term="研究" scheme="https://nnsay.github.io/tags/%E7%A0%94%E7%A9%B6/"/>
+    
+  </entry>
   
   <entry>
     <title>s3 file zip download by stream</title>

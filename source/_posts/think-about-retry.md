@@ -1,5 +1,5 @@
 ---
-title: think about retry
+title: thinking about retry
 date: 2020-04-09 16:04:30
 tags:
 - 代码
@@ -15,7 +15,7 @@ tags:
 
 Besides all above, we can implement retry by recursion or iteration method. `Retry` can help catch the expection and run same logic for multiple times.
 
-### 2. Think about retry
+### 2. Thinking about retry
 
 `Retry` is so nice that many developer to use it everywhere. But something you should know.
 

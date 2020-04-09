@@ -133,6 +133,64 @@
     <header class="article-header">
         
         <h1 itemprop="name">
+            <a href="/2020/04/09/think-about-retry/">think about retry</a>
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="/2020/04/09/think-about-retry/">
+    
+    <i class="icon-calendar"></i>
+    
+    <time datetime="2020-04-09T08:04:30.000Z" itemprop="datePublished">2020-04-09</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag"></i>
+    <a class="article-tag-link" href="/tags/%E4%BB%A3%E7%A0%81/" rel="tag">代码</a>, <a class="article-tag-link" href="/tags/%E6%8A%80%E5%B7%A7/" rel="tag">技巧</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h3 id="1-What-is-retry"><a href="#1-What-is-retry" class="headerlink" title="1. What is retry?"></a>1. What is retry?</h3><p><code>Retry</code> is way for code to process the expection. If you develop with javascrpt, too many tools support retry, for example:</p>
+<ul>
+<li><a href="https://github.com/JustinBeckwith/retry-axios" target="_blank" rel="noopener">retry-axios</a></li>
+<li><a href="https://github.com/demmer/bluebird-retry" target="_blank" rel="noopener">bluebird-retr</a></li>
+<li><a href="http://caolan.github.io/async/v3/docs.html#retry" target="_blank" rel="noopener">async</a></li>
+</ul>
+<p>Besides all above, we can implement retry by recursion or iteration method. <code>Retry</code> can help catch the expection and run same logic for multiple times.</p>
+<h3 id="2-Think-about-retry"><a href="#2-Think-about-retry" class="headerlink" title="2. Think about retry"></a>2. Think about retry</h3><p><code>Retry</code> is so nice that many developer to use it everywhere. But something you should know.</p>
+<h4 id="2-1-retry-is-not-silver-bullet"><a href="#2-1-retry-is-not-silver-bullet" class="headerlink" title="2.1 retry is not silver bullet"></a>2.1 retry is not silver bullet</h4><p>If a logic has error, we should fix the bug but not retry. Retry maybe make you lazzy to think the reason of the error.</p>
+<h4 id="2-2-retry-need-some-basic-requirement"><a href="#2-2-retry-need-some-basic-requirement" class="headerlink" title="2.2 retry need some basic requirement"></a>2.2 retry need some basic requirement</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">// the function can not do retry</span><br><span class="line">function demov1(from, to) &#123;</span><br><span class="line">    fs.renameSync(&apos;./package.json&apos;, &apos;./tmp/package.json&apos;)</span><br><span class="line">    ... other logic</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">// the fuction can do retry</span><br><span class="line">function demov2(from, to) &#123;</span><br><span class="line">    fs.copyFile(&apos;./package.json&apos;, &apos;./tmp/package.json&apos;)</span><br><span class="line">    ... other logic</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Above functions just a demo, it is not the real logic, but it is enough to explain my thoughts.</p>
+<p><code>demov1</code> can not support retry because if the expection is thrown in <code>other logic</code>. At that time the source file moving is done, so the retry will always failure. But in the <code>demov2</code>, the source file exists.</p>
+<p>Above all, the retry target logic must have some requirement for retry. <code>Retry</code> is not easy to use.</p>
+<h4 id="2-3-retry-nest"><a href="#2-3-retry-nest" class="headerlink" title="2.3 retry nest"></a>2.3 retry nest</h4><p>you write your module with retry, another developer finish his module also using retry. If the one module calls another one. The retry nest will appear. At end, you code maybe look like:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">retry(()=&gt;&#123;</span><br><span class="line">    retry(()=&gt;&#123;&#125;, 5)</span><br><span class="line">&#125;, 5)</span><br></pre></td></tr></table></figure>
+<p>I do think the retry nest is good design.</p>
+<h4 id="2-4-drawback"><a href="#2-4-drawback" class="headerlink" title="2.4 drawback"></a>2.4 drawback</h4><ul>
+<li>hide real bug</li>
+<li>if you do some aggregation, retry will let the aggregation result not right</li>
+</ul>
+<h3 id="3-Suggestion"><a href="#3-Suggestion" class="headerlink" title="3. Suggestion"></a>3. Suggestion</h3><ul>
+<li>use retry as less as possible</li>
+<li>think about the retry context, to avoid retry nest and make you code retryable</li>
+</ul>
+
+        
+    </section>
+</article>
+
+
+    <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
             <a href="/2020/04/08/appImage-auto-upgrade-failure/">AppImage Auto-Upgrade Failure Because of APPIMAGE NO Found</a>
         </h1>
         
@@ -832,57 +890,6 @@ H --> | Rollback | E</pre>
 <li>反馈机制</li>
 </ul>
 
-        
-    </section>
-</article>
-
-
-    <article class="article" itemscope itemprop="blogPost">
-    
-    <header class="article-header">
-        
-        <h1 itemprop="name">
-            <a href="/2019/10/20/es6/">ES6 详解</a>
-        </h1>
-        
-        <div class="article-meta clearfix">
-            <a class="article-date" href="/2019/10/20/es6/">
-    
-    <i class="icon-calendar"></i>
-    
-    <time datetime="2019-10-20T14:14:45.000Z" itemprop="datePublished">2019-10-20</time>
-</a>
-
-            
-<div class="article-tag-list">
-    <i class="icon-tag"></i>
-    <a class="article-tag-link" href="/tags/JavaScript/" rel="tag">JavaScript</a>, <a class="article-tag-link" href="/tags/%E4%BB%A3%E7%A0%81/" rel="tag">代码</a>
-</div>
-
-
-        </div>
-    </header>
-    
-    <section class="article-body markdown-body">
-        
-        <h2 id="1-块级作用域"><a href="#1-块级作用域" class="headerlink" title="1. 块级作用域"></a>1. 块级作用域</h2><p><code>var 说明:</code> </p>
-<ul>
-<li><p>var在方法中自动提升声明位置;</p>
-</li>
-<li><p>for循环的时候引用共享的变量;</p>
-</li>
-<li><p>var可以重复定义;</p>
-</li>
-</ul>
-<p><code>新定义:</code></p>
-        
-        <p class="article-more-link">
-            <a href="/2019/10/20/es6/#more">
-                <span class="vm">read more</span>
-                <i class="icon-arrow-double-right vm"></i>    
-            </a>
-        </p>
-        
         
     </section>
 </article>

@@ -4,6 +4,8 @@ date: 2020-02-07 01:46:10
 tags: 
 - 代码
 ---
+### Change Log:
+- 2020-04-11: add the `Issue` part
 
 ### 1. Basic
 ```mermaid
@@ -105,3 +107,8 @@ How to verify the result:
 ts-node stream-download-v3.ts
 // step2 visit http://localhost:3000 in browser
 ```
+
+### 4. Issue
+- [s3.getObject(params).createReadStream() Timeouts ](https://github.com/aws/aws-sdk-js/issues/2087)
+
+you can resolve the issue by use `PassThrough` or make iteration to a serializer processing.

@@ -274,7 +274,10 @@ Because the <code>APPIMAGE</code> is a runtime environment, we can not set the v
     
     <section class="article-body markdown-body">
         
-        <h3 id="1-Basic"><a href="#1-Basic" class="headerlink" title="1. Basic"></a>1. Basic</h3><pre class="mermaid">graph LR
+        <h3 id="Change-Log"><a href="#Change-Log" class="headerlink" title="Change Log:"></a>Change Log:</h3><ul>
+<li>2020-04-11: add the <code>Issue</code> part</li>
+</ul>
+<h3 id="1-Basic"><a href="#1-Basic" class="headerlink" title="1. Basic"></a>1. Basic</h3><pre class="mermaid">graph LR
 S3 -->|read stream| ZIP
 ZIP -->|write stream| DownloadAPI</pre>
 <ul>
@@ -317,6 +320,12 @@ ZIP -->|write stream| DownloadAPI</pre>
 
 <p>How to verify the result:</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">// step1 start the server</span><br><span class="line">ts-node stream-download-v3.ts</span><br><span class="line">// step2 visit http://localhost:3000 in browser</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-Issue"><a href="#4-Issue" class="headerlink" title="4. Issue"></a>4. Issue</h3><ul>
+<li><a href="https://github.com/aws/aws-sdk-js/issues/2087" target="_blank" rel="noopener">s3.getObject(params).createReadStream() Timeouts </a></li>
+</ul>
+<p>you can resolve the issue by use <code>PassThrough</code> or make iteration to a serializer processing.</p>
+
         
     </section>
 </article>

@@ -10,7 +10,7 @@ tags:
 
 `Retry` is way for code to process the expection. If you develop with javascrpt, too many tools support retry, for example:
 - [retry-axios](https://github.com/JustinBeckwith/retry-axios)
-- [bluebird-retr](https://github.com/demmer/bluebird-retry)
+- [bluebird-retry](https://github.com/demmer/bluebird-retry)
 - [async](http://caolan.github.io/async/v3/docs.html#retry)
 
 Besides all above, we can implement retry by recursion or iteration method. `Retry` can help catch the expection and run same logic for multiple times.

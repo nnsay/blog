@@ -133,6 +133,51 @@
     <header class="article-header">
         
         <h1 itemprop="name">
+            <a href="/2020/09/02/express-parameter-router-skill/">express parameter router skill</a>
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="/2020/09/02/express-parameter-router-skill/">
+    
+    <i class="icon-calendar"></i>
+    
+    <time datetime="2020-09-02T04:22:49.000Z" itemprop="datePublished">2020-09-02</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag"></i>
+    <a class="article-tag-link" href="/tags/%E6%8A%80%E5%B7%A7/" rel="tag">技巧</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h3 id="1-Problem-router-path-is-used-as-parameter"><a href="#1-Problem-router-path-is-used-as-parameter" class="headerlink" title="1. Problem: router path is used as parameter"></a>1. Problem: router path is used as parameter</h3><p>If we have both parameter router and normal router with same path structure, the normal router path will be used as a url parameter.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">r.route(&apos;PUT&apos;, &apos;/bind&apos;)</span><br><span class="line">r.route(&apos;PUT&apos;, &apos;/unbind&apos;)</span><br><span class="line">r.route(&apos;PUT&apos;, &apos;/:deviceId&apos;)</span><br></pre></td></tr></table></figure>
+
+<p>The above <code>bind</code> and <code>unbind</code> will be fetch and check in our middware, our middware check the parameter value type and throw error if the type is not number.</p>
+<p>We get the url parameters by express standard interface, so we can not fix the bug in our middware. We only can tell express, please do not act noraml path as parameter in url. How to do?</p>
+<h3 id="2-Solution-use-exact-path-rule"><a href="#2-Solution-use-exact-path-rule" class="headerlink" title="2. Solution: use exact path rule"></a>2. Solution: use exact path rule</h3><p>we can deinfe the parameter route with more exact path:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">r.route(&apos;PUT&apos;, &apos;/:deviceId(\\+d)&apos;)</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-Reference"><a href="#3-Reference" class="headerlink" title="3. Reference"></a>3. Reference</h3><ul>
+<li><a href="http://expressjs.com/en/guide/routing.html" target="_blank" rel="noopener">Routing</a></li>
+</ul>
+
+        
+    </section>
+</article>
+
+
+    <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
             <a href="/2020/04/09/think-about-retry/">thinking about retry</a>
         </h1>
         
@@ -836,67 +881,6 @@ the app will show in the <code>Mir On X</code>:<br><img src="kiosk-result.png" a
 
 <h3 id="4-参考资料"><a href="#4-参考资料" class="headerlink" title="4. 参考资料"></a>4. 参考资料</h3><ul>
 <li><a href="https://coderwall.com/p/7smjkq/multiple-ssh-keys-for-different-accounts-on-github-or-gitlab" target="_blank" rel="noopener">Multiple SSH keys for different accounts on Github or Gitlab</a></li>
-</ul>
-
-        
-    </section>
-</article>
-
-
-    <article class="article" itemscope itemprop="blogPost">
-    
-    <header class="article-header">
-        
-        <h1 itemprop="name">
-            <a href="/2019/10/20/sprint-graph/">敏捷开发流程</a>
-        </h1>
-        
-        <div class="article-meta clearfix">
-            <a class="article-date" href="/2019/10/20/sprint-graph/">
-    
-    <i class="icon-calendar"></i>
-    
-    <time datetime="2019-10-20T17:12:25.000Z" itemprop="datePublished">2019-10-21</time>
-</a>
-
-            
-<div class="article-tag-list">
-    <i class="icon-tag"></i>
-    <a class="article-tag-link" href="/tags/%E6%95%88%E7%8E%87/" rel="tag">效率</a>
-</div>
-
-
-        </div>
-    </header>
-    
-    <section class="article-body markdown-body">
-        
-        <p>回看敏捷开发过程带来了的一些思考:</p>
-<pre class="mermaid">graph LR
-
-A(Idea) --> | Discussed | B(Requirements)
-B --> | Plan | C(Backlog)
-C --> | Sprint | D(In-Progress)
-D --> | Sprint | E(QA/Review)
-E --> | Sprint | D
-E --> | Sprint | F(Close)
-F --> | QA | G(Test)
-G --> | Ops | H(In Production)
-H --> | BugFix | D
-H --> | HotFix | G
-H --> | Rollback | E</pre>
-<p>敏捷实践心得体会:</p>
-<ul>
-<li>周期要短, 不超过2周</li>
-<li>需求要明确, 不确定/不可细化/不可验证的不做</li>
-<li>提早细化需求确定技术方案</li>
-<li>开发依赖前置</li>
-<li>测试用例前置</li>
-<li>风险及时暴露, 尽快决策</li>
-<li>迭代中期巡检</li>
-<li>开发自测</li>
-<li>CodeReview</li>
-<li>反馈机制</li>
 </ul>
 
         

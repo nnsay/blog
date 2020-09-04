@@ -21,7 +21,7 @@ We get the url parameters by express standard interface, so we can not fix the b
 ### 2. Solution: use exact path rule
 we can deinfe the parameter route with more exact path:
 ```
-r.route('PUT', '/:deviceId(\\+d)')
+r.route('PUT', '/:deviceId(\\d+)')
 ```
 
 ### 3. Reference

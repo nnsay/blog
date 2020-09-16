@@ -1,5 +1,5 @@
 ---
-title: log server custom domain does not work
+title: aliyun log service custom domain does not work
 date: 2020-09-16 14:21:51
 tags:
 - Aliyun

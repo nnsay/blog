@@ -7,10 +7,10 @@
 
     
 
-    <title>express parameter router skill | Jimmy&#39;s Blog</title>
+    <title>log server custom domain does not work | Jimmy&#39;s Blog</title>
     <meta name="author" content="Jimmy Wang" />
     <meta name="keywords" content="" />
-    <meta name="description" content="1. Problem: router path is used as parameterIf we have both parameter router and normal router with same path structure, the normal router path will be used as a url parameter.123r.route(&amp;apos;PUT&amp;apos;, &amp;apos;/bind&amp;apos;)r.route(&amp;apos;PUT&amp;apos;,..." />
+    <meta name="description" content="1. problemThe code does not work when you want to use aliyun sdk to send log to aliyun log server with your custom domain.After review the nodejs sdk source code, I find that the api domain is built:1234567891011121314151617var hostname = req.htt..." />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
 
@@ -91,7 +91,7 @@
         
 
         
-        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-Problem-router-path-is-used-as-parameter"><span class="toc-number">1.</span> <span class="toc-text">1. Problem: router path is used as parameter</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-Solution-use-exact-path-rule"><span class="toc-number">2.</span> <span class="toc-text">2. Solution: use exact path rule</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-Reference"><span class="toc-number">3.</span> <span class="toc-text">3. Reference</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-problem"><span class="toc-number">1.</span> <span class="toc-text">1. problem</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-solution"><span class="toc-number">2.</span> <span class="toc-text">2. solution</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-test-and-verify"><span class="toc-number">3.</span> <span class="toc-text">3. test and verify</span></a></li></ol>
         
     </div>
 </aside>
@@ -105,21 +105,21 @@
     <header class="article-header">
         
         <h1 itemprop="name">
-            express parameter router skill
+            log server custom domain does not work
         </h1>
         
         <div class="article-meta clearfix">
-            <a class="article-date" href="/2020/09/02/express-parameter-router-skill/">
+            <a class="article-date" href="/2020/09/16/log-server-custom-domain-does-not-work/">
     
     <i class="icon-calendar"></i>
     
-    <time datetime="2020-09-02T04:22:49.000Z" itemprop="datePublished">2020-09-02</time>
+    <time datetime="2020-09-16T06:21:51.000Z" itemprop="datePublished">2020-09-16</time>
 </a>
 
             
 <div class="article-tag-list">
     <i class="icon-tag"></i>
-    <a class="article-tag-link" href="/tags/%E6%8A%80%E5%B7%A7/" rel="tag">技巧</a>
+    <a class="article-tag-link" href="/tags/Aliyun/" rel="tag">Aliyun</a>, <a class="article-tag-link" href="/tags/%E6%8A%80%E5%B7%A7/" rel="tag">技巧</a>
 </div>
 
 
@@ -128,17 +128,37 @@
     
     <section class="article-body markdown-body">
         
-        <h3 id="1-Problem-router-path-is-used-as-parameter"><a href="#1-Problem-router-path-is-used-as-parameter" class="headerlink" title="1. Problem: router path is used as parameter"></a>1. Problem: router path is used as parameter</h3><p>If we have both parameter router and normal router with same path structure, the normal router path will be used as a url parameter.</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">r.route(&apos;PUT&apos;, &apos;/bind&apos;)</span><br><span class="line">r.route(&apos;PUT&apos;, &apos;/unbind&apos;)</span><br><span class="line">r.route(&apos;PUT&apos;, &apos;/:deviceId&apos;)</span><br></pre></td></tr></table></figure>
-
-<p>The above <code>bind</code> and <code>unbind</code> will be fetch and check in our middware, our middware check the parameter value type and throw error if the type is not number.</p>
-<p>We get the url parameters by express standard interface, so we can not fix the bug in our middware. We only can tell express, please do not act noraml path as parameter in url. How to do?</p>
-<h3 id="2-Solution-use-exact-path-rule"><a href="#2-Solution-use-exact-path-rule" class="headerlink" title="2. Solution: use exact path rule"></a>2. Solution: use exact path rule</h3><p>we can deinfe the parameter route with more exact path:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">r.route(&apos;PUT&apos;, &apos;/:deviceId(\\d+)&apos;)</span><br></pre></td></tr></table></figure>
-
-<h3 id="3-Reference"><a href="#3-Reference" class="headerlink" title="3. Reference"></a>3. Reference</h3><ul>
-<li><a href="http://expressjs.com/en/guide/routing.html" target="_blank" rel="noopener">Routing</a></li>
+        <h3 id="1-problem"><a href="#1-problem" class="headerlink" title="1. problem"></a>1. problem</h3><p>The code does not work when you want to use aliyun sdk to send log to aliyun log server with your custom domain.<br>After review the nodejs sdk source code, I find that the api domain is built:</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> hostname = req.httpRequest.endpoint.hostname;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> projectName = req.params[<span class="string">'projectName'</span>];</span><br><span class="line"><span class="keyword">var</span> host = projectName+<span class="string">'.'</span>+ hostname;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(!<span class="regexp">/^[0-9.]+$/</span>.test(hostname))&#123;</span><br><span class="line">  <span class="comment">//不是ip,  是域名, 则需要拼接project名</span></span><br><span class="line">  <span class="keyword">var</span> protocol = req.httpRequest.endpoint.protocol;</span><br><span class="line">  <span class="keyword">var</span> port = req.httpRequest.endpoint.port;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//real endpoint</span></span><br><span class="line">  <span class="keyword">var</span> endpointObj = parseURL(protocol+<span class="string">'//'</span>+host+<span class="string">':'</span>+port);</span><br><span class="line"></span><br><span class="line">  ALY.util.update(req.httpRequest, &#123;<span class="attr">endpoint</span>: endpointObj &#125;);</span><br><span class="line">  <span class="comment">// ALY.util.update(req.service, &#123;endpoint: endpointObj &#125;);</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>The endpoint also has the project name prefix</strong>. This will result a error address resolution.</p>
+<h3 id="2-solution"><a href="#2-solution" class="headerlink" title="2. solution"></a>2. solution</h3><p>add two address resolution rule:</p>
+<table>
+<thead>
+<tr>
+<th>machine record</th>
+<th>record type</th>
+<th>record value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>@</td>
+<td>CNAME</td>
+<td>cn-beijing.log.aliyuncs.com</td>
+</tr>
+<tr>
+<td><em>projectName</em></td>
+<td>CNAME</td>
+<td><em>projectName</em>.cn-beijing.log.aliyuncs.com</td>
+</tr>
+</tbody></table>
+<p>NOTE: <code>cn-beijing.log.aliyuncs.com</code>: the domain we need to replace with custom domain.<br>In the second rule, the project name acts the subdomain, the resolved address is the aliyun origiinal log sevice domain. If you use the <code>nslookup</code> to test the: <em>projectName</em>.custom.com, we can find that it is ok to resolve to right address.</p>
+<h3 id="3-test-and-verify"><a href="#3-test-and-verify" class="headerlink" title="3. test and verify"></a>3. test and verify</h3><p>Before testing, you sould change the endpoint from <code>cn-beijing.log.aliyuncs.com</code> to your custom domain for example: <code>jimmy.cn</code> in your code. I have tested below three sdk:</p>
+<ul>
+<li><a href="https://github.com/aliyun-UED/aliyun-sdk-js" target="_blank" rel="noopener">nodejs sdk</a></li>
+<li><a href="https://github.com/aliyun/aliyun-log-python-sdk" target="_blank" rel="noopener">python sdk</a>(loging base on the python logging)</li>
+<li><a href="https://help.aliyun.com/document_detail/31752.html" target="_blank" rel="noopener">web trancking</a></li>
 </ul>
+<p>After change the endpoint from aliyun domain to custom domain, all my code works to send log to aliyun log service, so the above solution is ok.</p>
 
         
     </section>
@@ -146,10 +166,8 @@
 
 
 
-<a id="pagenext" href="/2020/04/09/think-about-retry/" class="article-next" title="thinking about retry"><i class="icon-arrow-right"></i></a>
+<a id="pagenext" href="/2020/09/02/express-parameter-router-skill/" class="article-next" title="express parameter router skill"><i class="icon-arrow-right"></i></a>
 
-
-<a id="pageprev" href="/2020/09/16/log-server-custom-domain-does-not-work/" class="article-prev" title="log server custom domain does not work"><i class="icon-arrow-left"></i></a>
 
 
 
@@ -163,11 +181,11 @@
         repo: "blog",
         owner: "nnsay",
         admin: ["nnsay"],
-        id: "2020/09/02/express-parameter-router-skill",
+        id: "2020/09/16/log-server-custom-domain-does-not-work",
         distractionFreeMode: true,
-        title: "express parameter router skill",
-        body: "https://nnsay.github.io/2020/09/02/express-parameter-router-skill/",
-        labels: ["技巧"]
+        title: "log server custom domain does not work",
+        body: "https://nnsay.github.io/2020/09/16/log-server-custom-domain-does-not-work/",
+        labels: ["技巧","Aliyun"]
     }).render('comments');
     </script>
 </div>

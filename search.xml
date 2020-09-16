@@ -4,6 +4,27 @@
   
     
     <entry>
+      <title>log server custom domain does not work</title>
+      <link href="/2020/09/16/log-server-custom-domain-does-not-work/"/>
+      <url>/2020/09/16/log-server-custom-domain-does-not-work/</url>
+      
+        <content type="html"><![CDATA[<h3 id="1-problem"><a href="#1-problem" class="headerlink" title="1. problem"></a>1. problem</h3><p>The code does not work when you want to use aliyun sdk to send log to aliyun log server with your custom domain.<br>After review the nodejs sdk source code, I find that the api domain is built:</p><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> hostname = req.httpRequest.endpoint.hostname;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> projectName = req.params[<span class="string">'projectName'</span>];</span><br><span class="line"><span class="keyword">var</span> host = projectName+<span class="string">'.'</span>+ hostname;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(!<span class="regexp">/^[0-9.]+$/</span>.test(hostname))&#123;</span><br><span class="line">  <span class="comment">//不是ip,  是域名, 则需要拼接project名</span></span><br><span class="line">  <span class="keyword">var</span> protocol = req.httpRequest.endpoint.protocol;</span><br><span class="line">  <span class="keyword">var</span> port = req.httpRequest.endpoint.port;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//real endpoint</span></span><br><span class="line">  <span class="keyword">var</span> endpointObj = parseURL(protocol+<span class="string">'//'</span>+host+<span class="string">':'</span>+port);</span><br><span class="line"></span><br><span class="line">  ALY.util.update(req.httpRequest, &#123;<span class="attr">endpoint</span>: endpointObj &#125;);</span><br><span class="line">  <span class="comment">// ALY.util.update(req.service, &#123;endpoint: endpointObj &#125;);</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p><strong>The endpoint also has the project name prefix</strong>. This will result a error address resolution.</p><h3 id="2-solution"><a href="#2-solution" class="headerlink" title="2. solution"></a>2. solution</h3><p>add two address resolution rule:</p><table><thead><tr><th>machine record</th><th>record type</th><th>record value</th></tr></thead><tbody><tr><td>@</td><td>CNAME</td><td>cn-beijing.log.aliyuncs.com</td></tr><tr><td><em>projectName</em></td><td>CNAME</td><td><em>projectName</em>.cn-beijing.log.aliyuncs.com</td></tr></tbody></table><p>NOTE: <code>cn-beijing.log.aliyuncs.com</code>: the domain we need to replace with custom domain.<br>In the second rule, the project name acts the subdomain, the resolved address is the aliyun origiinal log sevice domain. If you use the <code>nslookup</code> to test the: <em>projectName</em>.custom.com, we can find that it is ok to resolve to right address.</p><h3 id="3-test-and-verify"><a href="#3-test-and-verify" class="headerlink" title="3. test and verify"></a>3. test and verify</h3><p>Before testing, you sould change the endpoint from <code>cn-beijing.log.aliyuncs.com</code> to your custom domain for example: <code>jimmy.cn</code> in your code. I have tested below three sdk:</p><ul><li><a href="https://github.com/aliyun-UED/aliyun-sdk-js" target="_blank" rel="noopener">nodejs sdk</a></li><li><a href="https://github.com/aliyun/aliyun-log-python-sdk" target="_blank" rel="noopener">python sdk</a>(loging base on the python logging)</li><li><a href="https://help.aliyun.com/document_detail/31752.html" target="_blank" rel="noopener">web trancking</a></li></ul><p>After change the endpoint from aliyun domain to custom domain, all my code works to send log to aliyun log service, so the above solution is ok.</p>]]></content>
+      
+      
+      
+        <tags>
+            
+            <tag> 技巧 </tag>
+            
+            <tag> Aliyun </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>express parameter router skill</title>
       <link href="/2020/09/02/express-parameter-router-skill/"/>
       <url>/2020/09/02/express-parameter-router-skill/</url>

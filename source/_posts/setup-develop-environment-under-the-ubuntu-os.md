@@ -1,5 +1,5 @@
 ---
-title: setup develop environment under the ubuntu os
+title: Ubuntu 20.02 搭建开发环境 
 date: 2020-11-04 13:19:01
 tags:
 - Skill

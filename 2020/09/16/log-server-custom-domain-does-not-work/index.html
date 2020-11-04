@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>aliyun log service custom domain does not work | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="1. problemThe code does not work when you want to use aliyun sdk to send log to aliyun log server with your custom domain.After review the nodejs sdk source code, I find that the api domain is built:1234567891011121314151617var hostname = req.htt..." />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    <link rel="stylesheet" href="/css/style.css">
+
+    <!--[if lt IE 9]>
+    <style type="text/css">
+    .nav-inner {top:0;}
+    .author-meta {position:static;top:0;}
+    .search-form {height:36px;}
+    </style>
+    <script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-problem"><span class="toc-number">1.</span> <span class="toc-text">1. problem</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-solution"><span class="toc-number">2.</span> <span class="toc-text">2. solution</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-test-and-verify"><span class="toc-number">3.</span> <span class="toc-text">3. test and verify</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            aliyun log service custom domain does not work
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="/2020/09/16/log-server-custom-domain-does-not-work/">
+    
+    <i class="icon-calendar"></i>
+    
+    <time datetime="2020-09-16T06:21:51.000Z" itemprop="datePublished">2020-09-16</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag"></i>
+    <a class="article-tag-link" href="/tags/Aliyun/" rel="tag">Aliyun</a>, <a class="article-tag-link" href="/tags/%E6%8A%80%E5%B7%A7/" rel="tag">技巧</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h3 id="1-problem"><a href="#1-problem" class="headerlink" title="1. problem"></a>1. problem</h3><p>The code does not work when you want to use aliyun sdk to send log to aliyun log server with your custom domain.<br>After review the nodejs sdk source code, I find that the api domain is built:</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> hostname = req.httpRequest.endpoint.hostname;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> projectName = req.params[<span class="string">'projectName'</span>];</span><br><span class="line"><span class="keyword">var</span> host = projectName+<span class="string">'.'</span>+ hostname;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(!<span class="regexp">/^[0-9.]+$/</span>.test(hostname))&#123;</span><br><span class="line">  <span class="comment">//不是ip,  是域名, 则需要拼接project名</span></span><br><span class="line">  <span class="keyword">var</span> protocol = req.httpRequest.endpoint.protocol;</span><br><span class="line">  <span class="keyword">var</span> port = req.httpRequest.endpoint.port;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//real endpoint</span></span><br><span class="line">  <span class="keyword">var</span> endpointObj = parseURL(protocol+<span class="string">'//'</span>+host+<span class="string">':'</span>+port);</span><br><span class="line"></span><br><span class="line">  ALY.util.update(req.httpRequest, &#123;<span class="attr">endpoint</span>: endpointObj &#125;);</span><br><span class="line">  <span class="comment">// ALY.util.update(req.service, &#123;endpoint: endpointObj &#125;);</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>The endpoint also has the project name prefix</strong>. This will result a error address resolution.</p>
+<h3 id="2-solution"><a href="#2-solution" class="headerlink" title="2. solution"></a>2. solution</h3><p>add two address resolution rule:</p>
+<table>
+<thead>
+<tr>
+<th>machine record</th>
+<th>record type</th>
+<th>record value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>@</td>
+<td>CNAME</td>
+<td>cn-beijing.log.aliyuncs.com</td>
+</tr>
+<tr>
+<td><em>projectName</em></td>
+<td>CNAME</td>
+<td><em>projectName</em>.cn-beijing.log.aliyuncs.com</td>
+</tr>
+</tbody></table>
+<p>NOTE: <code>cn-beijing.log.aliyuncs.com</code>: the domain we need to replace with custom domain.<br>In the second rule, the project name acts the subdomain, the resolved address is the aliyun origiinal log sevice domain. If you use the <code>nslookup</code> to test the: <em>projectName</em>.custom.com, we can find that it is ok to resolve to right address.</p>
+<h3 id="3-test-and-verify"><a href="#3-test-and-verify" class="headerlink" title="3. test and verify"></a>3. test and verify</h3><p>Before testing, you sould change the endpoint from <code>cn-beijing.log.aliyuncs.com</code> to your custom domain for example: <code>jimmy.cn</code> in your code. I have tested below three sdk:</p>
+<ul>
+<li><a href="https://github.com/aliyun-UED/aliyun-sdk-js" target="_blank" rel="noopener">nodejs sdk</a></li>
+<li><a href="https://github.com/aliyun/aliyun-log-python-sdk" target="_blank" rel="noopener">python sdk</a>(loging base on the python logging)</li>
+<li><a href="https://help.aliyun.com/document_detail/31752.html" target="_blank" rel="noopener">web trancking</a></li>
+</ul>
+<p>After change the endpoint from aliyun domain to custom domain, all my code works to send log to aliyun log service, so the above solution is ok.</p>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2020/09/02/express-parameter-router-skill/" class="article-next" title="express parameter router skill"><i class="icon-arrow-right"></i></a>
+
+
+<a id="pageprev" href="/2020/11/04/setup-develop-environment-under-the-ubuntu-os/" class="article-prev" title="setup develop environment under the ubuntu os"><i class="icon-arrow-left"></i></a>
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "2020/09/16/log-server-custom-domain-does-not-work",
+        distractionFreeMode: true,
+        title: "aliyun log service custom domain does not work",
+        body: "https://nnsay.github.io/2020/09/16/log-server-custom-domain-does-not-work/",
+        labels: ["技巧","Aliyun"]
+    }).render('comments');
+    </script>
+</div>
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    
+        <script src='https://unpkg.com/mermaid@7.1.2/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script>
+      
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://cdn.bootcss.com/jquery/1.9.0/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle();
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp();
+            }, 3000);
+        }
+    });
+    </script>
+    
+        <script src="/js/scrollspy.min.js"></script>
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

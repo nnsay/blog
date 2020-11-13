@@ -133,6 +133,59 @@
     <header class="article-header">
         
         <h1 itemprop="name">
+            <a href="/2020/11/13/simple-three-step-to-publish-local-server-or-website/">简单三步发布本地服务或网站</a>
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="/2020/11/13/simple-three-step-to-publish-local-server-or-website/">
+    
+    <i class="icon-calendar"></i>
+    
+    <time datetime="2020-11-13T08:25:17.000Z" itemprop="datePublished">2020-11-13</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag"></i>
+    <a class="article-tag-link" href="/tags/%E5%B7%A5%E5%85%B7/" rel="tag">工具</a>, <a class="article-tag-link" href="/tags/%E6%8A%80%E5%B7%A7/" rel="tag">技巧</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h2 id="1-背景"><a href="#1-背景" class="headerlink" title="1. 背景"></a>1. 背景</h2><p>在日常开发中经常需要演示和调试未上线的网站或者API，<a href="https://support.diode.io/" target="_blank" rel="noopener">diode</a> 应运而生，简单的快速的可以发布本地的网站或者API服务到外网，然后通过diode.link的二级域名访问你发布的东西，十分方便。本文介绍如何简单快速的通过diode发布本地的API服务。</p>
+<h2 id="2-三步发布本地API服务"><a href="#2-三步发布本地API服务" class="headerlink" title="2. 三步发布本地API服务"></a>2. 三步发布本地API服务</h2><h3 id="2-1-启动一个本地服务"><a href="#2-1-启动一个本地服务" class="headerlink" title="2.1 启动一个本地服务"></a>2.1 启动一个本地服务</h3><p>我本地有一个开发的中的项目， 这个项目有一个健康检查的API： GET /health, 该项目是基于nodejs框架express的，这里不详细介绍了总之它是一个提供RESTful API的服务，使用如下命令启动：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm run start</span><br></pre></td></tr></table></figure>
+
+<p>我的服务启动后监听本地3000端口。</p>
+<h3 id="2-2-安装diode"><a href="#2-2-安装diode" class="headerlink" title="2.2 安装diode"></a>2.2 安装<a href="https://support.diode.io/article/lsr4tkzz8t" target="_blank" rel="noopener">diode</a></h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -Ssf https://diode.io/install.sh | sh</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-3-发布本地服务"><a href="#2-3-发布本地服务" class="headerlink" title="2.3 发布本地服务"></a>2.3 发布本地服务</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">diode publish -public 80:3000</span><br></pre></td></tr></table></figure>
+
+<p>上面这个命令的意思是： 本地3000端口的服务被发布到diode的80端口上，且这个发布是公开的（当然也可以更多安全发布策略）。</p>
+<p>首次发布比较慢，diode会初始化一个client的ID， 这个ID作为diode.link的自域名可以在外网被访问。上面命令的控制台输出大致如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">[INFO] Diode Client version : v0.6.1 02 Nov 2020                         </span><br><span class="line">[INFO] Client address       : 0xaf9e2d540232d394997480889042a2e9a3d11beb </span><br><span class="line">[INFO] Fleet address        : 0x6000000000000000000000000000000000000000 </span><br><span class="line">[INFO] Connected to host: as1.prenet.diode.io:41046, validating... </span><br><span class="line">[INFO] Network is validated, last valid block: 1001299 0x000024f36df70e4b0694bd7f604ed326dddd72cc25cbe8068af9934f348e11d6 </span><br><span class="line">[INFO]  </span><br><span class="line">[INFO] Port      &lt;name&gt;     : &lt;extern&gt;     &lt;mode&gt;    &lt;protocol&gt;     &lt;allowlist&gt; </span><br><span class="line">[INFO] Port         80      :     3000      public       any             </span><br><span class="line">[INFO] Port was not published port = 80         server=as1.prenet.diode.io:41046       server=as1.prenet.diode.io:41046</span><br><span class="line">[INFO] Port was not published port = 80         server=as1.prenet.diode.io:41046</span><br><span class="line">^C[INFO] 1/5 Stopping socksserver </span><br><span class="line">[INFO] 2/5 Stopping proxyserver </span><br><span class="line">[INFO] 3/5 Stopping configserver </span><br><span class="line">[INFO] 4/5 Cleaning pool </span><br><span class="line">[INFO] 5/5 Closing logs </span><br><span class="line">➜  ~ diode publish -public 3000:80  </span><br><span class="line">[INFO] Diode Client version : v0.6.1 02 Nov 2020                         </span><br><span class="line">[INFO] Client address       : 0xaf9e2d540232d394997480889042a2e9a3d11beb </span><br><span class="line">[INFO] Fleet address        : 0x6000000000000000000000000000000000000000 </span><br><span class="line">[INFO] Connected to host: as1.prenet.diode.io:41046, validating... </span><br><span class="line">[INFO] Network is validated, last valid block: 1001331 0x0000793c211a3a7707fcf13b5275a84a961c7f19857ce03c9c0e8d3026bc0b16 </span><br><span class="line">[INFO]  </span><br><span class="line">[INFO] HTTP Gateway Enabled : http://0xaf9e2d540232d394997480889042a2e9a3d11beb.diode.link/ </span><br><span class="line">[INFO] Port      &lt;name&gt;     : &lt;extern&gt;     &lt;mode&gt;    &lt;protocol&gt;     &lt;allowlist&gt; </span><br><span class="line">[INFO] Port       3000      :       80      public       any</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-验证"><a href="#3-验证" class="headerlink" title="3. 验证"></a>3. 验证</h2><p>通过上面的三步，可以从最后一步最后看到本地程序已经被发布了，从控制台可以看到一个<code>Client address</code>, 现在你可以在外网使用： http://<client address>.diode.link 如同使用本地的服务 <a href="http://localhost:3000" target="_blank" rel="noopener">http://localhost:3000</a> ， 使用curl测试一下health接口：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -s -XGET https://0xaf9e2d540232d394997480889042a2e9a3d11beb.diode.link/health</span><br></pre></td></tr></table></figure>
+
+<p>测试结果符合预期， 测试成功！</p>
+<h2 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h2><p>Diode是我看到第一个免费的且超级方便的本地服务发布工具，在安全性它还有一些高级的设置可以继续学习和研究， 比如只允许特定的地址访问被发布的外网服务；diode也可以发布本地静态文件所以网站也是可以,这对前端的同学也很有帮助。</p>
+<p>今天介绍的Diode希望可以帮助开发的朋友。</p>
+
+        
+    </section>
+</article>
+
+
+    <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
             <a href="/2020/11/04/setup-develop-environment-under-the-ubuntu-os/">Ubuntu 20.02 搭建开发环境</a>
         </h1>
         
@@ -847,70 +900,6 @@ the app will show in the <code>Mir On X</code>:<br><img src="kiosk-result.png" a
 <li>batch processing should a fault-tolerant, eg: batch deleting</li>
 <li>replace the trick with a common way, eg: async load config before user module</li>
 <li>keep the code as simple as possible but be not a magic for everything</li>
-</ul>
-
-        
-    </section>
-</article>
-
-
-    <article class="article" itemscope itemprop="blogPost">
-    
-    <header class="article-header">
-        
-        <h1 itemprop="name">
-            <a href="/2019/11/18/soft-delete/">软删除</a>
-        </h1>
-        
-        <div class="article-meta clearfix">
-            <a class="article-date" href="/2019/11/18/soft-delete/">
-    
-    <i class="icon-calendar"></i>
-    
-    <time datetime="2019-11-18T07:41:30.000Z" itemprop="datePublished">2019-11-18</time>
-</a>
-
-            
-<div class="article-tag-list">
-    <i class="icon-tag"></i>
-    <a class="article-tag-link" href="/tags/%E4%BB%A3%E7%A0%81/" rel="tag">代码</a>, <a class="article-tag-link" href="/tags/%E6%8A%80%E5%B7%A7/" rel="tag">技巧</a>, <a class="article-tag-link" href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a>
-</div>
-
-
-        </div>
-    </header>
-    
-    <section class="article-body markdown-body">
-        
-        <h3 id="1-什么是软删除"><a href="#1-什么是软删除" class="headerlink" title="1. 什么是软删除?"></a>1. 什么是软删除?</h3><p>软删(soft delete)除是相对于常见的数据库删除命令 DELETE 来说的. 执行 DELETE 命令数据库表中的记录会被真实的删除(hard delete), 在某些场景下希望数据不要被删除比如数据有分析和统计的意义又不需要在前台业务上呈现, 这个时候一般有两种实现方式:</p>
-<ul>
-<li>软删除: 在数据库表中增加一列例如: deletedAt, 需要删除的时候使用 UPDATE 替换 DELETE 命令, 修改 deletedAt 为一个不为 NULL 的值, 一般是时间戳. 这种删除方式也称为<strong>标记删除</strong>.</li>
-<li>删除迁移: 创建一个和生产库相同表结构专门为删除数据准备的数据库, 或者直接在生产库中创建为一套需要删除数据表对应的删除表, 当执行 DELETE 的时候可以将要删除的数据从生产的表中转移到删除表中, 然后在生产库的表执行删除操作.</li>
-</ul>
-<p>简单比较一下软删除和迁移删除, 软删除操作比较简单且成本相对较小, 删除迁移相对比较复杂还需要考虑到业务表和删除表两个操作的事务性, 除此之外迁移在有外键约束的情况下, 迁移数据的逻辑也变的更复杂, 所以一般在设计删除的时候都采用软删除.</p>
-<h3 id="2-软删除是否完美"><a href="#2-软删除是否完美" class="headerlink" title="2. 软删除是否完美?"></a>2. 软删除是否完美?</h3><p>最近因为业务需要, 我们进行了一次讨论关于软删除和硬删除, 我也做了一些软删除的测试和实践, 首先分享一下我们讨论的一个观点: 不管是软删除还是硬删除都是删除, 既然是删除行为应该一致. 具体可以从以下两点理解这句话:</p>
-<ol>
-<li>硬删除删除了就查不来了, 软删除删除了也应该查不出来(不做特殊处理查不出来)</li>
-<li>硬删除会级联删除, 软删除应该也自动标记级联的实体的实例删除</li>
-</ol>
-<p>上面的观点1如果想要达成, 如果不通过 ORM 的话很难从纯 SQL 上解决, 我们假设都使用 ORM, 那么测试的核心就是: 在各种查询下不做特殊指定 ORM 总是返回未被软删除的数据. 上面观点2的测试重点也很简单: 如果级联删除, 关联表记录也被软删除.</p>
-<p>因为是已有业务和已有的技术栈, 这里我测试是 nodejs 的一个 ORM: Sequelize, 数据库则是: mysql.<br>测试过程忽略, 测试结果:</p>
-<ol>
-<li>ORM 可以在不做特殊指定的时候默认不查询已经软删除的数据记录, 这个点保证了我们已有的业务代码修改不会太多.</li>
-<li>软删除场景下 ORM 不能做到级联删除, 这点也很好理解, 级联删除是数据库引擎的事情, ORM 不太好去实现, 所以如果级联情况下需手工处理.</li>
-</ol>
-<p>至此, 基本了解了软删除的可行性. 而从技术角度查看执行 SQL 可以发现软删除表在不做特殊指定的时查询和更新操作默认都会增加一个筛选条件: </p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(deletedAt is null or deletedAt &lt; now())</span><br></pre></td></tr></table></figure>
-<p>所以 ORM 通过默认增加的筛选条件实现了观点1.<br>如果总结一下: <strong>在技术角度有 ORM 配合的软删除还是很不错的</strong>.</p>
-<h3 id="3-软删除与业务结合时需要注意的坑"><a href="#3-软删除与业务结合时需要注意的坑" class="headerlink" title="3. 软删除与业务结合时需要注意的坑"></a>3. 软删除与业务结合时需要注意的坑</h3><p>单从技术上软删除可行性还是挺不错的, 如果结合业务就是另外一回事情了, 简单总结一下软删除结合业务时候需要注意的点:</p>
-<ul>
-<li>unique index: 如果表有唯一索引, 比如用户表的邮箱列有唯一索引, 那么在做了软删除后被删除行的邮箱从数据角度任然在起作用, 所以不能创建相同邮箱的用户.</li>
-<li>performance: 上小节最后发现 ORM 是通过增加一个由 or 组成的附加条件来实现被删除的数据不被使用, 这时候需要考虑 SQL 的执行效率, 可以给标记列创建索引.</li>
-</ul>
-<h3 id="4-参考资料-Sequelize"><a href="#4-参考资料-Sequelize" class="headerlink" title="4. 参考资料(Sequelize)"></a>4. 参考资料(Sequelize)</h3><ul>
-<li><a href="https://sequelize.org/master/manual/models-definition.html#configuration" target="_blank" rel="noopener">configuration</a></li>
-<li><a href="https://sequelize.org/master/manual/instances.html#destroying---deleting-persistent-instances" target="_blank" rel="noopener">deleting-persistent-instances</a></li>
-<li><a href="https://sequelize.org/master/manual/models-usage.html#including-soft-deleted-records" target="_blank" rel="noopener">including-soft-deleted-records</a></li>
 </ul>
 
         

@@ -133,6 +133,54 @@
     <header class="article-header">
         
         <h1 itemprop="name">
+            <a href="/2021/01/14/nodejs-OOM-in-production/">nodejs OOM in production</a>
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="/2021/01/14/nodejs-OOM-in-production/">
+    
+    <i class="icon-calendar"></i>
+    
+    <time datetime="2021-01-14T06:12:55.000Z" itemprop="datePublished">2021-01-14</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag"></i>
+    <a class="article-tag-link" href="/tags/CaseStudy/" rel="tag">CaseStudy</a>, <a class="article-tag-link" href="/tags/%E4%BB%A3%E7%A0%81/" rel="tag">代码</a>, <a class="article-tag-link" href="/tags/%E6%8A%80%E5%B7%A7/" rel="tag">技巧</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h3 id="1-Backgroud"><a href="#1-Backgroud" class="headerlink" title="1. Backgroud"></a>1. Backgroud</h3><p>API slow in production and a OOM error in log.</p>
+<h3 id="2-Research"><a href="#2-Research" class="headerlink" title="2. Research"></a>2. Research</h3><h4 id="2-1-code-review"><a href="#2-1-code-review" class="headerlink" title="2.1 code review"></a>2.1 code review</h4><p>check the code and debug the slow code looks like below:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">const org = await DB.Org.findByPk(orgId, &#123;</span><br><span class="line">    include: [DB.Project, DB.User, DB.Subject],</span><br><span class="line">  &#125;);</span><br></pre></td></tr></table></figure>
+<p>the above code use the ORM(Sequelize) find the org and relation entites(project/user/subject).</p>
+<h4 id="2-2-find-format-simplify-sql"><a href="#2-2-find-format-simplify-sql" class="headerlink" title="2.2 find/format/simplify sql"></a>2.2 find/format/simplify sql</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">SELECT *</span><br><span class="line">FROM `Orgs` `Org`</span><br><span class="line">	LEFT JOIN `Subjects` `Subjects` ON `Org`.`id` = `Subjects`.`orgId` # 1512</span><br><span class="line">	LEFT JOIN `Projects` `Projects` ON `Org`.`id` = `Projects`.`orgId` # 635</span><br><span class="line">	LEFT JOIN `Users` `Users` ON `Org`.`id` = `Users`.`orgId` # 14</span><br><span class="line">WHERE `Org`.`id` = 1;</span><br></pre></td></tr></table></figure>
+<h4 id="2-3-separate-the-sql-and-exec"><a href="#2-3-separate-the-sql-and-exec" class="headerlink" title="2.3 separate the sql and exec"></a>2.3 separate the sql and exec</h4><ul>
+<li>only left join Subjects: 1512 rows, 35ms<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">SELECT *</span><br><span class="line">FROM `Orgs` `Org`</span><br><span class="line">	LEFT JOIN `Subjects` `Subjects` ON `Org`.`id` = `Subjects`.`orgId`</span><br><span class="line">WHERE `Org`.`id` = 1;</span><br></pre></td></tr></table></figure></li>
+<li>only left join Projects: 635 rows, 26ms<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">SELECT *</span><br><span class="line">FROM `Orgs` `Org`</span><br><span class="line">	LEFT JOIN `Projects` `Projects` ON `Org`.`id` = `Projects`.`orgId`</span><br><span class="line">WHERE `Org`.`id` = 1;</span><br></pre></td></tr></table></figure></li>
+<li>only left join Users: 14 rows, 7ms<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># only for left join Users</span><br><span class="line"># 14 rows, 7ms</span><br><span class="line">SELECT *</span><br><span class="line">FROM `Orgs` `Org`</span><br><span class="line">	LEFT JOIN `Users` `Users` ON `Org`.`id` = `Users`.`orgId` # 14</span><br><span class="line">WHERE `Org`.`id` = 1;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<p>The reason is very clear now. If we join three tables, the total rows count is 1512 * 635 * 14 = <strong>13441680</strong>.<br><strong>13441680</strong> rows with all columns are too big for v8 engine in nodejs.</p>
+<h3 id="3-How-to-resolve"><a href="#3-How-to-resolve" class="headerlink" title="3. How to resolve?"></a>3. How to resolve?</h3><p>Separate query for Subject/User/Project is the solution. The three paralle query maybe a better solution.</p>
+
+        
+    </section>
+</article>
+
+
+    <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
             <a href="/2020/11/13/simple-three-step-to-publish-local-server-or-website/">简单三步发布本地服务或网站</a>
         </h1>
         
@@ -801,107 +849,6 @@ the app will show in the <code>Mir On X</code>:<br><img src="kiosk-result.png" a
 </ul>
 <h3 id="4-QA"><a href="#4-QA" class="headerlink" title="4. QA"></a>4. QA</h3><h4 id="4-1-how-to-set-the-version-of-snapcraft-nodejs-plugin"><a href="#4-1-how-to-set-the-version-of-snapcraft-nodejs-plugin" class="headerlink" title="4.1  how to set the version of snapcraft nodejs plugin?"></a>4.1  how to set the version of snapcraft nodejs plugin?</h4><p>check <a href="https://github.com/search?q=filename%3Asnapcraft.yaml+%22plugin%3A+nodejs%22&type=Code" target="_blank" rel="noopener">here</a>, set the <code>node-engine</code></p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">parts:</span><br><span class="line">  hmon:</span><br><span class="line">    plugin: nodejs</span><br><span class="line">    node-engine: 12.13.1</span><br></pre></td></tr></table></figure>
-        
-    </section>
-</article>
-
-
-    <article class="article" itemscope itemprop="blogPost">
-    
-    <header class="article-header">
-        
-        <h1 itemprop="name">
-            <a href="/2019/12/04/make-effective-communication/">Make effective communication</a>
-        </h1>
-        
-        <div class="article-meta clearfix">
-            <a class="article-date" href="/2019/12/04/make-effective-communication/">
-    
-    <i class="icon-calendar"></i>
-    
-    <time datetime="2019-12-04T03:35:00.000Z" itemprop="datePublished">2019-12-04</time>
-</a>
-
-            
-<div class="article-tag-list">
-    <i class="icon-tag"></i>
-    <a class="article-tag-link" href="/tags/%E5%B7%A5%E4%BD%9C/" rel="tag">工作</a>, <a class="article-tag-link" href="/tags/%E6%95%88%E7%8E%87/" rel="tag">效率</a>
-</div>
-
-
-        </div>
-    </header>
-    
-    <section class="article-body markdown-body">
-        
-        <h3 id="1-What-is-the-best-result"><a href="#1-What-is-the-best-result" class="headerlink" title="1. What is the best result"></a>1. What is the best result</h3><ul>
-<li>the best publish time is yesterday.</li>
-<li>the best code is that has not been written yet.</li>
-</ul>
-<h3 id="2-About-design-solution"><a href="#2-About-design-solution" class="headerlink" title="2. About design/solution"></a>2. About design/solution</h3><p>the factors for a better design:</p>
-<ul>
-<li>layered<ul>
-<li>basic targets</li>
-<li>optional targets</li>
-</ul>
-</li>
-<li>benefits</li>
-<li>drawbacks</li>
-</ul>
-<p>when talk about the <code>benefits</code> and <code>drawbacks</code>, we can evaluate from the following aspects:</p>
-<ul>
-<li>compliance</li>
-<li>performance</li>
-<li>extensionable</li>
-<li>understandable</li>
-<li>devops</li>
-<li>implement time</li>
-</ul>
-<h3 id="3-How-to-discuss-about-the-design"><a href="#3-How-to-discuss-about-the-design" class="headerlink" title="3. How to discuss about the design"></a>3. How to discuss about the design</h3><p>Sometime we need to discuss your design or solution with other people. In order to save time, a good steps you can follow:</p>
-<p>3.1 Does other people have known the background about the design?</p>
-<ul>
-<li>no, stop</li>
-<li>yes, go on</li>
-</ul>
-<p>3.2 Do your have same design <code>basic targets</code>?</p>
-<ul>
-<li>no, try to make a common target</li>
-<li>yes, go on</li>
-</ul>
-<p>3.3 Design clarification</p>
-<ul>
-<li>you give your desgin, basic targets/optional targets/code  …</li>
-<li>other people give their design, idea/sugguestion/code …</li>
-<li>keep the same part, find out the different part, list the the different part</li>
-<li>foreach the different part list<ul>
-<li>what is the other pepole design benefit?</li>
-<li>do you agree?<ul>
-<li>yes, adopt<ul>
-<li>do the new suggestion bring out new probleme?</li>
-</ul>
-</li>
-<li>no, discuss</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>summary the sugguests what the both sides agree with</li>
-<li>reimplement</li>
-<li>checking</li>
-</ul>
-<h3 id="4-The-skill-for-communication"><a href="#4-The-skill-for-communication" class="headerlink" title="4. The skill for communication"></a>4. The skill for communication</h3><ul>
-<li>make some samll and core questions about you design to confirm the other people whether understands your design.</li>
-<li>ask for the drawback of your design  or the benifit of other people’s design</li>
-<li>ask question to make the other people think instead of always explaining the yourself design</li>
-<li>invite a third part to join the discussion</li>
-<li>summary the common thoughts</li>
-</ul>
-<h3 id="5-Summary-the-common-thoughts"><a href="#5-Summary-the-common-thoughts" class="headerlink" title="5. Summary the common thoughts"></a>5. Summary the common thoughts</h3><ul>
-<li>batch processing should a fault-tolerant, eg: batch deleting</li>
-<li>replace the trick with a common way, eg: async load config before user module</li>
-<li>keep the code as simple as possible but be not a magic for everything</li>
-</ul>
-
         
     </section>
 </article>

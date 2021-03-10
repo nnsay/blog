@@ -133,6 +133,64 @@
     <header class="article-header">
         
         <h1 itemprop="name">
+            <a href="/2021/03/10/aliyun-migration-knowlege-point/">阿里云知识点</a>
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="/2021/03/10/aliyun-migration-knowlege-point/">
+    
+    <i class="icon-calendar"></i>
+    
+    <time datetime="2021-03-10T09:47:41.000Z" itemprop="datePublished">2021-03-10</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag"></i>
+    <a class="article-tag-link" href="/tags/Aliyun/" rel="tag">Aliyun</a>, <a class="article-tag-link" href="/tags/%E6%8A%80%E5%B7%A7/" rel="tag">技巧</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h3 id="1-使用临时token登录阿里云CR"><a href="#1-使用临时token登录阿里云CR" class="headerlink" title="1. 使用临时token登录阿里云CR"></a>1. 使用临时token登录阿里云CR</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">aliyun cr GetAuthorizationToken | jq .data.authorizationToken | tr -d &apos;&quot;&apos; | docker login --username=cr_temp_user --password-stdin registry.cn-hangzhou.aliyuncs.com</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-获取Kubernetes集群的kuberctl配置文件"><a href="#2-获取Kubernetes集群的kuberctl配置文件" class="headerlink" title="2. 获取Kubernetes集群的kuberctl配置文件"></a>2. 获取Kubernetes集群的kuberctl配置文件</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">aliyun cs DescribeClusterUserKubeconfig --ClusterId=c90bf856c68364386a07384a6a2bb176b</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-使用use-context切换管理多个kubernetes集群"><a href="#3-使用use-context切换管理多个kubernetes集群" class="headerlink" title="3. 使用use-context切换管理多个kubernetes集群"></a>3. 使用use-context切换管理多个kubernetes集群</h3><p>多个集群kubectl配置如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: v1</span><br><span class="line">clusters:</span><br><span class="line">- cluster:</span><br><span class="line">    certificate-authority-data: DATA+OMITTED</span><br><span class="line">    server: https://192.168.132.236/k8s/clusters/c-8s9dc</span><br><span class="line">  name: ng-demo</span><br><span class="line">- cluster:</span><br><span class="line">    certificate-authority-data: DATA+OMITTED</span><br><span class="line">    server: https://192.168.132.236:6443</span><br><span class="line">  name: ng-demo-server01</span><br><span class="line">contexts:</span><br><span class="line">- context:</span><br><span class="line">    cluster: ng-demo</span><br><span class="line">    user: ng-demo</span><br><span class="line">  name: ng-demo</span><br><span class="line">- context:</span><br><span class="line">    cluster: ng-demo-server01</span><br><span class="line">    user: ng-demo</span><br><span class="line">  name: ng-demo-server01</span><br><span class="line">current-context: ng-demo</span><br><span class="line">kind: Config</span><br><span class="line">preferences: &#123;&#125;</span><br><span class="line">users:</span><br><span class="line">- name: ng-demo</span><br><span class="line">  user:</span><br><span class="line">    token: REDACTED</span><br></pre></td></tr></table></figure>
+
+<p>切换命令如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl config use-context ng-demo</span><br><span class="line">Switched to context &quot;ng-demo&quot;.</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-设置OSS生命周期"><a href="#4-设置OSS生命周期" class="headerlink" title="4. 设置OSS生命周期"></a>4. 设置OSS生命周期</h3><p>Terraform目前(2021-3-10)不支持对于分片文件的生命周期, 可以考虑通过阿里云CLI实现.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># get and view the bucket lifecycel</span></span><br><span class="line">aliyun oss lifecycle --method get oss://research-ng-temp</span><br><span class="line"><span class="comment"># set the lifecycle</span></span><br><span class="line">aliyun oss lifecycle --method put oss://research-ng-temp lifecycle.xml</span><br></pre></td></tr></table></figure>
+
+<p>上面命令中的lifecycle.xml如下:</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version="1.0" encoding="UTF-8"?&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">LifecycleConfiguration</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">Rule</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">ID</span>&gt;</span>857e37e3-0a3e-4250-a408-88f5b35f9714<span class="tag">&lt;/<span class="name">ID</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">Prefix</span>&gt;</span><span class="tag">&lt;/<span class="name">Prefix</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">Status</span>&gt;</span>Enabled<span class="tag">&lt;/<span class="name">Status</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">Expiration</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">Days</span>&gt;</span>16<span class="tag">&lt;/<span class="name">Days</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;/<span class="name">Expiration</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">AbortMultipartUpload</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">Days</span>&gt;</span>16<span class="tag">&lt;/<span class="name">Days</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;/<span class="name">AbortMultipartUpload</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">Rule</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">LifecycleConfiguration</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="5-ICP"><a href="#5-ICP" class="headerlink" title="5. ICP"></a>5. ICP</h3><ul>
+<li><a href="https://help.aliyun.com/knowledge_detail/36924.html" target="_blank" rel="noopener">ICP接入</a>: ICP可以同别的平台迁移到阿里云, 这个过程比在做一次ICP快很多</li>
+</ul>
+<h3 id="6-免费DV证书"><a href="#6-免费DV证书" class="headerlink" title="6. 免费DV证书"></a>6. <a href="https://help.aliyun.com/document_detail/156645.html" target="_blank" rel="noopener">免费DV证书</a></h3><p>阿里云每个实名账号个人或企业主体在一年内可以有20个免费DV证书可以使用, 每个证书仅支持绑定一个具体的域名, 20个的数量可以支持常见的测试和验证需求. 这种证书可以用于:</p>
+<ul>
+<li>CDN自定义域名</li>
+<li>SLB启用HTTPS</li>
+</ul>
+
+        
+    </section>
+</article>
+
+
+    <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
             <a href="/2021/01/14/nodejs-OOM-in-production/">nodejs OOM in production</a>
         </h1>
         
@@ -685,170 +743,6 @@ ZIP -->|write stream| DownloadAPI</pre>
 <li><a href="https://github.com/LGSInnovations/node-dbus-network-manager" target="_blank" rel="noopener">dbus-network-manager</a>: A node.js API to interact with NetworkManager via DBus. This is currently extremely new and incomplete</li>
 </ul>
 
-        
-    </section>
-</article>
-
-
-    <article class="article" itemscope itemprop="blogPost">
-    
-    <header class="article-header">
-        
-        <h1 itemprop="name">
-            <a href="/2019/12/05/kiosk-research/">Kiosk Research</a>
-        </h1>
-        
-        <div class="article-meta clearfix">
-            <a class="article-date" href="/2019/12/05/kiosk-research/">
-    
-    <i class="icon-calendar"></i>
-    
-    <time datetime="2019-12-05T10:29:13.000Z" itemprop="datePublished">2019-12-05</time>
-</a>
-
-            
-<div class="article-tag-list">
-    <i class="icon-tag"></i>
-    <a class="article-tag-link" href="/tags/Linux/" rel="tag">Linux</a>, <a class="article-tag-link" href="/tags/%E5%B7%A5%E4%BD%9C/" rel="tag">工作</a>, <a class="article-tag-link" href="/tags/%E7%A0%94%E7%A9%B6/" rel="tag">研究</a>
-</div>
-
-
-        </div>
-    </header>
-    
-    <section class="article-body markdown-body">
-        
-        <h3 id="1-Requirements-of-Kiosk"><a href="#1-Requirements-of-Kiosk" class="headerlink" title="1. Requirements of Kiosk"></a>1. Requirements of Kiosk</h3><ul>
-<li>basic<ul>
-<li>limited usage<ul>
-<li>only ourself desktop application</li>
-</ul>
-</li>
-<li>system management<ul>
-<li>wifi config</li>
-<li>file share</li>
-<li>network config</li>
-</ul>
-</li>
-<li>platform<ul>
-<li>linux: best</li>
-<li>windows: not bad</li>
-<li>android/ios: none</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>advance<ul>
-<li>remote control</li>
-<li>report &amp; alert<ul>
-<li>battery level alert: Get device battery percentage (%) alerts for the selected time range of a day.</li>
-<li>location report: Location history reports for each device or group of devices.</li>
-<li>data usage alert: Receive a notification when the device exceeds the data limit set by you.</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="2-Kiosk-Solution"><a href="#2-Kiosk-Solution" class="headerlink" title="2. Kiosk Solution"></a>2. Kiosk Solution</h3><h4 id="2-1-commerce-windows"><a href="#2-1-commerce-windows" class="headerlink" title="2.1 commerce(windows)"></a>2.1 commerce(windows)</h4><ul>
-<li><a href="https://scalefusion.com/windows-10-kiosk-mode" target="_blank" rel="noopener">scalefusion windows 10 kiosk mode</a><ul>
-<li>custom branding</li>
-<li>configure wifi setting</li>
-<li>app blacklisting</li>
-<li>location tracking</li>
-<li>restrict peripherals</li>
-<li>mail configuration</li>
-<li>enforce passcode policy</li>
-<li>edge brower management</li>
-</ul>
-</li>
-<li><a href="https://www.kioware.com/windows.aspx" target="_blank" rel="noopener">kioware for windows</a><ul>
-<li>keyboard filtering</li>
-<li>clears user data</li>
-<li>file download blocking</li>
-<li>device orgnazition</li>
-<li>content management</li>
-<li>remote monitoring</li>
-<li>device usage statistics</li>
-<li>reporting</li>
-</ul>
-</li>
-<li><a href="http://techgenix.com/windows-kiosk-mode-solutions/" target="_blank" rel="noopener">other windows solution</a></li>
-</ul>
-<h4 id="2-2-open-source-linux"><a href="#2-2-open-source-linux" class="headerlink" title="2.2 open source (linux)"></a>2.2 <a href="http://tuxdiary.com/2014/11/05/linux-distros-for-kiosks/" target="_blank" rel="noopener">open source (linux)</a></h4><ul>
-<li><p><a href="http://porteus-kiosk.org/" target="_blank" rel="noopener">Porteus kiosk</a></p>
-<p>  The mini distro Porteus has a dedicated mod to support kiosk mode. Provides options to customize as need on first boot.Porteus Kiosk is a free to use, lightweight Linux operating system which has been restricted to allow only use of the web browser.</p>
-</li>
-<li><p><a href="http://www.ubuntu.com/" target="_blank" rel="noopener">Ubuntu Guest login</a></p>
-<p>  Normal Ubuntu installation allows guest access from the login prompt. A perfect solution for kiosks. Login into guest mode with restricted permissions but non-restricted browser. Works from USB too.</p>
-</li>
-<li><p>Scientific Linux 6 and CentOS 6</p>
-<p>  Both the distros can be configured into kiosk-mode automatically by running this <a href="http://www.marcinwilk.eu/sl/make-kiosk.sh" target="_blank" rel="noopener">script</a>.</p>
-</li>
-<li><p>Kiosk conversion script</p>
-<p>  Redditor rawfan shared his script (<a href="https://gist.github.com/5bba6c9b6425a42b4ea1" target="_blank" rel="noopener">create_kiosk.sh</a>) to convert Ubuntu into a kiosk. It is untested and should not be run directly on your workstation as it modifies lightdm behaviour. Test first. It does the following:</p>
-<ul>
-<li><p>create a kiosk user with limited rights</p>
-</li>
-<li><p>the user gets an empty password (mkpasswd ”) with a password-policy that it can’t be changed</p>
-</li>
-<li><p>mount a union file system on top of the kiosk users $HOME (aufs) so that the user can’t actually change anything</p>
-</li>
-<li><p>wipe the aufs on login, logout and boot</p>
-</li>
-<li><p>display a warning on login that users need to save their stuff to USB keys because everything gets wiped clean</p>
-</li>
-<li><p>log the user out after a couple of minutes of inactivity</p>
-</li>
-<li><p>lightdm only displays the kiosk user and the option to enter a custom username and a message to press enter to log in</p>
-</li>
-<li><p>set up unattended upgrades for all packages</p>
-<p>If you test it out, don’t forget to leave a feedback on how the script performs.</p>
-</li>
-</ul>
-</li>
-<li><p><a href="https://tutorials.ubuntu.com/tutorial/secure-ubuntu-kiosk#0" target="_blank" rel="noopener">Ubuntu Kiosk</a></p>
-</li>
-</ul>
-<h4 id="2-3-other-article"><a href="#2-3-other-article" class="headerlink" title="2.3 other article"></a>2.3 other article</h4><ul>
-<li><a href="https://www.how2shout.com/tools/free-open-source-linux-kiosk-distros-browsers.html" target="_blank" rel="noopener">other linux kiosk distros and browsers tools</a></li>
-</ul>
-<h3 id="3-Ubuntu-kiosk"><a href="#3-Ubuntu-kiosk" class="headerlink" title="3. Ubuntu kiosk"></a>3. Ubuntu kiosk</h3><p>take a deep research for below targets:</p>
-<ul>
-<li>how to work</li>
-<li>how to setup</li>
-<li>how to deploy</li>
-<li>does it support basic system config</li>
-<li>does it support for multiple application</li>
-</ul>
-<h4 id="3-1-basic-knowledge"><a href="#3-1-basic-knowledge" class="headerlink" title="3.1 basic knowledge"></a>3.1 basic knowledge</h4><p>We use Wayland as the primary display interface. We will use Mir to manage the display and support connections from Wayland clients. Snapd will confine the applications and enable Wayland protocol interactions through Mir, securely.</p>
-<p>Your graphics approach largely depends on the toolkit your application uses:</p>
-<ul>
-<li><p>GTK3/4 and Qt5 - have native support for Wayland<br>This is the simplest case, as the application can talk Wayland to Mir directly.</p>
-</li>
-<li><p>GTK2, Qt4, Java - do not have Wayland support<br>This is a more complex case, as the toolkits require a legacy X11 server to function. To enable these applications we will embed a tiny X11 server into your application package, which translates X11 calls to Wayland ones.</p>
-</li>
-<li><p>Electron, HTML5, Chromium - do not have Wayland support<br>We will need to use the embedded browser together with a tiny embedded X11 server to handle the translation.</p>
-</li>
-</ul>
-<p><img src="kiosk-structure.png" alt="kiosk-structure"></p>
-<p>If our descktop app base on electron, so the third option should be choosed.</p>
-<h4 id="3-2-make-a-HTML-Electron-based-kiosk-snap"><a href="#3-2-make-a-HTML-Electron-based-kiosk-snap" class="headerlink" title="3.2 make a HTML/Electron-based kiosk snap"></a>3.2 <a href="https://tutorials.ubuntu.com/tutorial/electron-kiosk#0" target="_blank" rel="noopener">make a HTML/Electron-based kiosk snap</a></h4><ul>
-<li>prepare<ul>
-<li>install mir<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo snap install --devmode mir-kiosk -y</span><br><span class="line">sudo mir-kiosk</span><br></pre></td></tr></table></figure></li>
-<li>install snacraft<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install snapcraft -y</span><br></pre></td></tr></table></figure></li>
-<li>install node<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># install nvm</span><br><span class="line">wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.1/install.sh | bash</span><br><span class="line"># enable nvm command</span><br><span class="line">command -v nvm</span><br><span class="line"># install nodejs(the version should support the async/await)</span><br><span class="line">nvm install v12.13.1</span><br></pre></td></tr></table></figure></li>
-<li>build &amp; install &amp; run<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"># 1. create a test workspace</span><br><span class="line">mkdir demo &amp;&amp; cd demo</span><br><span class="line"># 2. init a project</span><br><span class="line">snapcraft init</span><br><span class="line"># 3. edit the snapcraft.yaml use the demo application config: https://github.com/nnsay/blog/wiki/Ubuntu-Kiosk-Electron-Snap-Config</span><br><span class="line">gedit snap/snapcraft.yaml</span><br><span class="line"># 4. build</span><br><span class="line">snapcraft</span><br><span class="line"># 5. install</span><br><span class="line">sudo snap install --dangerous ./electron-hello-world-kiosk_0.1_amd64.snap</span><br><span class="line"># 6. connect to brower support</span><br><span class="line">sudo snap connect electron-hello-world-kiosk:wayland</span><br><span class="line"># 7. run(optional)</span><br><span class="line">sudo snap restart electron-hello-world-kiosk</span><br></pre></td></tr></table></figure>
-the app will show in the <code>Mir On X</code>:<br><img src="kiosk-result.png" alt="kiosk-result"></li>
-</ul>
-</li>
-</ul>
-<h4 id="3-3-summary"><a href="#3-3-summary" class="headerlink" title="3.3 summary"></a>3.3 summary</h4><ul>
-<li>ubuntu kiosk use wayland and mir to guarantee the security</li>
-<li>ubuntu kiosk is not a good way for system config</li>
-<li>no found the information about how to implement multiple application within kiosk</li>
-</ul>
-<h3 id="4-QA"><a href="#4-QA" class="headerlink" title="4. QA"></a>4. QA</h3><h4 id="4-1-how-to-set-the-version-of-snapcraft-nodejs-plugin"><a href="#4-1-how-to-set-the-version-of-snapcraft-nodejs-plugin" class="headerlink" title="4.1  how to set the version of snapcraft nodejs plugin?"></a>4.1  how to set the version of snapcraft nodejs plugin?</h4><p>check <a href="https://github.com/search?q=filename%3Asnapcraft.yaml+%22plugin%3A+nodejs%22&type=Code" target="_blank" rel="noopener">here</a>, set the <code>node-engine</code></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">parts:</span><br><span class="line">  hmon:</span><br><span class="line">    plugin: nodejs</span><br><span class="line">    node-engine: 12.13.1</span><br></pre></td></tr></table></figure>
         
     </section>
 </article>

@@ -92,3 +92,40 @@ aliyun oss lifecycle --method put oss://research-ng-temp lifecycle.xml
 阿里云每个实名账号个人或企业主体在一年内可以有20个免费DV证书可以使用, 每个证书仅支持绑定一个具体的域名, 20个的数量可以支持常见的测试和验证需求. 这种证书可以用于:
 - CDN自定义域名
 - SLB启用HTTPS
+
+### 7. 第三方账号证书导入
+阿里云支持上传证书, 可以将一个已经在其他平台和账号的证书上传到阿里云, 操纵步骤:
+- 下载购买证书, 如果在阿里云购买的话, 下载的时候有很多种下载方式, 选择 nginx 下载
+![cert download](https://gitee.com/nnsay/public/raw/master/1618555774_20210416144918809_2123515414.png)
+- 解压下载文件, 可以获得.pem(certificate)和.key(provide key)文件
+- 上传, 在需要证书的阿里云账号的证书管理控制台, 粘贴复制.pem和.key的内容
+- 使用, 上传完后证书即可以像其他购买的证书一样正常使用, 例如配置OSS自定义域名,代码15和16行
+```
+resource "alicloud_cdn_domain_new" "docker_storage_domain" {
+  domain_name = local.ng_docker_file_domain
+  cdn_type    = "download"
+  scope       = "domestic"
+
+  sources {
+    content = local.docker_storage_bucket_domain
+    type    = "oss"
+    port    = 443
+  }
+
+  certificate_config {
+    server_certificate_status = "on"
+    force_set                 = 1
+    cert_name                 = local.cert_name
+    cert_type                 = "upload"
+  }
+
+  tags = {
+    Name  = "${var.stack_name}-docker-storage-domain"
+    Stack = var.stack_name
+  }
+
+  depends_on = [
+    alicloud_oss_bucket.docker_storage
+  ]
+}
+```

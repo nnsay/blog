@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://nnsay.github.io/"/>
-  <updated>2021-04-16T07:01:38.597Z</updated>
+  <updated>2021-04-16T07:48:11.497Z</updated>
   <id>https://nnsay.github.io/</id>
   
   <author>
@@ -17,11 +17,35 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>搭建自定义授权的Docker Registory</title>
+    <link href="https://nnsay.github.io/2021/04/16/setup%20docker%20registry%20with%20custom%20auth/"/>
+    <id>https://nnsay.github.io/2021/04/16/setup docker registry with custom auth/</id>
+    <published>2021-04-16T07:43:47.000Z</published>
+    <updated>2021-04-16T07:48:11.497Z</updated>
+    
+    <summary type="html">
+    
+      
+      
+        
+        
+          &lt;p&gt;[toc]&lt;/p&gt;
+&lt;h3 id=&quot;1-鉴权介绍&quot;&gt;&lt;a href=&quot;#1-鉴权介绍&quot; class=&quot;headerlink&quot; title=&quot;1. 鉴权介绍&quot;&gt;&lt;/a&gt;1. 鉴权介绍&lt;/h3&gt;&lt;p&gt;自建docker registry比较简单, 但是docker
+        
+      
+    
+    </summary>
+    
+    
+    
+  </entry>
+  
+  <entry>
     <title>阿里云知识点</title>
     <link href="https://nnsay.github.io/2021/03/10/aliyun-migration-knowlege-point/"/>
     <id>https://nnsay.github.io/2021/03/10/aliyun-migration-knowlege-point/</id>
     <published>2021-03-10T09:47:41.000Z</published>
-    <updated>2021-04-16T07:01:38.597Z</updated>
+    <updated>2021-04-16T07:48:11.493Z</updated>
     
     <summary type="html">
     
@@ -48,7 +72,7 @@
     <link href="https://nnsay.github.io/2021/01/14/nodejs-OOM-in-production/"/>
     <id>https://nnsay.github.io/2021/01/14/nodejs-OOM-in-production/</id>
     <published>2021-01-14T06:12:55.000Z</published>
-    <updated>2021-04-16T07:01:38.597Z</updated>
+    <updated>2021-04-16T07:48:11.493Z</updated>
     
     <summary type="html">
     
@@ -77,7 +101,7 @@
     <link href="https://nnsay.github.io/2020/11/13/simple-three-step-to-publish-local-server-or-website/"/>
     <id>https://nnsay.github.io/2020/11/13/simple-three-step-to-publish-local-server-or-website/</id>
     <published>2020-11-13T08:25:17.000Z</published>
-    <updated>2021-04-16T07:01:38.597Z</updated>
+    <updated>2021-04-16T07:48:11.497Z</updated>
     
     <summary type="html">
     
@@ -104,7 +128,7 @@
     <link href="https://nnsay.github.io/2020/11/04/setup-develop-environment-under-the-ubuntu-os/"/>
     <id>https://nnsay.github.io/2020/11/04/setup-develop-environment-under-the-ubuntu-os/</id>
     <published>2020-11-04T05:19:01.000Z</published>
-    <updated>2021-04-16T07:01:38.597Z</updated>
+    <updated>2021-04-16T07:48:11.497Z</updated>
     
     <summary type="html">
     
@@ -129,7 +153,7 @@
     <link href="https://nnsay.github.io/2020/09/16/log-server-custom-domain-does-not-work/"/>
     <id>https://nnsay.github.io/2020/09/16/log-server-custom-domain-does-not-work/</id>
     <published>2020-09-16T06:21:51.000Z</published>
-    <updated>2021-04-16T07:01:38.597Z</updated>
+    <updated>2021-04-16T07:48:11.493Z</updated>
     
     <summary type="html">
     
@@ -156,7 +180,7 @@
     <link href="https://nnsay.github.io/2020/09/02/express-parameter-router-skill/"/>
     <id>https://nnsay.github.io/2020/09/02/express-parameter-router-skill/</id>
     <published>2020-09-02T04:22:49.000Z</published>
-    <updated>2021-04-16T07:01:38.597Z</updated>
+    <updated>2021-04-16T07:48:11.493Z</updated>
     
     <summary type="html">
     
@@ -181,7 +205,7 @@
     <link href="https://nnsay.github.io/2020/04/09/think-about-retry/"/>
     <id>https://nnsay.github.io/2020/04/09/think-about-retry/</id>
     <published>2020-04-09T08:04:30.000Z</published>
-    <updated>2021-04-16T07:01:38.597Z</updated>
+    <updated>2021-04-16T07:48:11.497Z</updated>
     
     <summary type="html">
     
@@ -208,7 +232,7 @@
     <link href="https://nnsay.github.io/2020/04/08/appImage-auto-upgrade-failure/"/>
     <id>https://nnsay.github.io/2020/04/08/appImage-auto-upgrade-failure/</id>
     <published>2020-04-08T14:19:44.000Z</published>
-    <updated>2021-04-16T07:01:38.597Z</updated>
+    <updated>2021-04-16T07:48:11.493Z</updated>
     
     <summary type="html">
     
@@ -237,7 +261,7 @@
     <link href="https://nnsay.github.io/2020/02/06/s3-file-zip-download-by-stream/"/>
     <id>https://nnsay.github.io/2020/02/06/s3-file-zip-download-by-stream/</id>
     <published>2020-02-06T17:46:10.000Z</published>
-    <updated>2021-04-16T07:01:38.597Z</updated>
+    <updated>2021-04-16T07:48:11.497Z</updated>
     
     <summary type="html">
     
@@ -263,7 +287,7 @@
     <link href="https://nnsay.github.io/2019/12/10/ubuntu-network-manager/"/>
     <id>https://nnsay.github.io/2019/12/10/ubuntu-network-manager/</id>
     <published>2019-12-10T10:51:03.000Z</published>
-    <updated>2021-04-16T07:01:38.597Z</updated>
+    <updated>2021-04-16T07:48:11.497Z</updated>
     
     <summary type="html">
     
@@ -293,7 +317,7 @@
     <link href="https://nnsay.github.io/2019/12/05/kiosk-research/"/>
     <id>https://nnsay.github.io/2019/12/05/kiosk-research/</id>
     <published>2019-12-05T10:29:13.000Z</published>
-    <updated>2021-04-16T07:01:38.597Z</updated>
+    <updated>2021-04-16T07:48:11.493Z</updated>
     
     <summary type="html">
     
@@ -322,7 +346,7 @@
     <link href="https://nnsay.github.io/2019/12/04/make-effective-communication/"/>
     <id>https://nnsay.github.io/2019/12/04/make-effective-communication/</id>
     <published>2019-12-04T03:35:00.000Z</published>
-    <updated>2021-04-16T07:01:38.597Z</updated>
+    <updated>2021-04-16T07:48:11.493Z</updated>
     
     <summary type="html">
     
@@ -349,7 +373,7 @@
     <link href="https://nnsay.github.io/2019/11/18/soft-delete/"/>
     <id>https://nnsay.github.io/2019/11/18/soft-delete/</id>
     <published>2019-11-18T07:41:30.000Z</published>
-    <updated>2021-04-16T07:01:38.597Z</updated>
+    <updated>2021-04-16T07:48:11.497Z</updated>
     
     <summary type="html">
     
@@ -378,7 +402,7 @@
     <link href="https://nnsay.github.io/2019/10/24/shell-script-pass-parameter/"/>
     <id>https://nnsay.github.io/2019/10/24/shell-script-pass-parameter/</id>
     <published>2019-10-24T15:40:00.000Z</published>
-    <updated>2021-04-16T07:01:38.597Z</updated>
+    <updated>2021-04-16T07:48:11.497Z</updated>
     
     <summary type="html">
     
@@ -405,7 +429,7 @@
     <link href="https://nnsay.github.io/2019/10/21/multi-key-for-git/"/>
     <id>https://nnsay.github.io/2019/10/21/multi-key-for-git/</id>
     <published>2019-10-21T03:18:10.000Z</published>
-    <updated>2021-04-16T07:01:38.597Z</updated>
+    <updated>2021-04-16T07:48:11.493Z</updated>
     
     <summary type="html">
     
@@ -434,7 +458,7 @@
     <link href="https://nnsay.github.io/2019/10/20/sprint-graph/"/>
     <id>https://nnsay.github.io/2019/10/20/sprint-graph/</id>
     <published>2019-10-20T17:12:25.000Z</published>
-    <updated>2021-04-16T07:01:38.597Z</updated>
+    <updated>2021-04-16T07:48:11.497Z</updated>
     
     <summary type="html">
     
@@ -464,7 +488,7 @@ C --&gt; | Sprint
     <link href="https://nnsay.github.io/2019/10/20/es6/"/>
     <id>https://nnsay.github.io/2019/10/20/es6/</id>
     <published>2019-10-20T14:14:45.000Z</published>
-    <updated>2021-04-16T07:01:38.597Z</updated>
+    <updated>2021-04-16T07:48:11.493Z</updated>
     
     <summary type="html">
     
@@ -494,7 +518,7 @@ C --&gt; | Sprint
     <link href="https://nnsay.github.io/2019/10/20/code-art/"/>
     <id>https://nnsay.github.io/2019/10/20/code-art/</id>
     <published>2019-10-20T14:08:50.000Z</published>
-    <updated>2021-04-16T07:01:38.597Z</updated>
+    <updated>2021-04-16T07:48:11.493Z</updated>
     
     <summary type="html">
     
@@ -520,7 +544,7 @@ C --&gt; | Sprint
     <link href="https://nnsay.github.io/2019/10/20/okr/"/>
     <id>https://nnsay.github.io/2019/10/20/okr/</id>
     <published>2019-10-20T14:08:07.000Z</published>
-    <updated>2021-04-16T07:01:38.597Z</updated>
+    <updated>2021-04-16T07:48:11.493Z</updated>
     
     <summary type="html">
     
@@ -543,34 +567,6 @@ C --&gt; | Sprint
       <category term="效率" scheme="https://nnsay.github.io/tags/%E6%95%88%E7%8E%87/"/>
     
       <category term="OKR" scheme="https://nnsay.github.io/tags/OKR/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>命令行查看天气</title>
-    <link href="https://nnsay.github.io/2019/10/20/shell-weather/"/>
-    <id>https://nnsay.github.io/2019/10/20/shell-weather/</id>
-    <published>2019-10-20T14:03:23.000Z</published>
-    <updated>2021-04-16T07:01:38.597Z</updated>
-    
-    <summary type="html">
-    
-      &lt;h3 id=&quot;1-说明介绍&quot;&gt;&lt;a href=&quot;#1-说明介绍&quot; class=&quot;headerlink&quot; title=&quot;1. 说明介绍&quot;&gt;&lt;/a&gt;1. 说明介绍&lt;/h3&gt;&lt;p&gt;程序开发人员最长用的工具就是命令行的终端了, 如果可以快捷的从命令行获取天气信息则是一件比较极客和有效率操作了. 现在介绍一个极为简单的方式实现命令行获取天气信息, 并且有以下几个特点:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;无需安装依赖&lt;/li&gt;
-&lt;li&gt;自定义程度较高&lt;/li&gt;
-&lt;li&gt;配置简单&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id=&quot;2-安装配置&quot;&gt;&lt;a href=&quot;#2-安装配置&quot; class=&quot;headerlink&quot; title=&quot;2. 安装配置&quot;&gt;&lt;/a&gt;2. 安装配置&lt;/h3&gt;&lt;h4 id=&quot;2-1-添加shell方法&quot;&gt;&lt;a href=&quot;#2-1-添加shell方法&quot; class=&quot;headerlink&quot; title=&quot;2.1 添加shell方法&quot;&gt;&lt;/a&gt;2.1 添加shell方法&lt;/h4&gt;&lt;p&gt;根据自己的需要在~/.zshrc或者~/.bashrc中添加如下方法:&lt;/p&gt;
-&lt;figure class=&quot;highlight plain&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;1&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;2&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;3&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;4&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;td class=&quot;code&quot;&gt;&lt;pre&gt;&lt;span class=&quot;line&quot;&gt;fweather()&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#123;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;  curl -H &amp;quot;Accept-Language: zh&amp;quot; &amp;quot;http://wttr.in/$&amp;#123;1-beijing&amp;#125;?m&amp;amp;$&amp;#123;2-3&amp;#125;&amp;quot;&lt;/span&gt;&lt;br&gt;&lt;span class=&quot;line&quot;&gt;&amp;#125;&lt;/span&gt;&lt;br&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;/figure&gt;
-    
-    </summary>
-    
-    
-    
-      <category term="工具" scheme="https://nnsay.github.io/tags/%E5%B7%A5%E5%85%B7/"/>
-    
-      <category term="Shell" scheme="https://nnsay.github.io/tags/Shell/"/>
     
   </entry>
   

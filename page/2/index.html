@@ -133,6 +133,83 @@
     <header class="article-header">
         
         <h1 itemprop="name">
+            <a href="/2019/12/10/ubuntu-network-manager/">Manage Network on Ubuntu Without GUI</a>
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="/2019/12/10/ubuntu-network-manager/">
+    
+    <i class="icon-calendar"></i>
+    
+    <time datetime="2019-12-10T10:51:03.000Z" itemprop="datePublished">2019-12-10</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag"></i>
+    <a class="article-tag-link" href="/tags/Ubuntu/" rel="tag">Ubuntu</a>, <a class="article-tag-link" href="/tags/%E5%B7%A5%E4%BD%9C/" rel="tag">工作</a>, <a class="article-tag-link" href="/tags/%E5%B7%A5%E5%85%B7/" rel="tag">工具</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h3 id="0-Goals"><a href="#0-Goals" class="headerlink" title="0. Goals"></a>0. Goals</h3><ul>
+<li>manage network on Ubuntu without GUI.</li>
+<li>which kind of network type<ul>
+<li>ethernet</li>
+<li>wifi</li>
+</ul>
+</li>
+</ul>
+<p>The topic is useful for developer who want develop a linux application, for example snap application in ubuntu.</p>
+<h3 id="1-Network-Manager-On-Ubuntu"><a href="#1-Network-Manager-On-Ubuntu" class="headerlink" title="1. Network Manager On Ubuntu"></a>1. Network Manager On Ubuntu</h3><p>Use the <a href="https://docs.ubuntu.com/core/en/stacks/network/network-manager/docs/" target="_blank" rel="noopener">NetworkManager</a> to manage the network device and connections. NetworkManager can manage network types:</p>
+<ul>
+<li>ethenet</li>
+<li>wifi</li>
+<li>mobile boardband(WWAN)</li>
+<li>PPPoE device for VPN</li>
+</ul>
+<h3 id="2-Usage-Of-NetworkManager"><a href="#2-Usage-Of-NetworkManager" class="headerlink" title="2. Usage Of NetworkManager"></a>2. Usage Of NetworkManager</h3><h4 id="2-1-Install-NetworkManager"><a href="#2-1-Install-NetworkManager" class="headerlink" title="2.1 Install NetworkManager"></a>2.1 <a href="https://docs.ubuntu.com/core/en/stacks/network/network-manager/docs/installation" target="_blank" rel="noopener">Install NetworkManager</a></h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># a. find the application</span><br><span class="line">snap find network-manager</span><br><span class="line"># b. install</span><br><span class="line">snap install network-manager</span><br><span class="line"># c. view the plugs</span><br><span class="line">snap interfaces network-manager</span><br><span class="line"># d. check the service status</span><br><span class="line">systemctl status network-manager</span><br></pre></td></tr></table></figure>
+<p>when execute the command <code>c</code> the output looks like:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">name:    network-manager</span><br><span class="line">summary: allows operating as the NetworkManager service</span><br><span class="line">plugs:</span><br><span class="line">  - network-manager:nmcli</span><br><span class="line">slots:</span><br><span class="line">  - core</span><br><span class="line">  - network-manager:service</span><br></pre></td></tr></table></figure>
+<p>we can find that the network manager command-line interface(nmcli) will be installed. the <code>nmcli</code> is key command what is used to manage network. If you wan to learn more about <code>nmcli</code>, you can use <code>nmcli help</code> command.</p>
+<h4 id="2-2-Manage-WIFI"><a href="#2-2-Manage-WIFI" class="headerlink" title="2.2 Manage WIFI"></a>2.2 <a href="https://docs.ubuntu.com/core/en/stacks/network/network-manager/docs/configure-wifi-connections" target="_blank" rel="noopener">Manage WIFI</a></h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"># check whether the wifi is open</span><br><span class="line">nmcli radio wifi</span><br><span class="line"># if return `disabled`, please enable the wifi radio</span><br><span class="line">nmcli radio wifi on</span><br><span class="line"># list available wifi</span><br><span class="line">nmcli device wifi list</span><br><span class="line"># connect to wifi</span><br><span class="line">nmcli d wifi connect my_wifi password &lt;password&gt;</span><br><span class="line"># check the connection</span><br><span class="line">nmcli connection show</span><br></pre></td></tr></table></figure>
+<p>Other wifi configuration:</p>
+<ul>
+<li>powersave option(0: default, 1: ignore, 2: disable, 3: enable)<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmcli c modify &lt;name&gt; 802-11-wireless.powersave 2</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h3 id="2-3-Manage-Ethernet"><a href="#2-3-Manage-Ethernet" class="headerlink" title="2.3 Manage Ethernet"></a>2.3 <a href="">Manage Ethernet</a></h3><p>before modify the Ethernet, backup the contents of /etc/netplan is a best practice.</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># check whether support enthernet by network manager</span></span><br><span class="line">sudo snap get network-manager ethernet.enable</span><br><span class="line"><span class="comment"># if return `false`, please enable ethernet support</span></span><br><span class="line">snap <span class="built_in">set</span> network-manager ethernet.enable=<span class="literal">true</span></span><br><span class="line">sudo reboot</span><br></pre></td></tr></table></figure>
+<p>after the reboot, you can edit the ethernet with <code>nmcli</code>. There two way to midfy the ethernet:</p>
+<ul>
+<li>interactive console: print/set/save</li>
+<li>connection modify command</li>
+</ul>
+<p>We choose the second way because it can be warpped as shell script or api.</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># list all connection</span></span><br><span class="line">nmcli connection show</span><br><span class="line"><span class="comment"># show detail a connection</span></span><br><span class="line">nmcli connection show &lt;myconnection name or uuid&gt;</span><br><span class="line"><span class="comment"># change the connection name</span></span><br><span class="line">nmcli connection modify myconnection connection.id myconn</span><br></pre></td></tr></table></figure>
+<p>You can get usage detail by executing <code>nmcli connection modify help</code>, looks like below:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">Usage: nmcli connection modify &#123; ARGUMENTS | help &#125;</span><br><span class="line"></span><br><span class="line">ARGUMENTS := [id | uuid | path] &lt;ID&gt; ([+|-]&lt;setting&gt;.&lt;property&gt; &lt;value&gt;)+</span><br><span class="line"></span><br><span class="line">Modify one or more properties of the connection profile.</span><br><span class="line">The profile is identified by its name, UUID or D-Bus path. For multi-valued</span><br><span class="line">properties you can use optional &apos;+&apos; or &apos;-&apos; prefix to the property name.</span><br><span class="line">The &apos;+&apos; sign allows appending items instead of overwriting the whole value.</span><br><span class="line">The &apos;-&apos; sign allows removing selected items instead of the whole value.</span><br><span class="line"></span><br><span class="line">Examples:</span><br><span class="line">nmcli con mod home-wifi wifi.ssid rakosnicek</span><br><span class="line">nmcli con mod em1-1 ipv4.method manual ipv4.addr &quot;192.168.1.2/24, 10.10.1.5/8&quot;</span><br><span class="line">nmcli con mod em1-1 +ipv4.dns 8.8.4.4</span><br><span class="line">nmcli con mod em1-1 -ipv4.dns 1</span><br><span class="line">nmcli con mod em1-1 -ipv6.addr &quot;abbe::cafe/56&quot;</span><br><span class="line">nmcli con mod bond0 +bond.options mii=500</span><br><span class="line">nmcli con mod bond0 -bond.options downdelay</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-Program"><a href="#3-Program" class="headerlink" title="3. Program"></a>3. Program</h3><ul>
+<li><a href="https://github.com/seveas/python-networkmanager" target="_blank" rel="noopener">python-networkmanager</a>: Easy communication with NetworkManager</li>
+<li><a href="https://github.com/LGSInnovations/node-dbus-network-manager" target="_blank" rel="noopener">dbus-network-manager</a>: A node.js API to interact with NetworkManager via DBus. This is currently extremely new and incomplete</li>
+</ul>
+
+        
+    </section>
+</article>
+
+
+    <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
             <a href="/2019/12/05/kiosk-research/">Kiosk Research</a>
         </h1>
         
@@ -776,59 +853,10 @@ H --> | Rollback | E</pre>
 </article>
 
 
-    <article class="article" itemscope itemprop="blogPost">
-    
-    <header class="article-header">
-        
-        <h1 itemprop="name">
-            <a href="/2019/10/20/shell-weather/">命令行查看天气</a>
-        </h1>
-        
-        <div class="article-meta clearfix">
-            <a class="article-date" href="/2019/10/20/shell-weather/">
-    
-    <i class="icon-calendar"></i>
-    
-    <time datetime="2019-10-20T14:03:23.000Z" itemprop="datePublished">2019-10-20</time>
-</a>
-
-            
-<div class="article-tag-list">
-    <i class="icon-tag"></i>
-    <a class="article-tag-link" href="/tags/Shell/" rel="tag">Shell</a>, <a class="article-tag-link" href="/tags/%E5%B7%A5%E5%85%B7/" rel="tag">工具</a>
-</div>
-
-
-        </div>
-    </header>
-    
-    <section class="article-body markdown-body">
-        
-        <h3 id="1-说明介绍"><a href="#1-说明介绍" class="headerlink" title="1. 说明介绍"></a>1. 说明介绍</h3><p>程序开发人员最长用的工具就是命令行的终端了, 如果可以快捷的从命令行获取天气信息则是一件比较极客和有效率操作了. 现在介绍一个极为简单的方式实现命令行获取天气信息, 并且有以下几个特点:</p>
-<ul>
-<li>无需安装依赖</li>
-<li>自定义程度较高</li>
-<li>配置简单</li>
-</ul>
-<h3 id="2-安装配置"><a href="#2-安装配置" class="headerlink" title="2. 安装配置"></a>2. 安装配置</h3><h4 id="2-1-添加shell方法"><a href="#2-1-添加shell方法" class="headerlink" title="2.1 添加shell方法"></a>2.1 添加shell方法</h4><p>根据自己的需要在~/.zshrc或者~/.bashrc中添加如下方法:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">fweather()</span><br><span class="line">&#123;</span><br><span class="line">  curl -H &quot;Accept-Language: zh&quot; &quot;http://wttr.in/$&#123;1-beijing&#125;?m&amp;$&#123;2-3&#125;&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-        
-        <p class="article-more-link">
-            <a href="/2019/10/20/shell-weather/#more">
-                <span class="vm">read more</span>
-                <i class="icon-arrow-double-right vm"></i>    
-            </a>
-        </p>
-        
-        
-    </section>
-</article>
-
-
 
 
 <nav class="page-nav">
-    <a class="extend prev" rel="prev" href="/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
+    <a class="extend prev" rel="prev" href="/">&amp;laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/3/">Next &amp;raquo;</a>
 </nav>
 
 

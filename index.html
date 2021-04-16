@@ -133,6 +133,70 @@
     <header class="article-header">
         
         <h1 itemprop="name">
+            <a href="/2021/04/16/setup%20docker%20registry%20with%20custom%20auth/">搭建自定义授权的Docker Registory</a>
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="/2021/04/16/setup%20docker%20registry%20with%20custom%20auth/">
+    
+    <i class="icon-calendar"></i>
+    
+    <time datetime="2021-04-16T07:43:47.000Z" itemprop="datePublished">2021-04-16</time>
+</a>
+
+            
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <p>[toc]</p>
+<h3 id="1-鉴权介绍"><a href="#1-鉴权介绍" class="headerlink" title="1. 鉴权介绍"></a>1. 鉴权介绍</h3><p>自建docker registry比较简单, 但是docker registry的鉴权如何能和现有的系统结合就很优雅了, 我们可以自定义一些规则允许/拒绝某些账户拉取和推送或者只推送. 实现的基本思路:</p>
+<ul>
+<li>自定义一个docker registry镜像, 可以基于现有官方镜像, 在定义镜像中指定鉴权服务地址</li>
+<li>自定一个鉴[toc]<h3 id="1-鉴权介绍-1"><a href="#1-鉴权介绍-1" class="headerlink" title="1. 鉴权介绍"></a>1. 鉴权介绍</h3>自建docker registry比较简单, 但是docker registry的鉴权如何能和现有的系统结合就很优雅了, 我们可以自定义一些规则允许/拒绝某些账户拉取和推送或者只推送. 实现的基本思路:</li>
+<li>自定义一个docker registry镜像, 可以基于现有官方镜像, 在定义镜像中指定鉴权服务地址</li>
+<li>自定一个鉴权的镜像, 在这个镜像中可以包含自定义的鉴权逻辑和仓库的ACL</li>
+<li>部署上面两个服务</li>
+</ul>
+<h3 id="2-自定义Docker-Registory"><a href="#2-自定义Docker-Registory" class="headerlink" title="2. 自定义Docker Registory"></a>2. 自定义Docker Registory</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">FROM centos:7.6.1810</span><br><span class="line"></span><br><span class="line">RUN mkdir -p /var/lib/registry</span><br><span class="line"></span><br><span class="line">EXPOSE 5000</span><br><span class="line"></span><br><span class="line">ENV REGISTRY_AUTH token</span><br><span class="line">ENV REGISTRY_AUTH_TOKEN_REALM https://$&#123;DOMAIN&#125;/auth</span><br><span class="line">ENV REGISTRY_AUTH_TOKEN_SERVICE &quot;Docker registry&quot;</span><br><span class="line">ENV REGISTRY_AUTH_TOKEN_ISSUER &quot;Auth Service&quot;</span><br><span class="line">ENV REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE /ssl/domain.crt</span><br><span class="line">ENV REGISTRY_HTTP_TLS_CERTIFICATE /ssl/domain.crt</span><br><span class="line">ENV REGISTRY_HTTP_TLS_KEY /ssl/domain.key</span><br><span class="line">ENV REGISTRY_HTTP_SECRET w87reoqweifgqoe</span><br><span class="line"></span><br><span class="line">COPY config/config.yml /etc/docker/registry/config.yml</span><br><span class="line">COPY ssl/ /ssl/</span><br><span class="line">COPY ./cert/digicert-ng.pem.trust /etc/pki/ca-trust/source/anchors/digicert-ng.pem</span><br><span class="line">RUN update-ca-trust extract</span><br><span class="line"></span><br><span class="line">CMD [&quot;/bin/registry&quot;, &quot;serve&quot;, &quot;/etc/docker/registry/config.yml&quot;]</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-自定义权限镜像-重点"><a href="#3-自定义权限镜像-重点" class="headerlink" title="3. 自定义权限镜像(重点)"></a>3. 自定义权限镜像(重点)</h3><h4 id="3-1-镜像"><a href="#3-1-镜像" class="headerlink" title="3.1 镜像"></a>3.1 镜像</h4><p>这里用到了一个开源的功能很全的基础镜像: <a href="https://github.com/cesanta/docker_auth" target="_blank" rel="noopener">cesanta/docker_auth</a>, 为了理解镜像配置需要学习这个镜像的基本知识.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">FROM cesanta/docker_auth as cesanta</span><br><span class="line">FROM python:2.7.18-alpine</span><br><span class="line">COPY --from=cesanta /docker_auth/ /docker_auth/</span><br><span class="line"></span><br><span class="line">ARG CICD_SECRET</span><br><span class="line">ENV CICD_SECRET=$&#123;CICD_SECRET&#125;</span><br><span class="line"></span><br><span class="line">ENTRYPOINT [&quot;/docker_auth/auth_server&quot;]</span><br><span class="line">CMD [&quot;-alsologtostderr=true&quot;, &quot;-log_dir=/logs&quot;, &quot;/config/extAuth.yml&quot;]</span><br><span class="line">EXPOSE 5001</span><br><span class="line"></span><br><span class="line">COPY config/ /config/</span><br><span class="line">COPY ssl/ /ssl/</span><br><span class="line">COPY extensions/ /extensions/</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-2-镜像配置"><a href="#3-2-镜像配置" class="headerlink" title="3.2 镜像配置"></a>3.2 镜像配置</h4><p>上面的镜像中有两个配置config/extensions</p>
+<ul>
+<li><a href="https://github.com/cesanta/docker_auth/blob/main/examples/reference.yml" target="_blank" rel="noopener">config配置参</a>, 如下配置配置了auth和registry通信是https的证书,token的issuer, 扩展授权方式ext_auth, 还有acl, 这些都是关键的配置<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">server:</span> <span class="comment"># Server settings.</span></span><br><span class="line"><span class="attr">  addr:</span> <span class="string">":5001"</span></span><br><span class="line"></span><br><span class="line"><span class="attr">  certificate:</span> <span class="string">"/ssl/domain.crt"</span></span><br><span class="line"><span class="attr">  key:</span> <span class="string">"/ssl/domain.key"</span></span><br><span class="line"></span><br><span class="line"><span class="attr">token:</span> <span class="comment"># Settings for the tokens.</span></span><br><span class="line"><span class="attr">  issuer:</span> <span class="string">"Auth Service"</span> <span class="comment"># Must match issuer in the Registry config.</span></span><br><span class="line"><span class="attr">  expiration:</span> <span class="number">900</span></span><br><span class="line"><span class="attr">ext_auth:</span></span><br><span class="line"><span class="attr">  command:</span> <span class="string">"/extensions/ext_auth.sh"</span> <span class="comment"># Can be a relative path too; $PATH works.</span></span><br><span class="line"><span class="attr">  args:</span> <span class="string">[""]</span></span><br><span class="line"><span class="attr">acl:</span></span><br><span class="line"><span class="attr">  - match:</span> <span class="string">&#123;</span> <span class="attr">ip:</span> <span class="string">"127.0.0.0/8"</span> <span class="string">&#125;</span></span><br><span class="line"><span class="attr">    actions:</span> <span class="string">["*"]</span></span><br><span class="line"><span class="attr">    comment:</span> <span class="string">"Allow everything from localhost (IPv4)"</span></span><br><span class="line"><span class="attr">  - match:</span> <span class="string">&#123;</span> <span class="attr">account:</span> <span class="string">"/.+/"</span><span class="string">,</span> <span class="attr">type:</span> <span class="string">"registry"</span><span class="string">,</span> <span class="attr">name:</span> <span class="string">"catalog"</span> <span class="string">&#125;</span></span><br><span class="line"><span class="attr">    actions:</span> <span class="string">["*"]</span></span><br><span class="line"><span class="attr">    comment:</span> <span class="string">"Logged in users can query the catalog."</span></span><br><span class="line"><span class="attr">  - match:</span> <span class="string">&#123;</span> <span class="attr">labels:</span> <span class="string">&#123;</span> <span class="string">"group"</span><span class="string">:</span> <span class="string">"CICD"</span> <span class="string">&#125;</span> <span class="string">&#125;</span></span><br><span class="line"><span class="attr">    actions:</span> <span class="string">["*"]</span></span><br><span class="line"><span class="attr">    comment:</span> <span class="string">"User assigned to group 'CICD' is able to push"</span></span><br><span class="line"><span class="attr">  - match:</span> <span class="string">&#123;</span> <span class="attr">account:</span> <span class="string">"/.+/"</span> <span class="string">&#125;</span></span><br><span class="line"><span class="attr">    actions:</span> <span class="string">["pull"]</span></span><br><span class="line"><span class="attr">    comment:</span> <span class="string">"Logged in users can pull all images."</span></span><br></pre></td></tr></table></figure></li>
+<li>extensions配置是基于上面的配置的ext_auth,例如是个脚本:<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">read</span> u p</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> [ <span class="string">"<span class="variable">$u</span>"</span> == <span class="string">"cicd"</span> ]; <span class="keyword">then</span></span><br><span class="line">  <span class="keyword">if</span> [ <span class="string">"<span class="variable">$p</span>"</span> == <span class="string">"<span class="variable">$CICD_SECRET</span>"</span> ]; <span class="keyword">then</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">'&#123;"labels": &#123;"group": ["CICD"]&#125;&#125;'</span></span><br><span class="line">    <span class="built_in">exit</span> 0</span><br><span class="line">  <span class="keyword">fi</span></span><br><span class="line">  <span class="built_in">exit</span> 1</span><br><span class="line"><span class="keyword">fi</span></span><br><span class="line"></span><br><span class="line">python /extensions/boxlogin.py <span class="string">"<span class="variable">$u</span>"</span> <span class="string">"<span class="variable">$p</span>"</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">exit</span> $?</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h4 id="3-3-鉴权镜像项目目录"><a href="#3-3-鉴权镜像项目目录" class="headerlink" title="3.3 鉴权镜像项目目录"></a>3.3 鉴权镜像项目目录</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── Dockerfile</span><br><span class="line">├── build.sh</span><br><span class="line">├── config</span><br><span class="line">│   └── extAuth.yml</span><br><span class="line">├── extensions</span><br><span class="line">│   ├── boxlogin.py</span><br><span class="line">│   └── ext_auth.sh</span><br><span class="line">└── ssl</span><br><span class="line">    ├── domain.crt</span><br><span class="line">    ├── domain.csr</span><br><span class="line">    └── domain.key</span><br></pre></td></tr></table></figure>
+<p>ext_auth.sh是配置所需要的shell脚本, 脚本不要配置标准输出, 退出的code是0或者1. boxlogin.py的Python脚本可以自定更灵活的逻辑, 比如发送Restful请求到现有服务, 判断登录是否成功, 成功则exit(0),否则exit(1).</p>
+<h3 id="4-部署"><a href="#4-部署" class="headerlink" title="4. 部署"></a>4. 部署</h3><p>有了镜像部署就简单了:</p>
+<ul>
+<li>部署registry并暴露一个访问地址</li>
+<li>部署auth并部署并暴露一个访问地址</li>
+<li>两个访问地址IP或者域名一致,但是auth的端口是5001<br>部署完了保证两个服务各自都可以访问, 可以通过如下命令分别查看两个服务是否正常:<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl https://my.registory.cn/v2/</span><br><span class="line">curl https://my.registory.cn:5001/auth</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h3 id="5-Troubleshooting"><a href="#5-Troubleshooting" class="headerlink" title="5. Troubleshooting"></a>5. Troubleshooting</h3><ul>
+<li><a href="https://github.com/goharbor/harbor/issues/7159" target="_blank" rel="noopener">docker login returns 400 Bad Request</a><br>如果用了负载均衡或者代理需要注意代理的后端必须是https, 可以参考<a href="https://github.com/goharbor/harbor/issues/7159" target="_blank" rel="noopener">issue</a></li>
+<li><a href="https://github.com/cesanta/docker_auth#troubleshooting" target="_blank" rel="noopener">auth failure</a><br>可以把auth服务的日志级别调高,<a href="https://github.com/cesanta/docker_auth#troubleshooting" target="_blank" rel="noopener">显示更多日志</a></li>
+</ul>
+
+        
+    </section>
+</article>
+
+
+    <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
             <a href="/2021/03/10/aliyun-migration-knowlege-point/">阿里云知识点</a>
         </h1>
         
@@ -678,87 +742,10 @@ ZIP -->|write stream| DownloadAPI</pre>
 </article>
 
 
-    <article class="article" itemscope itemprop="blogPost">
-    
-    <header class="article-header">
-        
-        <h1 itemprop="name">
-            <a href="/2019/12/10/ubuntu-network-manager/">Manage Network on Ubuntu Without GUI</a>
-        </h1>
-        
-        <div class="article-meta clearfix">
-            <a class="article-date" href="/2019/12/10/ubuntu-network-manager/">
-    
-    <i class="icon-calendar"></i>
-    
-    <time datetime="2019-12-10T10:51:03.000Z" itemprop="datePublished">2019-12-10</time>
-</a>
-
-            
-<div class="article-tag-list">
-    <i class="icon-tag"></i>
-    <a class="article-tag-link" href="/tags/Ubuntu/" rel="tag">Ubuntu</a>, <a class="article-tag-link" href="/tags/%E5%B7%A5%E4%BD%9C/" rel="tag">工作</a>, <a class="article-tag-link" href="/tags/%E5%B7%A5%E5%85%B7/" rel="tag">工具</a>
-</div>
-
-
-        </div>
-    </header>
-    
-    <section class="article-body markdown-body">
-        
-        <h3 id="0-Goals"><a href="#0-Goals" class="headerlink" title="0. Goals"></a>0. Goals</h3><ul>
-<li>manage network on Ubuntu without GUI.</li>
-<li>which kind of network type<ul>
-<li>ethernet</li>
-<li>wifi</li>
-</ul>
-</li>
-</ul>
-<p>The topic is useful for developer who want develop a linux application, for example snap application in ubuntu.</p>
-<h3 id="1-Network-Manager-On-Ubuntu"><a href="#1-Network-Manager-On-Ubuntu" class="headerlink" title="1. Network Manager On Ubuntu"></a>1. Network Manager On Ubuntu</h3><p>Use the <a href="https://docs.ubuntu.com/core/en/stacks/network/network-manager/docs/" target="_blank" rel="noopener">NetworkManager</a> to manage the network device and connections. NetworkManager can manage network types:</p>
-<ul>
-<li>ethenet</li>
-<li>wifi</li>
-<li>mobile boardband(WWAN)</li>
-<li>PPPoE device for VPN</li>
-</ul>
-<h3 id="2-Usage-Of-NetworkManager"><a href="#2-Usage-Of-NetworkManager" class="headerlink" title="2. Usage Of NetworkManager"></a>2. Usage Of NetworkManager</h3><h4 id="2-1-Install-NetworkManager"><a href="#2-1-Install-NetworkManager" class="headerlink" title="2.1 Install NetworkManager"></a>2.1 <a href="https://docs.ubuntu.com/core/en/stacks/network/network-manager/docs/installation" target="_blank" rel="noopener">Install NetworkManager</a></h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># a. find the application</span><br><span class="line">snap find network-manager</span><br><span class="line"># b. install</span><br><span class="line">snap install network-manager</span><br><span class="line"># c. view the plugs</span><br><span class="line">snap interfaces network-manager</span><br><span class="line"># d. check the service status</span><br><span class="line">systemctl status network-manager</span><br></pre></td></tr></table></figure>
-<p>when execute the command <code>c</code> the output looks like:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">name:    network-manager</span><br><span class="line">summary: allows operating as the NetworkManager service</span><br><span class="line">plugs:</span><br><span class="line">  - network-manager:nmcli</span><br><span class="line">slots:</span><br><span class="line">  - core</span><br><span class="line">  - network-manager:service</span><br></pre></td></tr></table></figure>
-<p>we can find that the network manager command-line interface(nmcli) will be installed. the <code>nmcli</code> is key command what is used to manage network. If you wan to learn more about <code>nmcli</code>, you can use <code>nmcli help</code> command.</p>
-<h4 id="2-2-Manage-WIFI"><a href="#2-2-Manage-WIFI" class="headerlink" title="2.2 Manage WIFI"></a>2.2 <a href="https://docs.ubuntu.com/core/en/stacks/network/network-manager/docs/configure-wifi-connections" target="_blank" rel="noopener">Manage WIFI</a></h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"># check whether the wifi is open</span><br><span class="line">nmcli radio wifi</span><br><span class="line"># if return `disabled`, please enable the wifi radio</span><br><span class="line">nmcli radio wifi on</span><br><span class="line"># list available wifi</span><br><span class="line">nmcli device wifi list</span><br><span class="line"># connect to wifi</span><br><span class="line">nmcli d wifi connect my_wifi password &lt;password&gt;</span><br><span class="line"># check the connection</span><br><span class="line">nmcli connection show</span><br></pre></td></tr></table></figure>
-<p>Other wifi configuration:</p>
-<ul>
-<li>powersave option(0: default, 1: ignore, 2: disable, 3: enable)<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmcli c modify &lt;name&gt; 802-11-wireless.powersave 2</span><br></pre></td></tr></table></figure>
-
-</li>
-</ul>
-<h3 id="2-3-Manage-Ethernet"><a href="#2-3-Manage-Ethernet" class="headerlink" title="2.3 Manage Ethernet"></a>2.3 <a href="">Manage Ethernet</a></h3><p>before modify the Ethernet, backup the contents of /etc/netplan is a best practice.</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># check whether support enthernet by network manager</span></span><br><span class="line">sudo snap get network-manager ethernet.enable</span><br><span class="line"><span class="comment"># if return `false`, please enable ethernet support</span></span><br><span class="line">snap <span class="built_in">set</span> network-manager ethernet.enable=<span class="literal">true</span></span><br><span class="line">sudo reboot</span><br></pre></td></tr></table></figure>
-<p>after the reboot, you can edit the ethernet with <code>nmcli</code>. There two way to midfy the ethernet:</p>
-<ul>
-<li>interactive console: print/set/save</li>
-<li>connection modify command</li>
-</ul>
-<p>We choose the second way because it can be warpped as shell script or api.</p>
-<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># list all connection</span></span><br><span class="line">nmcli connection show</span><br><span class="line"><span class="comment"># show detail a connection</span></span><br><span class="line">nmcli connection show &lt;myconnection name or uuid&gt;</span><br><span class="line"><span class="comment"># change the connection name</span></span><br><span class="line">nmcli connection modify myconnection connection.id myconn</span><br></pre></td></tr></table></figure>
-<p>You can get usage detail by executing <code>nmcli connection modify help</code>, looks like below:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">Usage: nmcli connection modify &#123; ARGUMENTS | help &#125;</span><br><span class="line"></span><br><span class="line">ARGUMENTS := [id | uuid | path] &lt;ID&gt; ([+|-]&lt;setting&gt;.&lt;property&gt; &lt;value&gt;)+</span><br><span class="line"></span><br><span class="line">Modify one or more properties of the connection profile.</span><br><span class="line">The profile is identified by its name, UUID or D-Bus path. For multi-valued</span><br><span class="line">properties you can use optional &apos;+&apos; or &apos;-&apos; prefix to the property name.</span><br><span class="line">The &apos;+&apos; sign allows appending items instead of overwriting the whole value.</span><br><span class="line">The &apos;-&apos; sign allows removing selected items instead of the whole value.</span><br><span class="line"></span><br><span class="line">Examples:</span><br><span class="line">nmcli con mod home-wifi wifi.ssid rakosnicek</span><br><span class="line">nmcli con mod em1-1 ipv4.method manual ipv4.addr &quot;192.168.1.2/24, 10.10.1.5/8&quot;</span><br><span class="line">nmcli con mod em1-1 +ipv4.dns 8.8.4.4</span><br><span class="line">nmcli con mod em1-1 -ipv4.dns 1</span><br><span class="line">nmcli con mod em1-1 -ipv6.addr &quot;abbe::cafe/56&quot;</span><br><span class="line">nmcli con mod bond0 +bond.options mii=500</span><br><span class="line">nmcli con mod bond0 -bond.options downdelay</span><br></pre></td></tr></table></figure>
-
-<h3 id="3-Program"><a href="#3-Program" class="headerlink" title="3. Program"></a>3. Program</h3><ul>
-<li><a href="https://github.com/seveas/python-networkmanager" target="_blank" rel="noopener">python-networkmanager</a>: Easy communication with NetworkManager</li>
-<li><a href="https://github.com/LGSInnovations/node-dbus-network-manager" target="_blank" rel="noopener">dbus-network-manager</a>: A node.js API to interact with NetworkManager via DBus. This is currently extremely new and incomplete</li>
-</ul>
-
-        
-    </section>
-</article>
-
-
 
 
 <nav class="page-nav">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &amp;raquo;</a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/">Next &amp;raquo;</a>
 </nav>
 
 

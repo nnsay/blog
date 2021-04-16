@@ -151,11 +151,8 @@
     
     <section class="article-body markdown-body">
         
-        <p>[toc]</p>
-<h3 id="1-鉴权介绍"><a href="#1-鉴权介绍" class="headerlink" title="1. 鉴权介绍"></a>1. 鉴权介绍</h3><p>自建docker registry比较简单, 但是docker registry的鉴权如何能和现有的系统结合就很优雅了, 我们可以自定义一些规则允许/拒绝某些账户拉取和推送或者只推送. 实现的基本思路:</p>
+        <h3 id="1-鉴权介绍"><a href="#1-鉴权介绍" class="headerlink" title="1. 鉴权介绍"></a>1. 鉴权介绍</h3><p>自建docker registry比较简单, 但是docker registry的鉴权如何能和现有的系统结合就很优雅了, 我们可以自定义一些规则允许/拒绝某些账户拉取和推送或者只推送. 实现的基本思路:</p>
 <ul>
-<li>自定义一个docker registry镜像, 可以基于现有官方镜像, 在定义镜像中指定鉴权服务地址</li>
-<li>自定一个鉴[toc]<h3 id="1-鉴权介绍-1"><a href="#1-鉴权介绍-1" class="headerlink" title="1. 鉴权介绍"></a>1. 鉴权介绍</h3>自建docker registry比较简单, 但是docker registry的鉴权如何能和现有的系统结合就很优雅了, 我们可以自定义一些规则允许/拒绝某些账户拉取和推送或者只推送. 实现的基本思路:</li>
 <li>自定义一个docker registry镜像, 可以基于现有官方镜像, 在定义镜像中指定鉴权服务地址</li>
 <li>自定一个鉴权的镜像, 在这个镜像中可以包含自定义的鉴权逻辑和仓库的ACL</li>
 <li>部署上面两个服务</li>

@@ -19,7 +19,7 @@ author:
 
 # Links:
 links:
-  - svg: ./source/svg/github.svg
+  - svg: ./source/svg/_github.svg
     url: https://github.com/nnsay
 
 # github comment 

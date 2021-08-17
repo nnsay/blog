@@ -7,8 +7,6 @@ tags:
   - CloudNative
 ---
 
-# 阿里云迁移中吃过的亏(持续更新)
-
 ### 0. 更新时间
 - 2021-8-17: ASK/SLS/ECI/KMS/OSS
 

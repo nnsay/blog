@@ -13,6 +13,7 @@ tags:
 ### 1. 背景
 7月中旬完成了AWS到Alicloud的迁移, 迁移前后通过压测和生产环境的持续巡检发现了一些问题, 列举出来希望后来人避免跳坑.
 
+<!-- more -->
 ### 2. 吃亏事件
 
 #### 2.1 ASK(Aliyun Severless Kubernetes) PV/PVC 莫名其妙的Lose

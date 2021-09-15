@@ -18,6 +18,6 @@ git config submodule.recurse true
     "clean": "hexo clean",
     "deploy": "npm run cp && hexo deploy",
     "server": "npm run cp && hexo server",
-    "cp": "cp themes/_config.yml themes/concise/"
+    "cp": "cp themes/_config.yml themes/concise/ && cp images/* themes/concise/source/images"
   },
 ```

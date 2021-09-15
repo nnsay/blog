@@ -1,0 +1,4 @@
+[submodule "themes/concise"]
+	path = themes/concise
+	url = https://github.com/sanonz/hexo-theme-concise.git
+	branch = master

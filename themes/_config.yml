@@ -1,0 +1,54 @@
+# Header
+menu:
+  Home: /
+  Tags: /tags
+  Archives: /archives
+  RSS: /atom.xml
+  About: /about
+
+# Content
+excerpt_link: read more 
+content_max_width: 800px
+
+# Sidebar
+author:
+  name: Jimmy Wang
+  work: DevOps Engineer
+  location: Beijign, China
+  avatar_url: /images/avatar.jpg
+
+# Links:
+links:
+  - svg: ./source/svg/_github.svg
+    url: https://github.com/nnsay
+
+# github comment 
+git_commit:
+  enable: true
+  client_id: f9b3c7ac0c057c6a0fa2
+  client_secret: 53d6285c56901c86774a7438d5550ef6a25247e4
+  repo: blog
+  owner: nnsay
+  admin:
+    - nnsay
+  per_page: 10
+  
+# https://github.com/wzpan/hexo-generator-search
+search:
+  path: search.xml
+  field: post
+  content: true
+
+# https://github.com/hexojs/hexo-generator-sitemap
+sitemap:
+    path: sitemap.xml
+    template: ./sitemap_template.xml
+    rel: false
+
+# 百度统计
+# baidu:
+#   id: e4027971a230b210f4671f485b33846a
+
+# Miscellaneous
+rss: /atom.xml
+favicon: /images/favicon.ico

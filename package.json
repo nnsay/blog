@@ -3,10 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "hexo generate",
+    "build": "npm run cp && hexo generate",
     "clean": "hexo clean",
-    "deploy": "hexo deploy",
-    "server": "hexo server"
+    "deploy": "npm run cp && hexo deploy",
+    "server": "npm run cp && hexo server",
+    "cp": "cp themes/_config.yml themes/concise/"
   },
   "hexo": {
     "version": "5.4.0"

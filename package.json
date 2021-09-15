@@ -7,7 +7,7 @@
     "clean": "hexo clean",
     "deploy": "npm run cp && hexo deploy",
     "server": "npm run cp && hexo server",
-    "cp": "cp themes/_config.yml themes/concise/"
+    "cp": "cp themes/_config.yml themes/concise/ && cp themes/images/* themes/concise/source/images/"
   },
   "hexo": {
     "version": "5.4.0"

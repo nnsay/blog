@@ -9,6 +9,9 @@ git config -f .gitmodules submodule.themes/concise.branch master
 
 # 配置git pull自动拉取子模块
 git config submodule.recurse true
+
+# 忽略子模块变更
+git config -f .gitmodules submodule."themes/concise".ignore dirty 
 ```
 
 除此之外, 需要把配置安装到主题中, 主题配置放在themes目录根目录, 然后copy到主题中, 所以修改package script如下:

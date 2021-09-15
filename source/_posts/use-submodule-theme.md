@@ -28,6 +28,11 @@ git config -f .gitmodules submodule.themes/concise.branch master
 git config submodule.recurse true
 ```
 
+- 忽略子模块更新(因为本地调试时需要替换图片)
+```
+git config -f .gitmodules submodule."themes/concise".ignore dirty 
+```
+
 除此之外, 需要把配置安装到主题中, 主题配置放在themes目录根目录, 然后copy到主题中, 所以修改package script如下:
 ```
 "scripts": {

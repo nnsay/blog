@@ -3,7 +3,7 @@ title: 阿里云知识点
 date: 2021-03-10 17:47:41
 tags:
 - Aliyun
-- 技巧
+- Tips
 ---
 
 ### 1. 使用临时token登录阿里云CR

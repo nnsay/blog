@@ -2,8 +2,8 @@
 title: thinking about retry
 date: 2020-04-09 16:04:30
 tags:
-- 代码
-- 技巧
+- Code
+- Tips
 ---
 
 ### 1. What is retry?

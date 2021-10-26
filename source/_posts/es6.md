@@ -3,7 +3,7 @@ title: ES6 详解
 date: 2019-10-20 22:14:45
 tags: 
 - JavaScript
-- 代码
+- Code
 ---
 
 ## 1. 块级作用域

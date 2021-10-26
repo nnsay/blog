@@ -3,8 +3,8 @@ title: nodejs OOM in production
 date: 2021-01-14 14:12:55
 tags:
 - CaseStudy
-- 技巧
-- 代码
+- Tips
+- Code
 ---
 
 ### 1. Backgroud

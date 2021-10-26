@@ -3,7 +3,7 @@ title: markdown文件转pdf
 date: 2021-08-26 18:09:17
 tags:
  - 工具
- - 技巧
+ - Tips
 ---
 
 ### 1. 方案: marked + wkhtmltopdf

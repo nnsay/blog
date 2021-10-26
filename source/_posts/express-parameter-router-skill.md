@@ -2,7 +2,7 @@
 title: express parameter router skill
 date: 2020-09-02 12:22:49
 tags: 
-- 技巧
+- Tips
 ---
 
 ### 1. Problem: router path is used as parameter

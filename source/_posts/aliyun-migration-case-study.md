@@ -40,7 +40,7 @@ tags:
 - 原因: 代码逻辑触发了KMS API 节流
 - 解决方案: 
     - 提交工单申请更大的 KMS API 阈值
-    - 代码修改捕获Throttling错误, 随机时长delay重试
+    - Code修改捕获Throttling错误, 随机时长delay重试
 
 #### 2.5 对象存储 OSS
 - 问题描述: OSS结合CDN使用后上传失败

@@ -3,7 +3,7 @@ title: shell 脚本传参
 date: 2019-10-24 23:40:00
 tags:
   - Shell
-  - 技巧
+  - Tips
 ---
 
 ### 1. 如何在 Shell 脚本间传递参数

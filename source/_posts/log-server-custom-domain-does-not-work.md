@@ -3,7 +3,7 @@ title: aliyun log service custom domain does not work
 date: 2020-09-16 14:21:51
 tags:
 - Aliyun
-- 技巧
+- Tips
 ---
 
 ### 1. problem

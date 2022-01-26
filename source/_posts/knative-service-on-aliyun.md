@@ -153,7 +153,10 @@ helloworld-go-00001-deployment-7f7d75c465-xdr5k   2/2     Running   0          6
 - 没有流量: 仅有reserve pod
 - 有少许流量: reserve pod 和 service pod 都有, 但是 reserve pod总试图退出
 - 持续刘流量: 没有reserve pod, 此时没有意义
-综上reserve pod是波峰到波谷是最后一个用于反馈下一次流量新建service pod的一种守护pod.
+综上reserve pod是波峰到波谷是最后一个用于反馈下一次流量新建service pod的一种守护pod. 这种机制是knavite工作的重点, 其中serving组件的工作原理如下图:
+![components of serviing](https://gitee.com/nnsay/imagehost/raw/master/vnotebooks/default/it/study/knative%20on%20aliyun.md/35640196825920.png)
+从0流量到1流量的工作细节如下:
+![0-1](https://gitee.com/nnsay/imagehost/raw/master/vnotebooks/default/it/study/knative%20on%20aliyun.md/396041405615012.png)
 
 
 ## 3. 帮助手册

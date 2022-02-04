@@ -129,3 +129,132 @@ resource "alicloud_cdn_domain_new" "docker_storage_domain" {
   ]
 }
 ```
+
+### 8. KMS
+- 获取Secret版本
+```
+ali kms ListSecretVersionIds --SecretName="/stack/research/db_password"                                                   
+{
+	"PageNumber": 1,
+	"PageSize": 10,
+	"RequestId": "e9bf3ff1-d3b1-44e1-abef-96416a52cd7d",
+	"SecretName": "/stack/research/db_password",
+	"TotalCount": 2,
+	"VersionIds": {
+		"VersionId": [
+			{
+				"CreateTime": "2021-05-07T02:13:58Z",
+				"VersionId": "v20210507191252",
+				"VersionStages": {
+					"VersionStage": [
+						"ACSPrevious"
+					]
+				}
+			},
+			{
+				"CreateTime": "2021-05-07T02:15:45Z",
+				"VersionId": "v20210510191252",
+				"VersionStages": {
+					"VersionStage": [
+						"ACSCurrent"
+					]
+				}
+			}
+		]
+	}
+
+```
+- 可以使用VersionStage获取最近的Secret值
+目前值发现两个VersionStage: ACSCurrent/ACSPrevious
+```
+ali kms GetSecretValue --SecretName="/stack/research/db_password" --VersionStage=ACSCurrent
+ali kms GetSecretValue --SecretName="/stack/research/db_password" --VersionStage=ACSPrevious
+```
+
+- 使用Key加密
+`keyId`可以是id也可以是alias
+```
+ali kms Encrypt --KeyId="8da42b24-f1f7-450b-8ccb-f568b1e555fe" --Plaintext=helloworld
+ali kms Encrypt --KeyId=alias/NG-Common --Plaintext=helloworld
+```
+- 解密
+
+```
+ali kms Decrypt --CiphertextBlob="ZWZiOTMxMDMtOTUyNi00OGUxLWI5MzEtOTYxZjU0OGUwMWU0T3BDf6PdXvJIHzMKCIxYKr7N3PngT2aS07Rk7TiFx4Me+u0QIMk="
+{
+	"KeyId": "8da42b24-f1f7-450b-8ccb-f568b1e555fe",
+	"KeyVersionId": "efb93103-9526-48e1-b931-961f548e01e4",
+	"Plaintext": "helloworld",
+	"RequestId": "691ce8ec-f5e5-41dd-bc55-d8a06e2d99e2"
+}
+```
+
+### 9. 使用digest拉取Docker镜像
+
+image tag如分支名不能精确代表最新的镜像, 可以使用digest, digest使用时用@而不是, 如下:
+```
+docker pull registry.cn-hangzhou.aliyuncs.com/ngiq-cr/app_server@sha256:c4e1cbe395d87e4c9d94d831c689e7c01531d457f3d1bbbb83d6f1a698fac8e4
+```
+digest如何获取呢? 在阿里云中可以使用`GetRepoTag`方法:
+```
+aliyun cr GetRepoTag --RepoName=app_server --RepoNamespace=ngiq-cr --Tag=feature-aliyun
+{
+	"data": {
+		"digest": "7de0f4b43286daef25f2c3ffadb9a78796e9aabde45feb16199528357b731791",
+		"imageCreate": 1620436982000,
+		"imageId": "de991a1a65f1eda17878cbb326e39e092d135f60bed068a983f750925ad6ce31",
+		"imageSize": 346647563,
+		"imageUpdate": 1620641463000,
+		"status": "NORMAL",
+		"tag": "feature-aliyun"
+}
+```
+
+配合jq则可以快速获取digest值:
+```
+aliyun cr GetRepoTag --RepoName=app_server --RepoNamespace=ngiq-cr --Tag=feature-aliyun | jq -r '.data.digest'
+```
+
+需要注意的是这个值在`docker pull`的时候需要增加`sha256:`
+
+
+### 10. 获取CLI STS TOKEN
+aliyun 有些资源可以通过配置的profile自动获取STS但是有些资源不可以，例如CR、CSK
+```
+export CRED=$(curl http://100.100.100.200/latest/meta-data/Ram/security-credentials/CICDRole)
+export AK=$(echo $CRED | jq -r '.AccessKeyId')
+export AK_SEC=$(echo $CRED | jq -r '.AccessKeySecret')
+export AK_STS=$(echo $CRED | jq -r '.SecurityToken')
+export ALI_CRED="--sts-token=$AK_STS --access-key-id=$AK --mode=StsToken --access-key-secret=$AK_SEC"
+
+aliyun cr $ALI_CRED GetAuthorizationToken | jq -r .data.authorizationToken | docker login --username=cr_temp_user --password-stdin "${PROC_BUILDER_URI}"
+
+```
+
+### 11. 获取account id
+
+```
+ali ram GetAccountAlias
+{
+	"AccountAlias": "1886910356xxxxx",
+	"RequestId": "797603B6-F858-48B5-8D63-5DF508CF4713"
+}
+```
+
+### 12. 同步文件
+```
+-- 同步 ng-system
+mc cp --continue --recursive s3/ng-system/ oss/ng-system/
+-- 比较
+mc diff s3/ng-system/ oss/ng-system/
+
+```
+
+### 13. 命令行 ECR
+个人版本的CR存在限流问题, 当个人仓库流量到达一定的限制, 触发限流, 当值镜像拉取很慢, 此时应该开启企业版CR即ECR, 当时阿里云CLI CR默认是没有对ECR做支持的, 但是可以通过`force`和`version`使用OpenAPI, 进而达到管理企业版CR的目的:
+```
+#获取实例列表
+ali cr ListInstance --force --version 2018-12-01
+#获取仓库列表
+ali cr ListRepository --InstanceId=cri-xxxx--RepoStatus=NORMAL --version 2018-12-01 --force | jq -r '.Repositories[]|select(.RepoNamespaceName=="ngiq-prod-cr")|{RepoId,RepoNamespaceName,RepoName}'
+```

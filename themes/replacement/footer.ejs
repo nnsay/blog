@@ -6,14 +6,14 @@
         var _hmt = _hmt || [];
         (function () {
             var hm = document.createElement("script");
-            hm.src = "https://hm.baidu.com/hm.js?<%= theme.baidu.id %>";
+            hm.src = "https://hm.baidu.com/hm.js?<%= config.baidu.id %>";
             var s = document.getElementsByTagName("script")[0];
             s.parentNode.insertBefore(hm, s);
         })();
     </script>
     <% } %>
     <% if (config.mermaid && config.mermaid.enable) { %>
-        <script src='https://unpkg.com/mermaid@<%= theme.mermaid.version %>/dist/mermaid.min.js'></script>
+        <script src='https://unpkg.com/mermaid@<%= config.mermaid.version %>/dist/mermaid.min.js'></script>
         <script>
           if (window.mermaid) {
             mermaid.initialize({theme: 'forest'});

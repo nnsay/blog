@@ -105,6 +105,9 @@ mermaid: ## mermaid url https://github.com/knsv/mermaid
   options:  # find more api options from https://github.com/knsv/mermaid/blob/master/src/mermaidAPI.js
     #startOnload: true  // default true
 
+baidu:
+  id: 1f97030bb3a44256d81e14447104bef8
+
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:

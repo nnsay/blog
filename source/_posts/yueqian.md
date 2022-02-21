@@ -1,5 +1,5 @@
 ---
-title: 跃迁-读书笔记
+title: 跃迁:成为高手的技术
 date: 2022-02-21 15:18:46
 tags:
   - Reading

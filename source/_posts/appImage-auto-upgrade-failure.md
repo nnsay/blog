@@ -5,6 +5,7 @@ tags:
 - 工作
 - Linux
 - 研究
+excerpt: troubleshoot the electrol appImage application auto upgrade failure
 ---
 
 ### 1. What hanppened?

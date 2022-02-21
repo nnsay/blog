@@ -4,6 +4,8 @@ date: 2020-04-09 16:04:30
 tags:
 - Code
 - Tips
+
+excerpt: What should think when add the retry logic in code?
 ---
 
 ### 1. What is retry?

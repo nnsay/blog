@@ -5,6 +5,7 @@ tags:
 - CaseStudy
 - Tips
 - Code
+excerpt: share a troubleshooting for OOM problem
 ---
 
 ### 1. Backgroud

@@ -4,6 +4,7 @@ date: 2021-03-10 17:47:41
 tags:
 - Aliyun
 - Tips
+excerpt: 阿里云DevOps技巧列表
 ---
 
 ### 1. 使用临时token登录阿里云CR

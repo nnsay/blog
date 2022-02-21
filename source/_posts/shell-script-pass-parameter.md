@@ -4,6 +4,7 @@ date: 2019-10-24 23:40:00
 tags:
   - Shell
   - Tips
+excerpt: shell脚本相互调用时常见的传参方式
 ---
 
 ### 1. 如何在 Shell 脚本间传递参数

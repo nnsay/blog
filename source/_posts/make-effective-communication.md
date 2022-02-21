@@ -4,6 +4,7 @@ date: 2019-12-04 11:35:00
 tags:
 - 工作
 - 效率
+excerpt: how to do an effective communication in the office?
 ---
 
 ### 1. What is the best result

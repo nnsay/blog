@@ -4,6 +4,8 @@ date: 2019-10-20 22:14:45
 tags: 
 - JavaScript
 - Code
+- Reading
+excerpt: ES6学习笔记
 ---
 
 ## 1. 块级作用域

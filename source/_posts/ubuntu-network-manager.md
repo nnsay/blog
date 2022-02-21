@@ -5,6 +5,7 @@ tags:
 - Ubuntu
 - 工具
 - 工作
+excerpt: manage the ethernet/wifi with CLI
 ---
 
 ### 0. Goals

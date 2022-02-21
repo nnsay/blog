@@ -2,6 +2,7 @@
 title: 搭建自定义授权的Docker Registory
 date: 2021-04-16 15:43:47
 tags:
+excerpt: 自定义docker login鉴权逻辑
 ---
 ### 1. 鉴权介绍
 自建docker registry比较简单, 但是docker registry的鉴权如何能和现有的系统结合就很优雅了, 我们可以自定义一些规则允许/拒绝某些账户拉取和推送或者只推送. 实现的基本思路:

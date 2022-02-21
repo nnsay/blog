@@ -6,6 +6,7 @@ tags:
   - DevOps
   - CloudNative
   - 研究
+excerpt: 在阿里云创建Knative服务并练手
 ---
 
 ## 1. [搭建Knative环境](https://help.aliyun.com/document_detail/185057.html)

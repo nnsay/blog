@@ -6,6 +6,7 @@ tags:
   - DevOps
   - CloudNative
   - 研究
+excerpt: Knative自动伸缩三个组件的工作原理及协同
 ---
 
 # 1. KPA(knative's pod autoscaler)

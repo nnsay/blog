@@ -5,6 +5,7 @@ tags:
 - 工作
 - Linux
 - 研究
+excerpt: share some kiosk solution
 ---
 
 ### 1. Requirements of Kiosk

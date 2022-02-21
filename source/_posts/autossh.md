@@ -3,6 +3,7 @@ title: 优秀工具推荐--autossh
 date: 2021-08-09 09:28:36
 tags:
 - Linux
+excerpt: 介绍sautossh的几个妙用, 例如:在后台运行SSH通道;自动重连;
 ---
 
 ### 1. 背景

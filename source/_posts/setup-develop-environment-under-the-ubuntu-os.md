@@ -3,6 +3,7 @@ title: Ubuntu 20.02 搭建开发环境
 date: 2020-11-04 13:19:01
 tags:
 - Tips
+excerpt: 使用Ubuntu 20.02搭建办公/开发环境
 ---
 
 #### 0 介绍

@@ -4,6 +4,7 @@ date: 2020-09-16 14:21:51
 tags:
 - Aliyun
 - Tips
+excerpt: How to add a custom domain in the Alicloud SLS.
 ---
 
 ### 1. problem

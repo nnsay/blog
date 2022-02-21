@@ -5,6 +5,7 @@ tags:
   - Kubernetes
   - DevOps
   - Tips
+excerpt: Helm的安装和基本使用
 ---
 
 ### 1. 什么是 [helm](https://helm.sh/)?

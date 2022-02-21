@@ -5,6 +5,7 @@ tags:
 - Tips
 - Git
 - 工具
+excerpt: 解决本地多个GitHub账号配置和使用的一些技巧
 ---
 
 ### 1. 背景介绍

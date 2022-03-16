@@ -6,7 +6,6 @@ tags:
 - Java
 excerpt: SpringBoot+MybatisPlus+JUnit
 ---
-
 # 1. 创建项目
 
 - 安装依赖和CLI
@@ -26,7 +25,6 @@ excerpt: SpringBoot+MybatisPlus+JUnit
   spring init -d=web --build=gradle -g=neuralgalaxy.com -n point --package-name=com.neuralgalaxy.point point.zip
   unzip point.zip -d ./point
   ```
-  查看[Rest Service](https://spring.io/guides/gs/rest-service/)编写示例路由
   
 - 启动项目
 
@@ -39,7 +37,7 @@ excerpt: SpringBoot+MybatisPlus+JUnit
 	
 - 代码练习: 
 
-  - [Spring Boot Gradle Plugin Reference Guide](https://docs.spring.io/spring-boot/docs/2.6.4/gradle-plugin/reference/htmlsingle/)
+  - [Restful Service](https://spring.io/guides/gs/rest-service/)
   - [Spring Boot Gradle Plugin Reference Guide](https://docs.spring.io/spring-boot/docs/2.6.4/gradle-plugin/reference/htmlsingle/)
 
 
@@ -67,7 +65,7 @@ excerpt: SpringBoot+MybatisPlus+JUnit
 
 # 3. 学习视频
 
-- 【尚硅谷雷神SpringBoot2零基础入门springboot全套完整版（spring boot2）-哔哩哔哩】 https://b23.tv/xcU4MzU
-- 【【尚硅谷】2022版MyBatisPlus教程（一套玩转mybatis-plus）-哔哩哔哩】 https://b23.tv/wQxw0Pe
+- [【尚硅谷雷神SpringBoot2零基础入门springboot全套完整版（spring boot2）-哔哩哔哩】](https://b23.tv/xcU4MzU) 
+	- [配套学习大纲和教学笔记](https://www.yuque.com/atguigu/springboot)
+- [【【尚硅谷】2022版MyBatisPlus教程（一套玩转mybatis-plus）-哔哩哔哩】](https://b23.tv/wQxw0Pe) 
 - [Spring Boot 参考指南](https://www.apiref.com/spring-boot-zh/) 中文
-

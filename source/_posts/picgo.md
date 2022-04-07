@@ -136,7 +136,7 @@ yarn global add picgo # 或者 npm install picgo -g
 - 选择图像, 选择自定义命令
 - 输入自定义命令
 
-![image-20220407110157776](https://gitee.com/nnsay/imagehost/raw/master/image-20220407110157776.png)
+![image-20220407110157776](https://raw.githubusercontent.com/nnsay/gist/main/img/20220407113115.png)
 
 其中`命令`中的全文如下, 主要是增加了环境变量`PATH`的修改, 让其可以找到`picgo`命令
 

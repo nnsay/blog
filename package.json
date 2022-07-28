@@ -3,13 +3,12 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "npm run cp && hexo generate",
+    "build": "npm run me && hexo generate",
     "clean": "hexo clean",
-    "deploy": "npm run cp && hexo deploy",
-    "server": "npm run cp && hexo server",
+    "deploy": "npm run me && hexo deploy",
+    "server": "npm run me && hexo server",
     "lnconfig": "ln -f themes/replacement/_config.yml themes/concise/_config.yml",
-    "cp": "npm run lnconfig && cp themes/images/* themes/concise/source/images/",
-    "restore": "git restore themes/concise"
+    "me": "npm run lnconfig && cp themes/images/* themes/concise/source/images/"
   },
   "hexo": {
     "version": "5.4.0"

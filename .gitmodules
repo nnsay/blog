@@ -1,0 +1,5 @@
+[submodule "concise"]
+	path = themes/concise
+	url = https://github.com/nnsay/hexo-theme-concise.git
+	branch = master
+  dirty = true

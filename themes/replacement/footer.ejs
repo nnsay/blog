@@ -5,10 +5,13 @@
     <script>
         var _hmt = _hmt || [];
         (function () {
+            // 百度
             var hm = document.createElement("script");
             hm.src = "https://hm.baidu.com/hm.js?<%= config.baidu.id %>";
             var s = document.getElementsByTagName("script")[0];
             s.parentNode.insertBefore(hm, s);
+            // toc重复标题
+            $('.toc-number').remove();
         })();
     </script>
     <% } %>
@@ -19,5 +22,4 @@
             mermaid.initialize({theme: 'forest'});
           }
         </script>
-      <% } %>
 </footer>

@@ -8,7 +8,7 @@
     "deploy": "npm run cp && hexo deploy",
     "server": "npm run cp && hexo server",
     "lnconfig": "ln -f themes/replacement/_config.yml themes/concise/_config.yml",
-    "cp": "npm run lnconfig && cp themes/images/* themes/concise/source/images/ && cp themes/replacement/footer.ejs themes/concise/layout/_partial/footer.ejs",
+    "cp": "npm run lnconfig && cp themes/images/* themes/concise/source/images/",
     "restore": "git restore themes/concise"
   },
   "hexo": {

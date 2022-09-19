@@ -7,6 +7,8 @@ tags:
 excerpt: 挂载阿里云盘到本地(MacOS)
 ---
 
+# 阿里云盘挂载(MacOS)
+
 阿里云盘不限速吸引了很多用户, 早起用户有1T左右的永久空间, 这个空间办公足够了. 如果有影音需要可能这个空间可能不足但是可以通过做任务获取空间. 百度网盘之前有一个很好的体验就是可以把网盘映射到本地, 同步和浏览十分方便, 网盘如同本地磁盘一样使用体验上无感知, 本文主要介绍如何挂载阿里云盘到本地.
 
 [基本原理介绍](https://github.com/messense/aliyundrive-webdav): 首先把阿里云盘包装成一个WebDAV 服务, 然后在操作系统上直接使用该服务.
@@ -23,30 +25,47 @@ JSON.parse(localStorage.token).refresh_token
 
 ![image-20220701150434063](https://raw.githubusercontent.com/nnsay/gist/main/img/image-20220701150434063.png)
 
-## 1.2 搭建WebDAV服务
+### 1.2 搭建WebDAV服务
 
-使用docker部署一个webdav服务, docker-compose.yaml文件如下:
+- 方法一: 使用docker部署一个webdav服务, docker-compose.yaml文件如下:
 
-```yaml
-version: "3"
-services:
-  aliyundrive:
-    container_name: aliyundrive
-    restart: unless-stopped
-    ports:
-      - 4000:8080
-    environment:
-      - REFRESH_TOKEN="自己的阿里云盘TOKEN"
-      - WEBDAV_AUTH_USER=yourAccount # 自定义
-      - WEBDAV_AUTH_PASSWORD=yourAccountPassword # 自定义
-    image: messense/aliyundrive-webdav
-```
+  ```yaml
+  version: "3"
+  services:
+    aliyundrive:
+      container_name: aliyundrive
+      restart: unless-stopped
+      ports:
+        - 4000:8080
+      environment:
+        - REFRESH_TOKEN="自己的阿里云盘TOKEN"
+        - WEBDAV_AUTH_USER=yourAccount # 自定义
+        - WEBDAV_AUTH_PASSWORD=yourAccountPassword # 自定义
+      image: messense/aliyundrive-webdav
+  ```
 
-启动命令如下:
+  启动命令如下:
 
-```bash
-docker-compose up -d aliyundrive
-```
+  ```bash
+  docker-compose up -d aliyundrive
+  ```
+
+- 方法二: 使用二进制命令
+
+  - 下载安装 [aliyundrive-webdav](https://github.com/messense/aliyundrive-webdav/releases) 
+
+  - 启动命令
+
+    ```bash
+    # 前台方式
+    aliyundrive-webdav --workdir ~/temp/aliyundrive --auth-user aliyun --auth-password aliyun@pwd --refresh-token d63aa96109c442d8ad427035c960505b --port 8888
+    
+    # 后台方式
+    nohup aliyundrive-webdav --workdir ~/temp/aliyundrive --auth-user aliyun --auth-password aliyun@pwd --refresh-token d63aa96109c442d8ad427035c960505b --port 8888 &
+    ```
+    
+
+两种方式均OK, 启动Docker可能占用资源, 二进制方式对资源使用更友好一些.
 
 # 2. 挂载云盘到本地
 

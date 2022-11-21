@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>阿里云知识点 | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="1. 使用临时token登录阿里云CR1aliyun cr GetAuthorizationToken | jq .data.authorizationToken | tr -d &amp;#x27;&amp;quot;&amp;#x27; | docker login --username=cr_temp_user --password-stdin registry.cn-hangzhou.aliyuncs.com2. 获取Kubernetes集群的kuberctl配置文件1aliyun cs DescribeClu" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 5.4.2"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E4%BD%BF%E7%94%A8%E4%B8%B4%E6%97%B6token%E7%99%BB%E5%BD%95%E9%98%BF%E9%87%8C%E4%BA%91CR"><span class="toc-text">1. 使用临时token登录阿里云CR</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E8%8E%B7%E5%8F%96Kubernetes%E9%9B%86%E7%BE%A4%E7%9A%84kuberctl%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="toc-text">2. 获取Kubernetes集群的kuberctl配置文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E4%BD%BF%E7%94%A8use-context%E5%88%87%E6%8D%A2%E7%AE%A1%E7%90%86%E5%A4%9A%E4%B8%AAkubernetes%E9%9B%86%E7%BE%A4"><span class="toc-text">3. 使用use-context切换管理多个kubernetes集群</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E8%AE%BE%E7%BD%AEOSS%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="toc-text">4. 设置OSS生命周期</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-ICP"><span class="toc-text">5. ICP</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#6-%E5%85%8D%E8%B4%B9DV%E8%AF%81%E4%B9%A6"><span class="toc-text">6. 免费DV证书</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#7-%E7%AC%AC%E4%B8%89%E6%96%B9%E8%B4%A6%E5%8F%B7%E8%AF%81%E4%B9%A6%E5%AF%BC%E5%85%A5"><span class="toc-text">7. 第三方账号证书导入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#8-KMS"><span class="toc-text">8. KMS</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#9-%E4%BD%BF%E7%94%A8digest%E6%8B%89%E5%8F%96Docker%E9%95%9C%E5%83%8F"><span class="toc-text">9. 使用digest拉取Docker镜像</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#10-%E8%8E%B7%E5%8F%96CLI-STS-TOKEN"><span class="toc-text">10. 获取CLI STS TOKEN</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#11-%E8%8E%B7%E5%8F%96account-id"><span class="toc-text">11. 获取account id</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#12-%E5%90%8C%E6%AD%A5%E6%96%87%E4%BB%B6"><span class="toc-text">12. 同步文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#13-%E5%91%BD%E4%BB%A4%E8%A1%8C-ECR"><span class="toc-text">13. 命令行 ECR</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            阿里云知识点
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2021/03/10/aliyun-migration-knowlege-point/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2021-03-10T09:47:41.000Z" itemprop="datePublished">2021-03-10</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/Aliyun/" rel="tag">Aliyun</a>, <a class="article-tag-link" href="/tags/Tips/" rel="tag">Tips</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h3 id="1-使用临时token登录阿里云CR"><a href="#1-使用临时token登录阿里云CR" class="headerlink" title="1. 使用临时token登录阿里云CR"></a>1. 使用临时token登录阿里云CR</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">aliyun cr GetAuthorizationToken | jq .data.authorizationToken | tr -d &#x27;&quot;&#x27; | docker login --username=cr_temp_user --password-stdin registry.cn-hangzhou.aliyuncs.com</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-获取Kubernetes集群的kuberctl配置文件"><a href="#2-获取Kubernetes集群的kuberctl配置文件" class="headerlink" title="2. 获取Kubernetes集群的kuberctl配置文件"></a>2. 获取Kubernetes集群的kuberctl配置文件</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">aliyun cs DescribeClusterUserKubeconfig --ClusterId=c90bf856c68364386a07384a6a2bb176b</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-使用use-context切换管理多个kubernetes集群"><a href="#3-使用use-context切换管理多个kubernetes集群" class="headerlink" title="3. 使用use-context切换管理多个kubernetes集群"></a>3. 使用use-context切换管理多个kubernetes集群</h3><p>多个集群kubectl配置如下:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">apiVersion: v1</span><br><span class="line">clusters:</span><br><span class="line">- cluster:</span><br><span class="line">    certificate-authority-data: DATA+OMITTED</span><br><span class="line">    server: https://192.168.132.236/k8s/clusters/c-8s9dc</span><br><span class="line">  name: ng-demo</span><br><span class="line">- cluster:</span><br><span class="line">    certificate-authority-data: DATA+OMITTED</span><br><span class="line">    server: https://192.168.132.236:6443</span><br><span class="line">  name: ng-demo-server01</span><br><span class="line">contexts:</span><br><span class="line">- context:</span><br><span class="line">    cluster: ng-demo</span><br><span class="line">    user: ng-demo</span><br><span class="line">  name: ng-demo</span><br><span class="line">- context:</span><br><span class="line">    cluster: ng-demo-server01</span><br><span class="line">    user: ng-demo</span><br><span class="line">  name: ng-demo-server01</span><br><span class="line">current-context: ng-demo</span><br><span class="line">kind: Config</span><br><span class="line">preferences: &#123;&#125;</span><br><span class="line">users:</span><br><span class="line">- name: ng-demo</span><br><span class="line">  user:</span><br><span class="line">    token: REDACTED</span><br></pre></td></tr></table></figure>
+
+<p>切换命令如下:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl config use-context ng-demo</span><br><span class="line">Switched to context &quot;ng-demo&quot;.</span><br></pre></td></tr></table></figure>
+
+<h3 id="4-设置OSS生命周期"><a href="#4-设置OSS生命周期" class="headerlink" title="4. 设置OSS生命周期"></a>4. 设置OSS生命周期</h3><p>Terraform目前(2021-3-10)不支持对于分片文件的生命周期, 可以考虑通过阿里云CLI实现.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># get and view the bucket lifecycel</span></span><br><span class="line">aliyun oss lifecycle --method get oss://research-ng-temp</span><br><span class="line"><span class="comment"># set the lifecycle</span></span><br><span class="line">aliyun oss lifecycle --method put oss://research-ng-temp lifecycle.xml</span><br></pre></td></tr></table></figure>
+
+<p>上面命令中的lifecycle.xml如下:</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;UTF-8&quot;</span>?&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">LifecycleConfiguration</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">Rule</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">ID</span>&gt;</span>857e37e3-0a3e-4250-a408-88f5b35f9714<span class="tag">&lt;/<span class="name">ID</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">Prefix</span>&gt;</span><span class="tag">&lt;/<span class="name">Prefix</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">Status</span>&gt;</span>Enabled<span class="tag">&lt;/<span class="name">Status</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">Expiration</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">Days</span>&gt;</span>16<span class="tag">&lt;/<span class="name">Days</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;/<span class="name">Expiration</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">AbortMultipartUpload</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">Days</span>&gt;</span>16<span class="tag">&lt;/<span class="name">Days</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;/<span class="name">AbortMultipartUpload</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">Rule</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">LifecycleConfiguration</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="5-ICP"><a href="#5-ICP" class="headerlink" title="5. ICP"></a>5. ICP</h3><ul>
+<li><a target="_blank" rel="noopener" href="https://help.aliyun.com/knowledge_detail/36924.html">ICP接入</a>: ICP可以同别的平台迁移到阿里云, 这个过程比在做一次ICP快很多</li>
+</ul>
+<h3 id="6-免费DV证书"><a href="#6-免费DV证书" class="headerlink" title="6. 免费DV证书"></a>6. <a target="_blank" rel="noopener" href="https://help.aliyun.com/document_detail/156645.html">免费DV证书</a></h3><p>阿里云每个实名账号个人或企业主体在一年内可以有20个免费DV证书可以使用, 每个证书仅支持绑定一个具体的域名, 20个的数量可以支持常见的测试和验证需求. 这种证书可以用于:</p>
+<ul>
+<li>CDN自定义域名</li>
+<li>SLB启用HTTPS</li>
+</ul>
+<h3 id="7-第三方账号证书导入"><a href="#7-第三方账号证书导入" class="headerlink" title="7. 第三方账号证书导入"></a>7. 第三方账号证书导入</h3><p>阿里云支持上传证书, 可以将一个已经在其他平台和账号的证书上传到阿里云, 操纵步骤:</p>
+<ul>
+<li>下载购买证书, 如果在阿里云购买的话, 下载的时候有很多种下载方式, 选择 nginx 下载<br><img src="https://gitee.com/nnsay/public/raw/master/1618555774_20210416144918809_2123515414.png" alt="cert download"></li>
+<li>解压下载文件, 可以获得.pem(certificate)和.key(provide key)文件</li>
+<li>上传, 在需要证书的阿里云账号的证书管理控制台, 粘贴复制.pem和.key的内容</li>
+<li>使用, 上传完后证书即可以像其他购买的证书一样正常使用, 例如配置OSS自定义域名,代码15和16行<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">resource &quot;alicloud_cdn_domain_new&quot; &quot;docker_storage_domain&quot; &#123;</span><br><span class="line">  domain_name = local.ng_docker_file_domain</span><br><span class="line">  cdn_type    = &quot;download&quot;</span><br><span class="line">  scope       = &quot;domestic&quot;</span><br><span class="line"></span><br><span class="line">  sources &#123;</span><br><span class="line">    content = local.docker_storage_bucket_domain</span><br><span class="line">    type    = &quot;oss&quot;</span><br><span class="line">    port    = 443</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  certificate_config &#123;</span><br><span class="line">    server_certificate_status = &quot;on&quot;</span><br><span class="line">    force_set                 = 1</span><br><span class="line">    cert_name                 = local.cert_name</span><br><span class="line">    cert_type                 = &quot;upload&quot;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  tags = &#123;</span><br><span class="line">    Name  = &quot;$&#123;var.stack_name&#125;-docker-storage-domain&quot;</span><br><span class="line">    Stack = var.stack_name</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  depends_on = [</span><br><span class="line">    alicloud_oss_bucket.docker_storage</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="8-KMS"><a href="#8-KMS" class="headerlink" title="8. KMS"></a>8. KMS</h3><ul>
+<li><p>获取Secret版本</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">ali kms ListSecretVersionIds --SecretName=&quot;/stack/research/db_password&quot;                                                   </span><br><span class="line">&#123;</span><br><span class="line">	&quot;PageNumber&quot;: 1,</span><br><span class="line">	&quot;PageSize&quot;: 10,</span><br><span class="line">	&quot;RequestId&quot;: &quot;e9bf3ff1-d3b1-44e1-abef-96416a52cd7d&quot;,</span><br><span class="line">	&quot;SecretName&quot;: &quot;/stack/research/db_password&quot;,</span><br><span class="line">	&quot;TotalCount&quot;: 2,</span><br><span class="line">	&quot;VersionIds&quot;: &#123;</span><br><span class="line">		&quot;VersionId&quot;: [</span><br><span class="line">			&#123;</span><br><span class="line">				&quot;CreateTime&quot;: &quot;2021-05-07T02:13:58Z&quot;,</span><br><span class="line">				&quot;VersionId&quot;: &quot;v20210507191252&quot;,</span><br><span class="line">				&quot;VersionStages&quot;: &#123;</span><br><span class="line">					&quot;VersionStage&quot;: [</span><br><span class="line">						&quot;ACSPrevious&quot;</span><br><span class="line">					]</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;,</span><br><span class="line">			&#123;</span><br><span class="line">				&quot;CreateTime&quot;: &quot;2021-05-07T02:15:45Z&quot;,</span><br><span class="line">				&quot;VersionId&quot;: &quot;v20210510191252&quot;,</span><br><span class="line">				&quot;VersionStages&quot;: &#123;</span><br><span class="line">					&quot;VersionStage&quot;: [</span><br><span class="line">						&quot;ACSCurrent&quot;</span><br><span class="line">					]</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		]</span><br><span class="line">	&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
+<li><p>可以使用VersionStage获取最近的Secret值<br>目前值发现两个VersionStage: ACSCurrent&#x2F;ACSPrevious</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ali kms GetSecretValue --SecretName=&quot;/stack/research/db_password&quot; --VersionStage=ACSCurrent</span><br><span class="line">ali kms GetSecretValue --SecretName=&quot;/stack/research/db_password&quot; --VersionStage=ACSPrevious</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>使用Key加密<br><code>keyId</code>可以是id也可以是alias</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ali kms Encrypt --KeyId=&quot;8da42b24-f1f7-450b-8ccb-f568b1e555fe&quot; --Plaintext=helloworld</span><br><span class="line">ali kms Encrypt --KeyId=alias/NG-Common --Plaintext=helloworld</span><br></pre></td></tr></table></figure></li>
+<li><p>解密</p>
+</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">ali kms Decrypt --CiphertextBlob=&quot;ZWZiOTMxMDMtOTUyNi00OGUxLWI5MzEtOTYxZjU0OGUwMWU0T3BDf6PdXvJIHzMKCIxYKr7N3PngT2aS07Rk7TiFx4Me+u0QIMk=&quot;</span><br><span class="line">&#123;</span><br><span class="line">	&quot;KeyId&quot;: &quot;8da42b24-f1f7-450b-8ccb-f568b1e555fe&quot;,</span><br><span class="line">	&quot;KeyVersionId&quot;: &quot;efb93103-9526-48e1-b931-961f548e01e4&quot;,</span><br><span class="line">	&quot;Plaintext&quot;: &quot;helloworld&quot;,</span><br><span class="line">	&quot;RequestId&quot;: &quot;691ce8ec-f5e5-41dd-bc55-d8a06e2d99e2&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="9-使用digest拉取Docker镜像"><a href="#9-使用digest拉取Docker镜像" class="headerlink" title="9. 使用digest拉取Docker镜像"></a>9. 使用digest拉取Docker镜像</h3><p>image tag如分支名不能精确代表最新的镜像, 可以使用digest, digest使用时用@而不是, 如下:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull registry.cn-hangzhou.aliyuncs.com/ngiq-cr/app_server@sha256:c4e1cbe395d87e4c9d94d831c689e7c01531d457f3d1bbbb83d6f1a698fac8e4</span><br></pre></td></tr></table></figure>
+<p>digest如何获取呢? 在阿里云中可以使用<code>GetRepoTag</code>方法:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">aliyun cr GetRepoTag --RepoName=app_server --RepoNamespace=ngiq-cr --Tag=feature-aliyun</span><br><span class="line">&#123;</span><br><span class="line">	&quot;data&quot;: &#123;</span><br><span class="line">		&quot;digest&quot;: &quot;7de0f4b43286daef25f2c3ffadb9a78796e9aabde45feb16199528357b731791&quot;,</span><br><span class="line">		&quot;imageCreate&quot;: 1620436982000,</span><br><span class="line">		&quot;imageId&quot;: &quot;de991a1a65f1eda17878cbb326e39e092d135f60bed068a983f750925ad6ce31&quot;,</span><br><span class="line">		&quot;imageSize&quot;: 346647563,</span><br><span class="line">		&quot;imageUpdate&quot;: 1620641463000,</span><br><span class="line">		&quot;status&quot;: &quot;NORMAL&quot;,</span><br><span class="line">		&quot;tag&quot;: &quot;feature-aliyun&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>配合jq则可以快速获取digest值:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">aliyun cr GetRepoTag --RepoName=app_server --RepoNamespace=ngiq-cr --Tag=feature-aliyun | jq -r &#x27;.data.digest&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>需要注意的是这个值在<code>docker pull</code>的时候需要增加<code>sha256:</code></p>
+<h3 id="10-获取CLI-STS-TOKEN"><a href="#10-获取CLI-STS-TOKEN" class="headerlink" title="10. 获取CLI STS TOKEN"></a>10. 获取CLI STS TOKEN</h3><p>aliyun 有些资源可以通过配置的profile自动获取STS但是有些资源不可以，例如CR、CSK</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">export CRED=$(curl http://100.100.100.200/latest/meta-data/Ram/security-credentials/CICDRole)</span><br><span class="line">export AK=$(echo $CRED | jq -r &#x27;.AccessKeyId&#x27;)</span><br><span class="line">export AK_SEC=$(echo $CRED | jq -r &#x27;.AccessKeySecret&#x27;)</span><br><span class="line">export AK_STS=$(echo $CRED | jq -r &#x27;.SecurityToken&#x27;)</span><br><span class="line">export ALI_CRED=&quot;--sts-token=$AK_STS --access-key-id=$AK --mode=StsToken --access-key-secret=$AK_SEC&quot;</span><br><span class="line"></span><br><span class="line">aliyun cr $ALI_CRED GetAuthorizationToken | jq -r .data.authorizationToken | docker login --username=cr_temp_user --password-stdin &quot;$&#123;PROC_BUILDER_URI&#125;&quot;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="11-获取account-id"><a href="#11-获取account-id" class="headerlink" title="11. 获取account id"></a>11. 获取account id</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ali ram GetAccountAlias</span><br><span class="line">&#123;</span><br><span class="line">	&quot;AccountAlias&quot;: &quot;1886910356xxxxx&quot;,</span><br><span class="line">	&quot;RequestId&quot;: &quot;797603B6-F858-48B5-8D63-5DF508CF4713&quot;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="12-同步文件"><a href="#12-同步文件" class="headerlink" title="12. 同步文件"></a>12. 同步文件</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">-- 同步 ng-system</span><br><span class="line">mc cp --continue --recursive s3/ng-system/ oss/ng-system/</span><br><span class="line">-- 比较</span><br><span class="line">mc diff s3/ng-system/ oss/ng-system/</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="13-命令行-ECR"><a href="#13-命令行-ECR" class="headerlink" title="13. 命令行 ECR"></a>13. 命令行 ECR</h3><p>个人版本的CR存在限流问题, 当个人仓库流量到达一定的限制, 触发限流, 当值镜像拉取很慢, 此时应该开启企业版CR即ECR, 当时阿里云CLI CR默认是没有对ECR做支持的, 但是可以通过<code>force</code>和<code>version</code>使用OpenAPI, 进而达到管理企业版CR的目的:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">#获取实例列表</span><br><span class="line">ali cr ListInstance --force --version 2018-12-01</span><br><span class="line">#获取仓库列表</span><br><span class="line">ali cr ListRepository --InstanceId=cri-xxxx--RepoStatus=NORMAL --version 2018-12-01 --force | jq -r &#x27;.Repositories[]|select(.RepoNamespaceName==&quot;ngiq-prod-cr&quot;)|&#123;RepoId,RepoNamespaceName,RepoName&#125;&#x27;</span><br></pre></td></tr></table></figure>
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2021/01/14/nodejs-OOM-in-production/" class="article-next" title="nodejs OOM in production"><i class="icon-arrow-right"></i></a>
+
+
+<a id="pageprev" href="/2021/04/16/setup%20docker%20registry%20with%20custom%20auth/" class="article-prev" title="搭建自定义授权的Docker Registory"><i class="icon-arrow-left"></i></a>
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "f0c899ef2e4512f83e96f81da03bd72d",
+        distractionFreeMode: true,
+        title: "阿里云知识点",
+        body: "https://nnsay.github.io/2021/03/10/aliyun-migration-knowlege-point/",
+        labels: ["Aliyun","Tips"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    
+        <script src='https://unpkg.com/mermaid@8.14.0/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script>
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>AppImage Auto-Upgrade Failure Because of APPIMAGE NO Found | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="1. What hanppened?We build a cross-platform application with electron. But its auto upgrade feature does not works. In order to explain, we image we have build a desktop application: app.AppImage. When we start the application in terminal and check t" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 5.4.2"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-What-hanppened"><span class="toc-text">1. What hanppened?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-Code-checking-amp-Research"><span class="toc-text">2. Code checking &amp; Research</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-from-research"><span class="toc-text">2.1 from research</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-from-code"><span class="toc-text">2.2 from code</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-How-to-fix"><span class="toc-text">3. How to fix?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-What-have-learned"><span class="toc-text">4. What have learned?</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-1-there-are-two-kind-of-environment-parameter"><span class="toc-text">4.1 there are two kind of environment parameter</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-2-never-to-rewrite-whole-process-env-only-set-the-what-you-need"><span class="toc-text">4.2 never to rewrite whole process.env, only set the what you need</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-3-Summary"><span class="toc-text">4.3 Summary</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#5-Other-useful-article"><span class="toc-text">5. Other useful article</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            AppImage Auto-Upgrade Failure Because of APPIMAGE NO Found
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2020/04/08/appImage-auto-upgrade-failure/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2020-04-08T14:19:44.000Z" itemprop="datePublished">2020-04-08</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/Linux/" rel="tag">Linux</a>, <a class="article-tag-link" href="/tags/%E5%B7%A5%E4%BD%9C/" rel="tag">工作</a>, <a class="article-tag-link" href="/tags/%E7%A0%94%E7%A9%B6/" rel="tag">研究</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h3 id="1-What-hanppened"><a href="#1-What-hanppened" class="headerlink" title="1. What hanppened?"></a>1. What hanppened?</h3><p>We build a cross-platform application with electron. But its auto upgrade feature does not works. In order to explain, we image we have build a desktop application: app.AppImage. When we start the application in terminal and check the latest the version, there are some output information look like below:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Error: Error: APPIMAGE env is not defined</span><br><span class="line">    at t.newError (/tmp/.mount_no-app2Kmp8v/resources/app.asar/dist/main.js:1:12502)</span><br><span class="line">    at Object.task (/tmp/.mount_no-app2Kmp8v/resources/app.asar/dist/main.js:142:178326)</span><br><span class="line">    at h.executeDownload (/tmp/.mount_no-app2Kmp8v/resources/app.asar/dist/main.js:1:254868)</span><br><span class="line">    at async /tmp/.mount_no-app2Kmp8v/resources/app.asar/dist/main.js:315:180714</span><br><span class="line">    at async EventEmitter.Hr (/tmp/.mount_no-app2Kmp8v/resources/app.asar/dist/main.js:315:180675)</span><br><span class="line">09:30:53.222 › Cannot dispatch error event: TypeError: Error processing argument at index 1, conversion failure from Error: APPIMAGE env is not defined</span><br><span class="line">    at Object.showErrorBox (/tmp/.mount_no-app2Kmp8v/resources/electron.asar/browser/api/dialog.js:163:24)</span><br><span class="line">    at h.&lt;anonymous&gt; (/tmp/.mount_no-app2Kmp8v/resources/app.asar/dist/main.js:315:179401)</span><br></pre></td></tr></table></figure>
+<p>You will more detail inforamtion from output if you start with a debug flag like below </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">chmod +x app.AppImage</span><br><span class="line">DEBUG=true ./app.AppImage</span><br></pre></td></tr></table></figure>
+<p>You will find the <code>APPIMAGE</code> environment parameter is existing. Yes, it is here, but you program can not find it.</p>
+<h3 id="2-Code-checking-amp-Research"><a href="#2-Code-checking-amp-Research" class="headerlink" title="2. Code checking &amp; Research"></a>2. Code checking &amp; Research</h3><h4 id="2-1-from-research"><a href="#2-1-from-research" class="headerlink" title="2.1 from research"></a>2.1 from research</h4><ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/electron-userland/electron-builder/issues/3167">APPIMAGE env is not defined </a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/PatrickJS/starter/issues/386">Best way to pass variables through Webpack?</a></li>
+</ul>
+<p>According some github issue, we know some pulugin for example: <code>DefinePlugin</code> will reset the environment parameters. Maybe this is the reason.</p>
+<h4 id="2-2-from-code"><a href="#2-2-from-code" class="headerlink" title="2.2 from code"></a>2.2 from code</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">const stringified = &#123;</span><br><span class="line">    &#x27;process.env&#x27;: Object.keys(raw).reduce(</span><br><span class="line">      (env, key) =&gt; &#123;</span><br><span class="line">        env[key] = JSON.stringify(raw[key]);</span><br><span class="line">        return env;</span><br><span class="line">      &#125;, &#123;&#125;</span><br><span class="line">    ),</span><br><span class="line">  &#125;;</span><br><span class="line">new webpack.DefinePlugin(stringified)</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>From the code, we find the we use the <code>DefinePlugin</code> to pass some environment parameter for building. And the important thing is that the whole <code>process.env</code> is rewrited.</p>
+<h3 id="3-How-to-fix"><a href="#3-How-to-fix" class="headerlink" title="3. How to fix?"></a>3. How to fix?</h3><p>We have find the reason and there two way to fix the bug:</p>
+<ul>
+<li>append <code>APPIMAGE</code> to the existing code</li>
+<li>only rewrite some process.env parameters, look like below:<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">const envParames = &#123;&#125;;</span><br><span class="line">  Object.keys(raw).forEach(k =&gt; &#123;</span><br><span class="line">    envParames[`process.env.$&#123;k&#125;`] = JSON.stringify(raw[k])</span><br><span class="line">  &#125;);</span><br><span class="line">new webpack.DefinePlugin(envParames)</span><br></pre></td></tr></table></figure>
+Because the <code>APPIMAGE</code> is a runtime environment, we can not set the value in building time. So the second it is right way to fix. Build a new application with new code, we test the <code>app.AppImage</code> auto upgrade function, it works now.</li>
+</ul>
+<h3 id="4-What-have-learned"><a href="#4-What-have-learned" class="headerlink" title="4. What have learned?"></a>4. What have learned?</h3><h4 id="4-1-there-are-two-kind-of-environment-parameter"><a href="#4-1-there-are-two-kind-of-environment-parameter" class="headerlink" title="4.1 there are two kind of environment parameter"></a>4.1 there are two kind of environment parameter</h4><ul>
+<li>build time</li>
+<li>runtime</li>
+</ul>
+<h4 id="4-2-never-to-rewrite-whole-process-env-only-set-the-what-you-need"><a href="#4-2-never-to-rewrite-whole-process-env-only-set-the-what-you-need" class="headerlink" title="4.2 never to rewrite whole process.env, only set the what you need"></a>4.2 never to rewrite whole process.env, only set the what you need</h4><h4 id="4-3-Summary"><a href="#4-3-Summary" class="headerlink" title="4.3 Summary"></a>4.3 Summary</h4><p>if your code running some website, you maybe never to care about runtime environment parameter. But if you code will build to some package application eg: command line tools &#x2F; desktop application, you should care about the runtime environment.</p>
+<h3 id="5-Other-useful-article"><a href="#5-Other-useful-article" class="headerlink" title="5. Other useful article"></a>5. Other useful article</h3><ul>
+<li><a target="_blank" rel="noopener" href="https://docs.appimage.org/packaging-guide/environment-variables.html#id2">Type 2 AppImage runtime</a>: the APPIMAGE is a absolute path with symlinks resolved</li>
+</ul>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2020/02/07/s3-file-zip-download-by-stream/" class="article-next" title="s3 file zip download by stream"><i class="icon-arrow-right"></i></a>
+
+
+<a id="pageprev" href="/2020/04/09/think-about-retry/" class="article-prev" title="thinking about retry"><i class="icon-arrow-left"></i></a>
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "a5099e31d603e7e92841f937f362c2b0",
+        distractionFreeMode: true,
+        title: "AppImage Auto-Upgrade Failure Because of APPIMAGE NO Found",
+        body: "https://nnsay.github.io/2020/04/08/appImage-auto-upgrade-failure/",
+        labels: ["研究","工作","Linux"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    
+        <script src='https://unpkg.com/mermaid@8.14.0/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script>
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

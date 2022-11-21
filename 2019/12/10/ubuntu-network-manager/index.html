@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>Manage Network on Ubuntu Without GUI | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="0. Goalsmanage network on Ubuntu without GUI.which kind of network typeethernetwifiThe topic is useful for developer who want develop a linux application, for example snap application in ubuntu.1. Network Manager On UbuntuUse the NetworkManager to ma" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 5.4.2"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#0-Goals"><span class="toc-text">0. Goals</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-Network-Manager-On-Ubuntu"><span class="toc-text">1. Network Manager On Ubuntu</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-Usage-Of-NetworkManager"><span class="toc-text">2. Usage Of NetworkManager</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-Install-NetworkManager"><span class="toc-text">2.1 Install NetworkManager</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-Manage-WIFI"><span class="toc-text">2.2 Manage WIFI</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-Manage-Ethernet"><span class="toc-text">2.3 Manage Ethernet</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-Program"><span class="toc-text">3. Program</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            Manage Network on Ubuntu Without GUI
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2019/12/10/ubuntu-network-manager/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2019-12-10T10:51:03.000Z" itemprop="datePublished">2019-12-10</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/Ubuntu/" rel="tag">Ubuntu</a>, <a class="article-tag-link" href="/tags/%E5%B7%A5%E4%BD%9C/" rel="tag">工作</a>, <a class="article-tag-link" href="/tags/%E5%B7%A5%E5%85%B7/" rel="tag">工具</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h3 id="0-Goals"><a href="#0-Goals" class="headerlink" title="0. Goals"></a>0. Goals</h3><ul>
+<li>manage network on Ubuntu without GUI.</li>
+<li>which kind of network type<ul>
+<li>ethernet</li>
+<li>wifi</li>
+</ul>
+</li>
+</ul>
+<p>The topic is useful for developer who want develop a linux application, for example snap application in ubuntu.</p>
+<h3 id="1-Network-Manager-On-Ubuntu"><a href="#1-Network-Manager-On-Ubuntu" class="headerlink" title="1. Network Manager On Ubuntu"></a>1. Network Manager On Ubuntu</h3><p>Use the <a target="_blank" rel="noopener" href="https://docs.ubuntu.com/core/en/stacks/network/network-manager/docs/">NetworkManager</a> to manage the network device and connections. NetworkManager can manage network types:</p>
+<ul>
+<li>ethenet</li>
+<li>wifi</li>
+<li>mobile boardband(WWAN)</li>
+<li>PPPoE device for VPN</li>
+</ul>
+<h3 id="2-Usage-Of-NetworkManager"><a href="#2-Usage-Of-NetworkManager" class="headerlink" title="2. Usage Of NetworkManager"></a>2. Usage Of NetworkManager</h3><h4 id="2-1-Install-NetworkManager"><a href="#2-1-Install-NetworkManager" class="headerlink" title="2.1 Install NetworkManager"></a>2.1 <a target="_blank" rel="noopener" href="https://docs.ubuntu.com/core/en/stacks/network/network-manager/docs/installation">Install NetworkManager</a></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># a. find the application</span><br><span class="line">snap find network-manager</span><br><span class="line"># b. install</span><br><span class="line">snap install network-manager</span><br><span class="line"># c. view the plugs</span><br><span class="line">snap interfaces network-manager</span><br><span class="line"># d. check the service status</span><br><span class="line">systemctl status network-manager</span><br></pre></td></tr></table></figure>
+<p>when execute the command <code>c</code> the output looks like:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">name:    network-manager</span><br><span class="line">summary: allows operating as the NetworkManager service</span><br><span class="line">plugs:</span><br><span class="line">  - network-manager:nmcli</span><br><span class="line">slots:</span><br><span class="line">  - core</span><br><span class="line">  - network-manager:service</span><br></pre></td></tr></table></figure>
+<p>we can find that the network manager command-line interface(nmcli) will be installed. the <code>nmcli</code> is key command what is used to manage network. If you wan to learn more about <code>nmcli</code>, you can use <code>nmcli help</code> command.</p>
+<h4 id="2-2-Manage-WIFI"><a href="#2-2-Manage-WIFI" class="headerlink" title="2.2 Manage WIFI"></a>2.2 <a target="_blank" rel="noopener" href="https://docs.ubuntu.com/core/en/stacks/network/network-manager/docs/configure-wifi-connections">Manage WIFI</a></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"># check whether the wifi is open</span><br><span class="line">nmcli radio wifi</span><br><span class="line"># if return `disabled`, please enable the wifi radio</span><br><span class="line">nmcli radio wifi on</span><br><span class="line"># list available wifi</span><br><span class="line">nmcli device wifi list</span><br><span class="line"># connect to wifi</span><br><span class="line">nmcli d wifi connect my_wifi password &lt;password&gt;</span><br><span class="line"># check the connection</span><br><span class="line">nmcli connection show</span><br></pre></td></tr></table></figure>
+<p>Other wifi configuration:</p>
+<ul>
+<li>powersave option(0: default, 1: ignore, 2: disable, 3: enable)<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nmcli c modify &lt;name&gt; 802-11-wireless.powersave 2</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="2-3-Manage-Ethernet"><a href="#2-3-Manage-Ethernet" class="headerlink" title="2.3 Manage Ethernet"></a>2.3 <a href="">Manage Ethernet</a></h3><p>before modify the Ethernet, backup the contents of &#x2F;etc&#x2F;netplan is a best practice.</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># check whether support enthernet by network manager</span></span><br><span class="line">sudo snap get network-manager ethernet.enable</span><br><span class="line"><span class="comment"># if return `false`, please enable ethernet support</span></span><br><span class="line">snap <span class="built_in">set</span> network-manager ethernet.enable=<span class="literal">true</span></span><br><span class="line">sudo reboot</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>after the reboot, you can edit the ethernet with <code>nmcli</code>. There two way to midfy the ethernet:</p>
+<ul>
+<li>interactive console: print&#x2F;set&#x2F;save</li>
+<li>connection modify command</li>
+</ul>
+<p>We choose the second way because it can be warpped as shell script or api.</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># list all connection</span></span><br><span class="line">nmcli connection show</span><br><span class="line"><span class="comment"># show detail a connection</span></span><br><span class="line">nmcli connection show &lt;myconnection name or uuid&gt;</span><br><span class="line"><span class="comment"># change the connection name</span></span><br><span class="line">nmcli connection modify myconnection connection.id myconn</span><br></pre></td></tr></table></figure>
+<p>You can get usage detail by executing <code>nmcli connection modify help</code>, looks like below:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">Usage: nmcli connection modify &#123; ARGUMENTS | help &#125;</span><br><span class="line"></span><br><span class="line">ARGUMENTS := [id | uuid | path] &lt;ID&gt; ([+|-]&lt;setting&gt;.&lt;property&gt; &lt;value&gt;)+</span><br><span class="line"></span><br><span class="line">Modify one or more properties of the connection profile.</span><br><span class="line">The profile is identified by its name, UUID or D-Bus path. For multi-valued</span><br><span class="line">properties you can use optional &#x27;+&#x27; or &#x27;-&#x27; prefix to the property name.</span><br><span class="line">The &#x27;+&#x27; sign allows appending items instead of overwriting the whole value.</span><br><span class="line">The &#x27;-&#x27; sign allows removing selected items instead of the whole value.</span><br><span class="line"></span><br><span class="line">Examples:</span><br><span class="line">nmcli con mod home-wifi wifi.ssid rakosnicek</span><br><span class="line">nmcli con mod em1-1 ipv4.method manual ipv4.addr &quot;192.168.1.2/24, 10.10.1.5/8&quot;</span><br><span class="line">nmcli con mod em1-1 +ipv4.dns 8.8.4.4</span><br><span class="line">nmcli con mod em1-1 -ipv4.dns 1</span><br><span class="line">nmcli con mod em1-1 -ipv6.addr &quot;abbe::cafe/56&quot;</span><br><span class="line">nmcli con mod bond0 +bond.options mii=500</span><br><span class="line">nmcli con mod bond0 -bond.options downdelay</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-Program"><a href="#3-Program" class="headerlink" title="3. Program"></a>3. Program</h3><ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/seveas/python-networkmanager">python-networkmanager</a>: Easy communication with NetworkManager</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/LGSInnovations/node-dbus-network-manager">dbus-network-manager</a>: A node.js API to interact with NetworkManager via DBus. This is currently extremely new and incomplete</li>
+</ul>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2019/12/05/kiosk-research/" class="article-next" title="Kiosk Research"><i class="icon-arrow-right"></i></a>
+
+
+<a id="pageprev" href="/2020/02/07/s3-file-zip-download-by-stream/" class="article-prev" title="s3 file zip download by stream"><i class="icon-arrow-left"></i></a>
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "4763e3c1c9434314e5c282f105b128a8",
+        distractionFreeMode: true,
+        title: "Manage Network on Ubuntu Without GUI",
+        body: "https://nnsay.github.io/2019/12/10/ubuntu-network-manager/",
+        labels: ["工作","工具","Ubuntu"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    
+        <script src='https://unpkg.com/mermaid@8.14.0/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script>
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

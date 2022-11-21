@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>软删除 | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="1. 什么是软删除?软删(soft delete)除是相对于常见的数据库删除命令 DELETE 来说的. 执行 DELETE 命令数据库表中的记录会被真实的删除(hard delete), 在某些场景下希望数据不要被删除比如数据有分析和统计的意义又不需要在前台业务上呈现, 这个时候一般有两种实现方式:软删除: 在数据库表中增加一列例如: deletedAt, 需要删除的时候使用 UPDATE 替换 DELETE 命令, 修改 deletedAt 为一个不为 NULL 的值, 一般是时间戳. 这种" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 5.4.2"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E4%BB%80%E4%B9%88%E6%98%AF%E8%BD%AF%E5%88%A0%E9%99%A4"><span class="toc-text">1. 什么是软删除?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E8%BD%AF%E5%88%A0%E9%99%A4%E6%98%AF%E5%90%A6%E5%AE%8C%E7%BE%8E"><span class="toc-text">2. 软删除是否完美?</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E8%BD%AF%E5%88%A0%E9%99%A4%E4%B8%8E%E4%B8%9A%E5%8A%A1%E7%BB%93%E5%90%88%E6%97%B6%E9%9C%80%E8%A6%81%E6%B3%A8%E6%84%8F%E7%9A%84%E5%9D%91"><span class="toc-text">3. 软删除与业务结合时需要注意的坑</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99-Sequelize"><span class="toc-text">4. 参考资料(Sequelize)</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            软删除
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2019/11/18/soft-delete/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2019-11-18T07:41:30.000Z" itemprop="datePublished">2019-11-18</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/Code/" rel="tag">Code</a>, <a class="article-tag-link" href="/tags/Tips/" rel="tag">Tips</a>, <a class="article-tag-link" href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag">数据库</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h3 id="1-什么是软删除"><a href="#1-什么是软删除" class="headerlink" title="1. 什么是软删除?"></a>1. 什么是软删除?</h3><p>软删(soft delete)除是相对于常见的数据库删除命令 DELETE 来说的. 执行 DELETE 命令数据库表中的记录会被真实的删除(hard delete), 在某些场景下希望数据不要被删除比如数据有分析和统计的意义又不需要在前台业务上呈现, 这个时候一般有两种实现方式:</p>
+<ul>
+<li>软删除: 在数据库表中增加一列例如: deletedAt, 需要删除的时候使用 UPDATE 替换 DELETE 命令, 修改 deletedAt 为一个不为 NULL 的值, 一般是时间戳. 这种删除方式也称为<strong>标记删除</strong>.</li>
+<li>删除迁移: 创建一个和生产库相同表结构专门为删除数据准备的数据库, 或者直接在生产库中创建为一套需要删除数据表对应的删除表, 当执行 DELETE 的时候可以将要删除的数据从生产的表中转移到删除表中, 然后在生产库的表执行删除操作.</li>
+</ul>
+<p>简单比较一下软删除和迁移删除, 软删除操作比较简单且成本相对较小, 删除迁移相对比较复杂还需要考虑到业务表和删除表两个操作的事务性, 除此之外迁移在有外键约束的情况下, 迁移数据的逻辑也变的更复杂, 所以一般在设计删除的时候都采用软删除.</p>
+<h3 id="2-软删除是否完美"><a href="#2-软删除是否完美" class="headerlink" title="2. 软删除是否完美?"></a>2. 软删除是否完美?</h3><p>最近因为业务需要, 我们进行了一次讨论关于软删除和硬删除, 我也做了一些软删除的测试和实践, 首先分享一下我们讨论的一个观点: 不管是软删除还是硬删除都是删除, 既然是删除行为应该一致. 具体可以从以下两点理解这句话:</p>
+<ol>
+<li>硬删除删除了就查不来了, 软删除删除了也应该查不出来(不做特殊处理查不出来)</li>
+<li>硬删除会级联删除, 软删除应该也自动标记级联的实体的实例删除</li>
+</ol>
+<p>上面的观点1如果想要达成, 如果不通过 ORM 的话很难从纯 SQL 上解决, 我们假设都使用 ORM, 那么测试的核心就是: 在各种查询下不做特殊指定 ORM 总是返回未被软删除的数据. 上面观点2的测试重点也很简单: 如果级联删除, 关联表记录也被软删除.</p>
+<p>因为是已有业务和已有的技术栈, 这里我测试是 nodejs 的一个 ORM: Sequelize, 数据库则是: mysql.<br>测试过程忽略, 测试结果:</p>
+<ol>
+<li>ORM 可以在不做特殊指定的时候默认不查询已经软删除的数据记录, 这个点保证了我们已有的业务代码修改不会太多.</li>
+<li>软删除场景下 ORM 不能做到级联删除, 这点也很好理解, 级联删除是数据库引擎的事情, ORM 不太好去实现, 所以如果级联情况下需手工处理.</li>
+</ol>
+<p>至此, 基本了解了软删除的可行性. 而从技术角度查看执行 SQL 可以发现软删除表在不做特殊指定的时查询和更新操作默认都会增加一个筛选条件: </p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(deletedAt <span class="keyword">is</span> <span class="keyword">null</span> <span class="keyword">or</span> deletedAt <span class="operator">&lt;</span> now())</span><br></pre></td></tr></table></figure>
+<p>所以 ORM 通过默认增加的筛选条件实现了观点1.<br>如果总结一下: <strong>在技术角度有 ORM 配合的软删除还是很不错的</strong>.</p>
+<h3 id="3-软删除与业务结合时需要注意的坑"><a href="#3-软删除与业务结合时需要注意的坑" class="headerlink" title="3. 软删除与业务结合时需要注意的坑"></a>3. 软删除与业务结合时需要注意的坑</h3><p>单从技术上软删除可行性还是挺不错的, 如果结合业务就是另外一回事情了, 简单总结一下软删除结合业务时候需要注意的点:</p>
+<ul>
+<li>unique index: 如果表有唯一索引, 比如用户表的邮箱列有唯一索引, 那么在做了软删除后被删除行的邮箱从数据角度任然在起作用, 所以不能创建相同邮箱的用户.</li>
+<li>performance: 上小节最后发现 ORM 是通过增加一个由 or 组成的附加条件来实现被删除的数据不被使用, 这时候需要考虑 SQL 的执行效率, 可以给标记列创建索引.</li>
+</ul>
+<h3 id="4-参考资料-Sequelize"><a href="#4-参考资料-Sequelize" class="headerlink" title="4. 参考资料(Sequelize)"></a>4. 参考资料(Sequelize)</h3><ul>
+<li><a target="_blank" rel="noopener" href="https://sequelize.org/master/manual/models-definition.html#configuration">configuration</a></li>
+<li><a target="_blank" rel="noopener" href="https://sequelize.org/master/manual/instances.html#destroying---deleting-persistent-instances">deleting-persistent-instances</a></li>
+<li><a target="_blank" rel="noopener" href="https://sequelize.org/master/manual/models-usage.html#including-soft-deleted-records">including-soft-deleted-records</a></li>
+</ul>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2019/10/24/shell-script-pass-parameter/" class="article-next" title="shell 脚本传参"><i class="icon-arrow-right"></i></a>
+
+
+<a id="pageprev" href="/2019/12/04/make-effective-communication/" class="article-prev" title="Make effective communication"><i class="icon-arrow-left"></i></a>
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "0a17d5a67216ba37910eebe3972ad95d",
+        distractionFreeMode: true,
+        title: "软删除",
+        body: "https://nnsay.github.io/2019/11/18/soft-delete/",
+        labels: ["Tips","Code","数据库"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    
+        <script src='https://unpkg.com/mermaid@8.14.0/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script>
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

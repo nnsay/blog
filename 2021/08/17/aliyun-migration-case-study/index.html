@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>阿里云迁移中吃过的亏(持续更新) | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="0. 更新时间2021-8-17: ASK&amp;#x2F;SLS&amp;#x2F;ECI&amp;#x2F;KMS&amp;#x2F;OSS2021-11-3: CR2022-2-4: 企业版CR限制2022-11-22: FC同步调用实例限制1. 背景7月中旬完成了AWS到Alicloud的迁移, 迁移前后通过压测和生产环境的持续巡检发现了一些问题, 列举出来希望后来人避免跳坑.2. 吃亏事件2.1 ASK(Aliyun Severless Kubernetes) PV&amp;#x2F;PVC 莫名其妙的Lose问题描述: " />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 5.4.2"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#0-%E6%9B%B4%E6%96%B0%E6%97%B6%E9%97%B4"><span class="toc-text">0. 更新时间</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E8%83%8C%E6%99%AF"><span class="toc-text">1. 背景</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E5%90%83%E4%BA%8F%E4%BA%8B%E4%BB%B6"><span class="toc-text">2. 吃亏事件</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-ASK-Aliyun-Severless-Kubernetes-PV-x2F-PVC-%E8%8E%AB%E5%90%8D%E5%85%B6%E5%A6%99%E7%9A%84Lose"><span class="toc-text">2.1 ASK(Aliyun Severless Kubernetes) PV&#x2F;PVC 莫名其妙的Lose</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-%E6%97%A5%E5%BF%97%E6%9C%8D%E5%8A%A1-SLS"><span class="toc-text">2.2 日志服务 SLS</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-%E5%BC%B9%E6%80%A7%E5%AE%B9%E5%99%A8%E5%AE%9E%E4%BE%8B-ECI-API"><span class="toc-text">2.3 弹性容器实例 ECI API</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-4-%E5%AF%86%E9%92%A5%E7%AE%A1%E7%90%86%E6%9C%8D%E5%8A%A1-KMS"><span class="toc-text">2.4 密钥管理服务 KMS</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-5-%E5%AF%B9%E8%B1%A1%E5%AD%98%E5%82%A8-OSS"><span class="toc-text">2.5 对象存储 OSS</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-6-%E5%BC%B9%E6%80%A7%E5%AE%B9%E5%99%A8%E5%AE%9E%E4%BE%8B-ECI-CPU%E6%95%B0%E9%87%8F"><span class="toc-text">2.6 弹性容器实例 ECI CPU数量</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-7-%E5%AE%B9%E5%99%A8%E9%95%9C%E5%83%8F%E6%9C%8D%E5%8A%A1-CR-%E4%B8%AA%E4%BA%BA%E7%89%88%E6%9C%89%E6%B5%81%E9%87%8F%E9%99%90%E5%88%B6"><span class="toc-text">2.7 容器镜像服务 CR 个人版有流量限制</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-8-%E5%87%BD%E6%95%B0%E8%AE%A1%E7%AE%97-FC-%E5%90%8C%E6%AD%A5%E8%B0%83%E7%94%A8%E9%99%90%E5%88%B6"><span class="toc-text">2.8 函数计算 FC 同步调用限制</span></a></li></ol></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            阿里云迁移中吃过的亏(持续更新)
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2021/08/17/aliyun-migration-case-study/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2021-08-17T03:50:57.000Z" itemprop="datePublished">2021-08-17</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/Aliyun/" rel="tag">Aliyun</a>, <a class="article-tag-link" href="/tags/CloudNative/" rel="tag">CloudNative</a>, <a class="article-tag-link" href="/tags/DevOps/" rel="tag">DevOps</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h3 id="0-更新时间"><a href="#0-更新时间" class="headerlink" title="0. 更新时间"></a>0. 更新时间</h3><ul>
+<li>2021-8-17: ASK&#x2F;SLS&#x2F;ECI&#x2F;KMS&#x2F;OSS</li>
+<li>2021-11-3: CR</li>
+<li>2022-2-4: 企业版CR限制</li>
+<li>2022-11-22: FC同步调用实例限制</li>
+</ul>
+<h3 id="1-背景"><a href="#1-背景" class="headerlink" title="1. 背景"></a>1. 背景</h3><p>7月中旬完成了AWS到Alicloud的迁移, 迁移前后通过压测和生产环境的持续巡检发现了一些问题, 列举出来希望后来人避免跳坑.</p>
+<!-- more -->
+<h3 id="2-吃亏事件"><a href="#2-吃亏事件" class="headerlink" title="2. 吃亏事件"></a>2. 吃亏事件</h3><h4 id="2-1-ASK-Aliyun-Severless-Kubernetes-PV-x2F-PVC-莫名其妙的Lose"><a href="#2-1-ASK-Aliyun-Severless-Kubernetes-PV-x2F-PVC-莫名其妙的Lose" class="headerlink" title="2.1 ASK(Aliyun Severless Kubernetes) PV&#x2F;PVC 莫名其妙的Lose"></a>2.1 ASK(Aliyun Severless Kubernetes) PV&#x2F;PVC 莫名其妙的Lose</h4><ul>
+<li>问题描述: 使用Terraform在ASK中创建的PV&#x2F;PVC状态过一段PVC状态就从Bound变成了Lose, 这个会导致所有引用PVC的Container处于一直Pending状态无法进行正常业务处理</li>
+<li>原因: 查看k8s的audit日志, 发现PVC的状态有被更新成Lost, 查看更新的操作的来源其实来自Terraform, 如图:<br><img src="/4290636159088.png" alt="update pvc status"><br><img src="/1335619716611.png" alt="operator"></li>
+<li>解决方案: 在Terraform中忽略PV&#x2F;PVC的所有变更, 即Terraform只负责创建和删除, 不进行任何多余的维护, 维护的工作应该交给Kubernetes</li>
+</ul>
+<h4 id="2-2-日志服务-SLS"><a href="#2-2-日志服务-SLS" class="headerlink" title="2.2 日志服务 SLS"></a>2.2 日志服务 SLS</h4><ul>
+<li>问题描述: 在Container中配置了<code>aliyun_logs_*</code>等环境变量但是最后看不日志项目</li>
+<li>原因: 日志项目名称阿里云全局唯一, 我用的日志项目名称太简单了, 已经存在了</li>
+<li>解决方案: 日志项目名称增加公司名前缀</li>
+</ul>
+<h4 id="2-3-弹性容器实例-ECI-API"><a href="#2-3-弹性容器实例-ECI-API" class="headerlink" title="2.3 弹性容器实例 ECI API"></a>2.3 弹性容器实例 ECI API</h4><ul>
+<li>问题描述: Pod启动出错</li>
+<li>原因: 触发了ECI API 节流阈值<br><img src="/4053715841454.png" alt="4053715841454"><br><img src="/5744833505703.png" alt="5744833505703"></li>
+<li>解决方案: 工单申请增加ECI API的阈值</li>
+</ul>
+<h4 id="2-4-密钥管理服务-KMS"><a href="#2-4-密钥管理服务-KMS" class="headerlink" title="2.4 密钥管理服务 KMS"></a>2.4 密钥管理服务 KMS</h4><ul>
+<li>问题描述: Pod启动失败, 代码进程报错退出</li>
+<li>原因: 代码逻辑触发了KMS API 节流</li>
+<li>解决方案: <ul>
+<li>提交工单申请更大的 KMS API 阈值</li>
+<li>Code修改捕获Throttling错误, 随机时长delay重试</li>
+</ul>
+</li>
+</ul>
+<h4 id="2-5-对象存储-OSS"><a href="#2-5-对象存储-OSS" class="headerlink" title="2.5 对象存储 OSS"></a>2.5 对象存储 OSS</h4><ul>
+<li>问题描述: OSS结合CDN使用后上传失败</li>
+<li>原因:  CDN上传最大支持300M, OSS直传没有这个限制, 之所以一定要用CDN两个原因: a. 自定义域名; b. 下载频繁</li>
+<li>解决方案: 无法解决, 前端上传时超过300M提醒用户</li>
+</ul>
+<h4 id="2-6-弹性容器实例-ECI-CPU数量"><a href="#2-6-弹性容器实例-ECI-CPU数量" class="headerlink" title="2.6 弹性容器实例 ECI CPU数量"></a>2.6 弹性容器实例 ECI CPU数量</h4><ul>
+<li>问题描述: 压力测试逐步增加并发, 但是没有新的Pod都处于ProviderFailure状态</li>
+<li>原因:  ECI CPU不够<br><img src="/1501583789858.png" alt="eci cpu"></li>
+<li>解决方案: 提交工单增加ECI CPU阈值</li>
+</ul>
+<h4 id="2-7-容器镜像服务-CR-个人版有流量限制"><a href="#2-7-容器镜像服务-CR-个人版有流量限制" class="headerlink" title="2.7 容器镜像服务 CR 个人版有流量限制"></a>2.7 容器镜像服务 CR 个人版有流量限制</h4><ul>
+<li>问题描述: pod创建很慢, describe之后发现其一直处于image pull的过程中, 慢的时候时长将近20分钟</li>
+<li>限制描述: 企业CR只能添加三个VPC, 如果有&gt;&#x3D;3个VPC且想在内网拉取&#x2F;推送镜像这是个限制</li>
+<li>原因: CR有个人版和企业之分, 考虑自身业务命名空间和仓库数目都比较小, 所以选择个人版本的容器镜像服务, 而个人版本的CR有流量上线</li>
+<li>解决方案: 使用企业版CR, 且将个人版仓库导入到企业版</li>
+</ul>
+<h4 id="2-8-函数计算-FC-同步调用限制"><a href="#2-8-函数计算-FC-同步调用限制" class="headerlink" title="2.8 函数计算 FC 同步调用限制"></a>2.8 函数计算 FC 同步调用限制</h4><ul>
+<li>限制描述: FC同步调用会有300实例节流的限制, 即账号级别一个时间窗口最大支持300个服务实例</li>
+<li>原因: 请求 1，2，3，4，5, ……, 300 ，这300个请求如果把实例用完了，第 301 个请求就报错限流了。但是如果在第 302 个请求来的时候，请求 1 已经处理完了，这个第 302 个请求就不会报错了</li>
+<li>解决方案: a. 提交工单增加这个限制; b. 同步调用修改为异步调用</li>
+</ul>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2021/08/09/autossh/" class="article-next" title="优秀工具推荐--autossh"><i class="icon-arrow-right"></i></a>
+
+
+<a id="pageprev" href="/2021/08/26/markdown-to-pdf/" class="article-prev" title="markdown文件转pdf"><i class="icon-arrow-left"></i></a>
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "4e7b93dc6bf218ee5680774a3bedc4ec",
+        distractionFreeMode: true,
+        title: "阿里云迁移中吃过的亏(持续更新)",
+        body: "https://nnsay.github.io/2021/08/17/aliyun-migration-case-study/",
+        labels: ["Aliyun","DevOps","CloudNative"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    
+        <script src='https://unpkg.com/mermaid@8.14.0/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script>
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

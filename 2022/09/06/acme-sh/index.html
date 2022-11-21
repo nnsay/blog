@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>acme.sh | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="1. 介绍证书管理客户端常见的有很多, 具体可以查看: ACME客户端列表, 社区中比较流行有以下两个:acme.shcertbotcertbot在国内使用不顺畅, 主要是不支持国内厂商的一些权限验证比如阿里云的DNS权限验证, 更重要的是如果无法使用DNS授权则不能自动更新证书, 只能手动验证或者结合社区方案; cerbot需要root权限, 而acme.sh不需要; cerbot是letencrypt推荐的客户端, 但是acme.sh不仅支持letencrypt还支持别的CA; 个人在简单体" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 5.4.2"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E4%BB%8B%E7%BB%8D"><span class="toc-text">1. 介绍</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E5%AE%89%E8%A3%85"><span class="toc-text">2. 安装</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E7%94%9F%E6%88%90%E8%AF%81%E4%B9%A6-%E6%89%8B%E5%8A%A8DNS-TXT%E9%AA%8C%E8%AF%81"><span class="toc-text">3. 生成证书: 手动DNS TXT验证</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E7%94%9F%E6%88%90%E8%AF%81%E4%B9%A6-%E4%BD%BF%E7%94%A8DNS-API%E9%AA%8C%E8%AF%81"><span class="toc-text">4. 生成证书: 使用DNS API验证</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#5-%E5%AE%89%E8%A3%85%E8%AF%81%E4%B9%A6"><span class="toc-text">5. 安装证书</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#6-%E8%87%AA%E5%8A%A8%E5%88%B7%E6%96%B0%E8%AF%81%E4%B9%A6"><span class="toc-text">6. 自动刷新证书</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#7-acme%E6%9B%B4%E6%96%B0"><span class="toc-text">7. acme更新</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#8-%E5%88%A0%E9%99%A4%E8%AF%81%E4%B9%A6"><span class="toc-text">8. 删除证书</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            acme.sh
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2022/09/06/acme-sh/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2022-09-06T04:04:12.000Z" itemprop="datePublished">2022-09-06</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/Aliyun/" rel="tag">Aliyun</a>, <a class="article-tag-link" href="/tags/Tips/" rel="tag">Tips</a>, <a class="article-tag-link" href="/tags/%E7%A0%94%E7%A9%B6/" rel="tag">研究</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h1 id="1-介绍"><a href="#1-介绍" class="headerlink" title="1. 介绍"></a>1. 介绍</h1><p>证书管理客户端常见的有很多, 具体可以查看: <a target="_blank" rel="noopener" href="https://letsencrypt.org/zh-cn/docs/client-options/">ACME客户端</a>列表, 社区中比较流行有以下两个:</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/acmesh-official/acme.sh">acme.sh</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/certbot/certbot">certbot</a></li>
+</ul>
+<p>certbot在国内使用不顺畅, 主要是不支持国内厂商的一些权限验证比如阿里云的DNS权限验证, 更重要的是如果无法使用DNS授权则不能自动更新证书, 只能手动验证或者结合<a target="_blank" rel="noopener" href="https://github.com/tengattack/certbot-dns-aliyun">社区方案</a>; cerbot需要root权限, 而acme.sh不需要; cerbot是letencrypt推荐的客户端, 但是acme.sh不仅支持letencrypt还支持别的CA; 个人在简单体验后在自定义程度上acme.sh更好; 综上所以本教程主要介绍acme.sh</p>
+<h1 id="2-安装"><a href="#2-安装" class="headerlink" title="2. 安装"></a>2. 安装</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/acmesh-official/acme.sh.git</span><br><span class="line"><span class="built_in">cd</span> ./acme.sh</span><br><span class="line">./acme.sh --install -m jimmy.w@aliyun.com</span><br></pre></td></tr></table></figure>
+
+<h1 id="3-生成证书-手动DNS-TXT验证"><a href="#3-生成证书-手动DNS-TXT验证" class="headerlink" title="3. 生成证书: 手动DNS TXT验证"></a>3. 生成证书: 手动DNS TXT验证</h1><p><a target="_blank" rel="noopener" href="https://github.com/acmesh-official/acme.sh/wiki/dns-manual-mode">使用DNS TXT记录方式验证域名</a></p>
+<ul>
+<li><p>生成TXT记录</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ acme.sh --issue --domain exmaple.cn --dns --yes-I-know-dns-manual-mode-enough-go-ahead-please --server letsencrypt </span><br><span class="line">[Mon Sep  5 17:51:04 CST 2022] Using CA: https://acme-v02.api.letsencrypt.org/directory</span><br><span class="line">[Mon Sep  5 17:51:04 CST 2022] Create account key ok.</span><br><span class="line">[Mon Sep  5 17:51:04 CST 2022] Registering account: https://acme-v02.api.letsencrypt.org/directory</span><br><span class="line">[Mon Sep  5 17:51:08 CST 2022] Registered</span><br><span class="line">[Mon Sep  5 17:51:08 CST 2022] ACCOUNT_THUMBPRINT=<span class="string">&#x27;Rw3wugyTUzVuXoVI5n1lnbRk16iauaTg4-aG2KxQe4k&#x27;</span></span><br><span class="line">[Mon Sep  5 17:51:08 CST 2022] Creating domain key</span><br><span class="line">[Mon Sep  5 17:51:08 CST 2022] The domain key is here: /Users/jw/.acme.sh/exmaple.cn/exmaple.cn.key</span><br><span class="line">[Mon Sep  5 17:51:08 CST 2022] Single domain=<span class="string">&#x27;exmaple.cn&#x27;</span></span><br><span class="line">[Mon Sep  5 17:51:08 CST 2022] Getting domain auth token <span class="keyword">for</span> each domain</span><br><span class="line">[Mon Sep  5 17:51:12 CST 2022] Getting webroot <span class="keyword">for</span> domain=<span class="string">&#x27;exmaple.cn&#x27;</span></span><br><span class="line">[Mon Sep  5 17:51:12 CST 2022] Add the following TXT record:</span><br><span class="line">[Mon Sep  5 17:51:12 CST 2022] Domain: <span class="string">&#x27;_acme-challenge.exmaple.cn&#x27;</span></span><br><span class="line">[Mon Sep  5 17:51:12 CST 2022] TXT value: <span class="string">&#x27;gj74Nh8vl8wkSyWeHwXHVldS2wzPF5laLiytCYxt6x8&#x27;</span></span><br><span class="line">[Mon Sep  5 17:51:12 CST 2022] Please be aware that you prepend _acme-challenge. before your domain</span><br><span class="line">[Mon Sep  5 17:51:12 CST 2022] so the resulting subdomain will be: _acme-challenge.exmaple.cn</span><br><span class="line">[Mon Sep  5 17:51:12 CST 2022] Please add the TXT records to the domains, and re-run with --renew.</span><br><span class="line">[Mon Sep  5 17:51:12 CST 2022] Please add <span class="string">&#x27;--debug&#x27;</span> or <span class="string">&#x27;--log&#x27;</span> to check more details.</span><br><span class="line">[Mon Sep  5 17:51:12 CST 2022] See: https://github.com/acmesh-official/acme.sh/wiki/How-to-debug-acme.sh</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p><a target="_blank" rel="noopener" href="https://github.com/acmesh-official/acme.sh/wiki/Server">server</a>: 支持很多种server, 默认是zerossl,国内网络不稳定, 使用letsencrypt较好, 也可以设置默认的CA</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">acme.sh --set-default-ca --server letsencrypt</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p>手动添加TXT</p>
+</li>
+<li><p>验证TXT, 生成证书</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ acme.sh --issue --domain exmaple.cn --dns --yes-I-know-dns-manual-mode-enough-go-ahead-please --server letsencrypt --renew</span><br><span class="line">[Mon Sep  5 17:54:03 CST 2022] Renew: <span class="string">&#x27;exmaple.cn&#x27;</span></span><br><span class="line">[Mon Sep  5 17:54:03 CST 2022] Renew to Le_API=https://acme-v02.api.letsencrypt.org/directory</span><br><span class="line">[Mon Sep  5 17:54:05 CST 2022] Using CA: https://acme-v02.api.letsencrypt.org/directory</span><br><span class="line">[Mon Sep  5 17:54:05 CST 2022] Single domain=<span class="string">&#x27;exmaple.cn&#x27;</span></span><br><span class="line">[Mon Sep  5 17:54:05 CST 2022] Getting domain auth token <span class="keyword">for</span> each domain</span><br><span class="line">[Mon Sep  5 17:54:05 CST 2022] Verifying: exmaple.cn</span><br><span class="line">[Mon Sep  5 17:54:08 CST 2022] Pending, The CA is processing your order, please just <span class="built_in">wait</span>. (1/30)</span><br><span class="line">[Mon Sep  5 17:54:13 CST 2022] Success</span><br><span class="line">[Mon Sep  5 17:54:13 CST 2022] Verify finished, start to sign.</span><br><span class="line">[Mon Sep  5 17:54:13 CST 2022] Lets finalize the order.</span><br><span class="line">[Mon Sep  5 17:54:13 CST 2022] Le_OrderFinalize=<span class="string">&#x27;https://acme-v02.api.letsencrypt.org/acme/finalize/717834657/122698486827&#x27;</span></span><br><span class="line">[Mon Sep  5 17:54:15 CST 2022] Downloading cert.</span><br><span class="line">[Mon Sep  5 17:54:15 CST 2022] Le_LinkCert=<span class="string">&#x27;https://acme-v02.api.letsencrypt.org/acme/cert/046d26bb81d66ad65eaba74a41d1c7944cdd&#x27;</span></span><br><span class="line">[Mon Sep  5 17:54:16 CST 2022] Cert success.</span><br><span class="line">-----BEGIN CERTIFICATE-----</span><br><span class="line">MIIFFTCCA/2gAwIBAgISBG0mu4HWatZeq6dKQdHHlEzdMA0GCSqGSIb3DQEBCwUA</span><br><span class="line">...</span><br><span class="line">YMHtkQUEV0zV</span><br><span class="line">-----END CERTIFICATE-----</span><br><span class="line">[Mon Sep  5 17:54:16 CST 2022] Your cert is <span class="keyword">in</span>: /Users/jw/.acme.sh/exmaple.cn/exmaple.cn.cer</span><br><span class="line">[Mon Sep  5 17:54:16 CST 2022] Your cert key is <span class="keyword">in</span>: /Users/jw/.acme.sh/exmaple.cn/exmaple.cn.key</span><br><span class="line">[Mon Sep  5 17:54:17 CST 2022] The intermediate CA cert is <span class="keyword">in</span>: /Users/jw/.acme.sh/exmaple.cn/ca.cer</span><br><span class="line">[Mon Sep  5 17:54:17 CST 2022] And the full chain certs is there: /Users/jw/.acme.sh/exmaple.cn/fullchain.cer</span><br></pre></td></tr></table></figure>
+
+<h1 id="4-生成证书-使用DNS-API验证"><a href="#4-生成证书-使用DNS-API验证" class="headerlink" title="4. 生成证书: 使用DNS API验证"></a>4. <a target="_blank" rel="noopener" href="https://github.com/acmesh-official/acme.sh/blob/master/dnsapi/dns_ali.sh">生成证书: 使用DNS API验证</a></h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> Ali_Key=<span class="string">&quot;access key id&quot;</span></span><br><span class="line"><span class="built_in">export</span> Ali_Secret=<span class="string">&quot;access key secret&quot;</span></span><br><span class="line"></span><br><span class="line">➜  ~ acme.sh --issue --dns dns_ali -d *.exmaple.cc --force</span><br><span class="line">[Mon Sep  5 19:53:24 CST 2022] Using CA: https://acme-v02.api.letsencrypt.org/directory</span><br><span class="line">[Mon Sep  5 19:53:24 CST 2022] Creating domain key</span><br><span class="line">[Mon Sep  5 19:53:24 CST 2022] The domain key is here: /Users/jw/.acme.sh/exmaple.cc/exmaple.cc.key</span><br><span class="line">[Mon Sep  5 19:53:24 CST 2022] Single domain=<span class="string">&#x27;exmaple.cc&#x27;</span></span><br><span class="line">[Mon Sep  5 19:53:25 CST 2022] Getting domain auth token <span class="keyword">for</span> each domain</span><br><span class="line">[Mon Sep  5 19:53:34 CST 2022] Getting webroot <span class="keyword">for</span> domain=<span class="string">&#x27;exmaple.cc&#x27;</span></span><br><span class="line">[Mon Sep  5 19:53:34 CST 2022] Adding txt value: WW37w1vmirOPCJcB0YlqAwQgnnc3UN84n7wAPp3dY84 <span class="keyword">for</span> domain:  _acme-challenge.exmaple.cc</span><br><span class="line">[Mon Sep  5 19:53:39 CST 2022] The txt record is added: Success.</span><br><span class="line">[Mon Sep  5 19:53:39 CST 2022] Let<span class="string">&#x27;s check each DNS record now. Sleep 20 seconds first.</span></span><br><span class="line"><span class="string">[Mon Sep  5 19:54:00 CST 2022] You can use &#x27;</span>--dnssleep<span class="string">&#x27; to disable public dns checks.</span></span><br><span class="line"><span class="string">[Mon Sep  5 19:54:00 CST 2022] See: https://github.com/acmesh-official/acme.sh/wiki/dnscheck</span></span><br><span class="line"><span class="string">[Mon Sep  5 19:54:00 CST 2022] Checking exmaple.cc for _acme-challenge.exmaple.cc</span></span><br><span class="line"><span class="string">[Mon Sep  5 19:54:02 CST 2022] Domain exmaple.cc &#x27;</span>_acme-challenge.exmaple.cc<span class="string">&#x27; success.</span></span><br><span class="line"><span class="string">[Mon Sep  5 19:54:02 CST 2022] All success, let&#x27;</span>s <span class="built_in">return</span></span><br><span class="line">[Mon Sep  5 19:54:02 CST 2022] Verifying: exmaple.cc</span><br><span class="line">[Mon Sep  5 19:54:05 CST 2022] Pending, The CA is processing your order, please just <span class="built_in">wait</span>. (1/30)</span><br><span class="line">[Mon Sep  5 19:54:15 CST 2022] Success</span><br><span class="line">[Mon Sep  5 19:54:15 CST 2022] Removing DNS records.</span><br><span class="line">[Mon Sep  5 19:54:15 CST 2022] Removing txt: WW37w1vmirOPCJcB0YlqAwQgnnc3UN84n7wAPp3dY84 <span class="keyword">for</span> domain: _acme-challenge.exmaple.cc</span><br><span class="line">[Mon Sep  5 19:54:23 CST 2022] Removed: Success</span><br><span class="line">[Mon Sep  5 19:54:23 CST 2022] Verify finished, start to sign.</span><br><span class="line">[Mon Sep  5 19:54:24 CST 2022] Lets finalize the order.</span><br><span class="line">[Mon Sep  5 19:54:24 CST 2022] Le_OrderFinalize=<span class="string">&#x27;https://acme-v02.api.letsencrypt.org/acme/finalize/717834657/122722852227&#x27;</span></span><br><span class="line">[Mon Sep  5 19:54:30 CST 2022] Downloading cert.</span><br><span class="line">[Mon Sep  5 19:54:30 CST 2022] Le_LinkCert=<span class="string">&#x27;https://acme-v02.api.letsencrypt.org/acme/cert/03986d5724d4c06ea2c89914b5de37b659cf&#x27;</span></span><br><span class="line">[Mon Sep  5 19:54:34 CST 2022] Cert success.</span><br><span class="line">-----BEGIN CERTIFICATE-----</span><br><span class="line">MIIFFzCCA/+gAwIBAgISA5htVyTUwG6iyJkUtd43tlnPMA0GCSqGSIb3DQEBCwUA</span><br><span class="line">....</span><br><span class="line">EJjkA/OhSkleGqg=</span><br><span class="line">-----END CERTIFICATE-----</span><br><span class="line">[Mon Sep  5 19:54:34 CST 2022] Your cert is <span class="keyword">in</span>: /Users/jw/.acme.sh/exmaple.cc/exmaple.cc.cer</span><br><span class="line">[Mon Sep  5 19:54:34 CST 2022] Your cert key is <span class="keyword">in</span>: /Users/jw/.acme.sh/exmaple.cc/exmaple.cc.key</span><br><span class="line">[Mon Sep  5 19:54:34 CST 2022] The intermediate CA cert is <span class="keyword">in</span>: /Users/jw/.acme.sh/exmaple.cc/ca.cer</span><br><span class="line">[Mon Sep  5 19:54:34 CST 2022] And the full chain certs is there: /Users/jw/.acme.sh/exmaple.cc/fullchain.cer</span><br></pre></td></tr></table></figure>
+
+<p>对比手动方式:</p>
+<ul>
+<li>手动方式生成的证书服务自动renew, 而api方式可以renew证书</li>
+</ul>
+<h1 id="5-安装证书"><a href="#5-安装证书" class="headerlink" title="5. 安装证书"></a>5. 安装证书</h1><p>以NGINX为例:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">acme.sh --install-cert -d exmaple.cn --key-file ~/temp/nginx/exmaple.cn.key --fullchain-file ~/temp/nginx/fullchain.cer --reloadcmd <span class="string">&quot;service nginx force-reload&quot;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>install-cert: 实际是拷贝证书</li>
+<li>reloadcmd: 自定义命令, 通常是重启服务</li>
+</ul>
+<h1 id="6-自动刷新证书"><a href="#6-自动刷新证书" class="headerlink" title="6. 自动刷新证书"></a>6. 自动刷新证书</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ acme.sh --cron --force</span><br><span class="line">[Mon Sep  5 20:00:14 CST 2022] ===Starting cron===</span><br><span class="line">[Mon Sep  5 20:00:14 CST 2022] Renew: <span class="string">&#x27;exmaple.cc&#x27;</span></span><br><span class="line">[Mon Sep  5 20:00:14 CST 2022] Renew to Le_API=https://acme-v02.api.letsencrypt.org/directory</span><br><span class="line">[Mon Sep  5 20:00:19 CST 2022] Using CA: https://acme-v02.api.letsencrypt.org/directory</span><br><span class="line">[Mon Sep  5 20:00:19 CST 2022] Single domain=<span class="string">&#x27;exmaple.cc&#x27;</span></span><br><span class="line">[Mon Sep  5 20:00:19 CST 2022] Getting domain auth token <span class="keyword">for</span> each domain</span><br><span class="line">[Mon Sep  5 20:00:34 CST 2022] Getting webroot <span class="keyword">for</span> domain=<span class="string">&#x27;exmaple.cc&#x27;</span></span><br><span class="line">[Mon Sep  5 20:00:34 CST 2022] exmaple.cc is already verified, skip dns-01.</span><br><span class="line">[Mon Sep  5 20:00:34 CST 2022] Verify finished, start to sign.</span><br><span class="line">[Mon Sep  5 20:00:34 CST 2022] Lets finalize the order.</span><br><span class="line">[Mon Sep  5 20:00:34 CST 2022] Le_OrderFinalize=<span class="string">&#x27;https://acme-v02.api.letsencrypt.org/acme/finalize/717834657/122724236097&#x27;</span></span><br><span class="line">[Mon Sep  5 20:00:36 CST 2022] Downloading cert.</span><br><span class="line">[Mon Sep  5 20:00:36 CST 2022] Le_LinkCert=<span class="string">&#x27;https://acme-v02.api.letsencrypt.org/acme/cert/035a862e306aa2155f43a86b47c2af23389a&#x27;</span></span><br><span class="line">[Mon Sep  5 20:00:47 CST 2022] Cert success.</span><br><span class="line">-----BEGIN CERTIFICATE-----</span><br><span class="line">MIIFFjCCA/6gAwIBAgISA1qGLjBqohVfQ6hrR8KvIziaMA0GCSqGSIb3DQEBCwUA</span><br><span class="line">...</span><br><span class="line">t0LWMLZT0U/Y1A==</span><br><span class="line">-----END CERTIFICATE-----</span><br><span class="line">[Mon Sep  5 20:00:47 CST 2022] Your cert is <span class="keyword">in</span>: /Users/jw/.acme.sh/exmaple.cc/exmaple.cc.cer</span><br><span class="line">[Mon Sep  5 20:00:47 CST 2022] Your cert key is <span class="keyword">in</span>: /Users/jw/.acme.sh/exmaple.cc/exmaple.cc.key</span><br><span class="line">[Mon Sep  5 20:00:47 CST 2022] The intermediate CA cert is <span class="keyword">in</span>: /Users/jw/.acme.sh/exmaple.cc/ca.cer</span><br><span class="line">[Mon Sep  5 20:00:47 CST 2022] And the full chain certs is there: /Users/jw/.acme.sh/exmaple.cc/fullchain.cer</span><br><span class="line">[Mon Sep  5 20:00:48 CST 2022] Renew: <span class="string">&#x27;exmaple.cn&#x27;</span></span><br><span class="line">[Mon Sep  5 20:00:48 CST 2022] Renew to Le_API=https://acme-v02.api.letsencrypt.org/directory</span><br><span class="line">[Mon Sep  5 20:00:48 CST 2022] It seems that you are using dns manual mode. Read this <span class="built_in">link</span> first: https://github.com/acmesh-official/acme.sh/wiki/dns-manual-mode</span><br><span class="line">[Mon Sep  5 20:00:48 CST 2022] Error renew exmaple.cn.</span><br><span class="line">[Mon Sep  5 20:00:48 CST 2022] ===End cron===</span><br></pre></td></tr></table></figure>
+
+<h1 id="7-acme更新"><a href="#7-acme更新" class="headerlink" title="7. acme更新"></a>7. acme更新</h1><p>acme更新是为了保证和CA更新同步, 应该时常做</p>
+<ul>
+<li><p>手动升级</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ acme.sh --upgrade</span><br><span class="line">[Tue Sep  6 09:33:08 CST 2022] Installing from online archive.</span><br><span class="line">[Tue Sep  6 09:33:08 CST 2022] Downloading https://github.com/acmesh-official/acme.sh/archive/master.tar.gz</span><br><span class="line">[Tue Sep  6 09:33:09 CST 2022] Extracting master.tar.gz</span><br><span class="line">[Tue Sep  6 09:33:10 CST 2022] It is recommended to install socat first.</span><br><span class="line">[Tue Sep  6 09:33:10 CST 2022] We use socat <span class="keyword">for</span> standalone server <span class="keyword">if</span> you use standalone mode.</span><br><span class="line">[Tue Sep  6 09:33:10 CST 2022] If you don<span class="string">&#x27;t use standalone mode, just ignore this warning.</span></span><br><span class="line"><span class="string">[Tue Sep  6 09:33:10 CST 2022] Installing to /Users/jw/.acme.sh</span></span><br><span class="line"><span class="string">[Tue Sep  6 09:33:10 CST 2022] Installed to /Users/jw/.acme.sh/acme.sh</span></span><br><span class="line"><span class="string">[Tue Sep  6 09:33:10 CST 2022] Good, bash is found, so change the shebang to use bash as preferred.</span></span><br><span class="line"><span class="string">[Tue Sep  6 09:33:12 CST 2022] OK</span></span><br><span class="line"><span class="string">[Tue Sep  6 09:33:12 CST 2022] Install success!</span></span><br><span class="line"><span class="string">[Tue Sep  6 09:33:13 CST 2022] Upgrade success!</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>自动升级</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">acme.sh --upgrade  --auto-upgrade</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>–auto-upgrade [0|1]: Valid for ‘–upgrade’ command, indicating whether to upgrade automatically in future. Defaults to 1 if argument is omitted.</li>
+</ul>
+</li>
+</ul>
+<h1 id="8-删除证书"><a href="#8-删除证书" class="headerlink" title="8. 删除证书"></a>8. 删除证书</h1><ul>
+<li><p>删除定时任务</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">acme.sh --uninstall-cronjob</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>删除证书</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ acme.sh --remove --domain exmaple.cn </span><br><span class="line">[Tue Sep  6 09:44:49 CST 2022] exmaple.cn is removed, the key and cert files are <span class="keyword">in</span> /Users/jw/.acme.sh/exmaple.cn</span><br><span class="line">[Tue Sep  6 09:44:49 CST 2022] You can remove them by yourself.</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>清除安装</p>
+<p>包括acme自身和cron job</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">acme.sh --uninstall</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+</ul>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2022/08/03/springboot-zipkin-trace-on-aliyun/" class="article-next" title="SpringBoot链路追踪服务在阿里云上的实践"><i class="icon-arrow-right"></i></a>
+
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "c3173ae764d5be6f5cf83f2d8860177f",
+        distractionFreeMode: true,
+        title: "acme.sh",
+        body: "https://nnsay.github.io/2022/09/06/acme-sh/",
+        labels: ["Aliyun","Tips","研究"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    
+        <script src='https://unpkg.com/mermaid@8.14.0/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script>
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

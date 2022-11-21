@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>Ubuntu 20.02 搭建开发环境 | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="0 介绍最近因为自己的MBP太老的性能有点跟不上了，所以申请了公司自的电脑， 公司的电脑是ThinkPadT490, 16G的内存极大的提高的开发效率， 特别是跑单元测试提高了两倍速度。根据最近一段时间的使用，我基于Ubuntu系统搭建了一套自己的开发环境，并且还比较顺手从MBP切换到Ubuntu从开发角度看并没有太多的不适应， 所以总结了这篇文章， 希望可以帮助到使用Ubuntu开发的朋友！Ubuntu OS:  Ubuntu 20.04.1 LTS。1 通过dpk安装软件dpk包是常见的安装" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 5.4.2"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-4"><a class="toc-link" href="#0-%E4%BB%8B%E7%BB%8D"><span class="toc-text">0 介绍</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E9%80%9A%E8%BF%87dpk%E5%AE%89%E8%A3%85%E8%BD%AF%E4%BB%B6"><span class="toc-text">1 通过dpk安装软件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E9%80%9A%E8%BF%87Snap%E5%AE%89%E8%A3%85%E8%BD%AF%E4%BB%B6"><span class="toc-text">2 通过Snap安装软件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E4%BD%BF%E7%94%A8AppImage%E8%BD%AF%E4%BB%B6"><span class="toc-text">3 使用AppImage软件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-%E4%BD%BF%E7%94%A8Wine%E5%AE%89%E8%A3%85Windows%E8%BD%AF%E4%BB%B6"><span class="toc-text">4 使用Wine安装Windows软件</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#5-%E4%BD%BF%E7%94%A8Docker%E5%AE%89%E8%A3%85%E8%BD%AF%E4%BB%B6"><span class="toc-text">5 使用Docker安装软件</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            Ubuntu 20.02 搭建开发环境
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2020/11/04/setup-develop-environment-under-the-ubuntu-os/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2020-11-04T05:19:01.000Z" itemprop="datePublished">2020-11-04</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/Tips/" rel="tag">Tips</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h4 id="0-介绍"><a href="#0-介绍" class="headerlink" title="0 介绍"></a>0 介绍</h4><p>最近因为自己的MBP太老的性能有点跟不上了，所以申请了公司自的电脑， 公司的电脑是ThinkPadT490, 16G的内存极大的提高的开发效率， 特别是跑单元测试提高了两倍速度。</p>
+<p>根据最近一段时间的使用，我基于Ubuntu系统搭建了一套自己的开发环境，并且还比较顺手从MBP切换到Ubuntu从开发角度看并没有太多的不适应， 所以总结了这篇文章， 希望可以帮助到使用Ubuntu开发的朋友！</p>
+<p>Ubuntu OS:  Ubuntu 20.04.1 LTS。</p>
+<h4 id="1-通过dpk安装软件"><a href="#1-通过dpk安装软件" class="headerlink" title="1 通过dpk安装软件"></a>1 <a target="_blank" rel="noopener" href="https://linoxide.com/ubuntu-how-to/install-deb-file-from-command-line/">通过dpk安装软件</a></h4><p>dpk包是常见的安装软件方式，而这些包基本都可以从软件的各自官网下载。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">#安装</span><br><span class="line">sudo dpkg -i ./xxx.deb</span><br><span class="line">#安装出错修复， 修复后再安装</span><br><span class="line">sudo apt -f</span><br><span class="line">#卸载</span><br><span class="line">sudo dpkg -r xxx</span><br></pre></td></tr></table></figure>
+<p>使用该方法可安装：</p>
+<ul>
+<li>有道词典</li>
+<li>DBearer</li>
+<li>网易云音乐</li>
+<li>VS Code</li>
+<li>WPS</li>
+<li>搜狗输入法</li>
+</ul>
+<h4 id="2-通过Snap安装软件"><a href="#2-通过Snap安装软件" class="headerlink" title="2 通过Snap安装软件"></a>2 通过Snap安装软件</h4><p>这类软件可以在Snap的商店里面找到你需要的软件： <a target="_blank" rel="noopener" href="https://snapcraft.io/store">https://snapcraft.io/store</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo snap install xxx</span><br></pre></td></tr></table></figure>
+<p>使用该方法可以安装：</p>
+<ul>
+<li>Microsoft Teams</li>
+<li>Zenhub</li>
+<li>Drawio</li>
+</ul>
+<h4 id="3-使用AppImage软件"><a href="#3-使用AppImage软件" class="headerlink" title="3 使用AppImage软件"></a>3 使用AppImage软件</h4><p>AppImage通用平台软件，这类软件可以从官网或者Github下载， 下载后只要增加可执行权限双击即可使用，使用该方式可以安装使用如下软件：</p>
+<ul>
+<li>VNote</li>
+</ul>
+<h4 id="4-使用Wine安装Windows软件"><a href="#4-使用Wine安装Windows软件" class="headerlink" title="4 使用Wine安装Windows软件"></a>4 <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/144286142">使用Wine安装Windows软件</a></h4><p>使用该方式可安装一些常用Windows软件：</p>
+<ul>
+<li>微信</li>
+</ul>
+<h4 id="5-使用Docker安装软件"><a href="#5-使用Docker安装软件" class="headerlink" title="5 使用Docker安装软件"></a>5 使用Docker安装软件</h4><p>使用docker-componse可以管理基础软件，这是本人经常使用的方式， 主要是方便快速管理和升级软件， 使用该方式可以安装的软件服务如下：</p>
+<ul>
+<li>mysql</li>
+<li>postgres</li>
+<li>redis</li>
+<li>mongodb</li>
+</ul>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2020/09/16/log-server-custom-domain-does-not-work/" class="article-next" title="aliyun log service custom domain does not work"><i class="icon-arrow-right"></i></a>
+
+
+<a id="pageprev" href="/2020/11/13/simple-three-step-to-publish-local-server-or-website/" class="article-prev" title="简单三步发布本地服务或网站"><i class="icon-arrow-left"></i></a>
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "e31b5b11fb3d48239fd50c7be7edc267",
+        distractionFreeMode: true,
+        title: "Ubuntu 20.02 搭建开发环境",
+        body: "https://nnsay.github.io/2020/11/04/setup-develop-environment-under-the-ubuntu-os/",
+        labels: ["Tips"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    
+        <script src='https://unpkg.com/mermaid@8.14.0/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script>
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

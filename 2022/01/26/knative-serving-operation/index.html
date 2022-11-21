@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>阿里云Knative Serving路由控制 | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="1. Serviceknative有两个主要的功能: serving 和 eventingserving主要由有Service提供功能service 的创建和变更产生配置 configuration &amp;#x2F; revision &amp;#x2F; routeroute有一个主路由其负载指向一个revision每个revision可以设置tag每个revision可以设置负载占比(可以实现:蓝绿&amp;#x2F;金丝雀&amp;#x2F;渐进式部署)1.1 方式一: kubctl+yaml123456789101" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 5.4.2"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-Service"><span class="toc-text">1. Service</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-%E6%96%B9%E5%BC%8F%E4%B8%80-kubctl-yaml"><span class="toc-text">1.1 方式一: kubctl+yaml</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-%E6%96%B9%E6%B3%95%E4%BA%8C-kn"><span class="toc-text">1.2 方法二: kn</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3-kubectl-vs-kn"><span class="toc-text">1.3 kubectl vs kn</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E8%AE%BE%E7%BD%AETag"><span class="toc-text">2.  设置Tag</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E8%AE%BE%E7%BD%AE%E8%B4%9F%E8%BD%BD"><span class="toc-text">3. 设置负载</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            阿里云Knative Serving路由控制
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2022/01/26/knative-serving-operation/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2022-01-26T06:35:06.000Z" itemprop="datePublished">2022-01-26</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/Aliyun/" rel="tag">Aliyun</a>, <a class="article-tag-link" href="/tags/CloudNative/" rel="tag">CloudNative</a>, <a class="article-tag-link" href="/tags/DevOps/" rel="tag">DevOps</a>, <a class="article-tag-link" href="/tags/%E7%A0%94%E7%A9%B6/" rel="tag">研究</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h1 id="1-Service"><a href="#1-Service" class="headerlink" title="1. Service"></a>1. Service</h1><ul>
+<li>knative有两个主要的功能: serving 和 eventing</li>
+<li>serving主要由有<code>Service</code>提供功能<ul>
+<li>service 的创建和变更产生配置 configuration &#x2F; revision &#x2F; route</li>
+<li>route有一个主路由其负载指向一个revision</li>
+<li>每个revision可以设置tag</li>
+<li>每个revision可以设置负载占比(可以实现:蓝绿&#x2F;金丝雀&#x2F;渐进式部署)</li>
+</ul>
+</li>
+</ul>
+<h2 id="1-1-方式一-kubctl-yaml"><a href="#1-1-方式一-kubctl-yaml" class="headerlink" title="1.1 方式一: kubctl+yaml"></a>1.1 方式一: kubctl+yaml</h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">serving.knative.dev/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">helloworld-go</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">template:</span></span><br><span class="line">    <span class="attr">metadata:</span></span><br><span class="line">      <span class="attr">labels:</span></span><br><span class="line">        <span class="attr">app:</span> <span class="string">helloworld-go</span></span><br><span class="line">      <span class="attr">annotations:</span></span><br><span class="line">        <span class="attr">autoscaling.knative.dev/target:</span> <span class="string">&quot;10&quot;</span></span><br><span class="line">    <span class="attr">spec:</span></span><br><span class="line">      <span class="attr">containerConcurrency:</span> <span class="number">10</span> <span class="comment"># ContainerConcurrency specifies the maximum allowed in-flight (concurrent) requests per container of the Revision</span></span><br><span class="line">      <span class="attr">timeoutSeconds:</span> <span class="number">1000</span> <span class="comment"># TimeoutSeconds is the maximum duration in seconds that the request routing layer will wait for a request delivered to a container to begin replying (send network traffic)</span></span><br><span class="line">      <span class="attr">containers:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">image:</span> <span class="string">registry.cn-hangzhou.aliyuncs.com/knative-sample/helloworld-go:160e4dc8</span></span><br><span class="line">          <span class="attr">ports:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">http1</span></span><br><span class="line">              <span class="attr">containerPort:</span> <span class="number">8080</span></span><br><span class="line">          <span class="attr">env:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">TARGET</span></span><br><span class="line">              <span class="attr">value:</span> <span class="string">&quot;World&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="1-2-方法二-kn"><a href="#1-2-方法二-kn" class="headerlink" title="1.2 方法二: kn"></a>1.2 方法二: kn</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ kn -n demo service create helloworld --image registry.cn-hangzhou.aliyuncs.com/knative-sample/helloworld-go:160e4dc8 --env TARGET=Jian</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="1-3-kubectl-vs-kn"><a href="#1-3-kubectl-vs-kn" class="headerlink" title="1.3 kubectl vs kn"></a>1.3 kubectl vs kn</h2><ul>
+<li>kubectl + yaml 可以做更细节的设置, 查看 <a target="_blank" rel="noopener" href="https://knative.dev/docs/reference/api/serving-api/#serving.knative.dev/v1.Service">serving.knative.dev&#x2F;v1</a><ul>
+<li>containerConcurrency</li>
+<li>timeoutSeconds</li>
+</ul>
+</li>
+<li>kn简单方便</li>
+</ul>
+<!-- more -->
+
+<h1 id="2-设置Tag"><a href="#2-设置Tag" class="headerlink" title="2.  设置Tag"></a>2.  设置Tag</h1><p>上步骤已经创建了一个serving: helloworld, 更新服务再生成一个revision:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ kn -n demo service update helloworld --<span class="built_in">env</span> TARGET=Jimmy</span><br></pre></td></tr></table></figure>
+
+<p>查看所有的revision</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ kn -n demo revision list -s helloworld</span><br><span class="line">NAME               SERVICE      TRAFFIC   TAGS   GENERATION   AGE   CONDITIONS   READY   REASON</span><br><span class="line">helloworld-00002   helloworld   100%             2            12h   3 OK / 4     True    </span><br><span class="line">helloworld-00001   helloworld                    1            12h   3 OK / 4     True </span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>为两个revision设置tag</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ kn -n demo service update helloworld-go --tag helloworld-go-00001=world --tag helloworld-go-00002=jimmy</span><br></pre></td></tr></table></figure>
+
+<p>查看路由详情</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">$ kn -n demo route describe helloworld-go</span><br><span class="line">Name:       helloworld</span><br><span class="line">Namespace:  demo</span><br><span class="line">Age:        4m</span><br><span class="line">URL:        http://helloworld.demo.xxxxxxxx.app.alicontainer.com</span><br><span class="line">Service:    helloworld</span><br><span class="line"></span><br><span class="line">Traffic Targets:  </span><br><span class="line">  100%  @latest (helloworld-00002)</span><br><span class="line">    0%  helloworld-00001 #cn</span><br><span class="line">        URL:  http://cn-helloworld.demo.xxxxxxxx.app.alicontainer.com</span><br><span class="line">    0%  helloworld-00002 #en</span><br><span class="line">        URL:  http://en-helloworld.demo.xxxxxxxx.app.alicontainer.com</span><br><span class="line"></span><br><span class="line">Conditions:  </span><br><span class="line">  OK TYPE                      AGE REASON</span><br><span class="line">  ++ Ready                     30s </span><br><span class="line">  ++ AllTrafficAssigned         3m </span><br><span class="line">  ++ CertificateProvisioned     3m TLSNotEnabled</span><br><span class="line">  ++ IngressReady              30s</span><br></pre></td></tr></table></figure>
+
+<p>其中 <code>Traffic Targets</code> 是关键, 这里的理论知识如下:</p>
+<ul>
+<li><code>@latest</code>是knative默认增加的tag,在configuration生成和修改时自动指向最新的revision</li>
+<li>主路由地址: http:&#x2F;&#x2F;<service name>.<namsapce>.xxxxxxxx.app.alicontainer.com</li>
+<li>Tag路由地址: http:&#x2F;&#x2F;<tag>-<service name>.<namsapce>.xxxxxxxx.app.alicontainer.com</li>
+<li>以上结果如果请求主路由, 100%流量导向 helloworld-00002</li>
+<li>以上结果如果请求Tag路由, 分别指向具体helloworld-00001(cn)和helloworld-00002(en)</li>
+</ul>
+<h1 id="3-设置负载"><a href="#3-设置负载" class="headerlink" title="3. 设置负载"></a>3. 设置负载</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">$ kn -n demo service update helloworld --traffic cn=80 --traffic en=20</span><br><span class="line">$ kn -n demo route describe helloworld-go</span><br><span class="line">Name:       helloworld</span><br><span class="line">Namespace:  demo</span><br><span class="line">Age:        13h</span><br><span class="line">URL:        http://helloworld.demo.xxxxxxxx.app.alicontainer.com</span><br><span class="line">Service:    helloworld</span><br><span class="line"></span><br><span class="line">Traffic Targets:  </span><br><span class="line">   80%  helloworld-00001 #cn</span><br><span class="line">        URL:  http://cn-helloworld.demo.xxxxxxxx.app.alicontainer.com</span><br><span class="line">   20%  helloworld-00002 #en</span><br><span class="line">        URL:  http://en-helloworld.demo.xxxxxxxx.app.alicontainer.com</span><br><span class="line"></span><br><span class="line">Conditions:  </span><br><span class="line">  OK TYPE                      AGE REASON</span><br><span class="line">  ++ Ready                     31s </span><br><span class="line">  ++ AllTrafficAssigned        13h </span><br><span class="line">  ++ CertificateProvisioned    13h TLSNotEnabled</span><br><span class="line">  ++ IngressReady              31s</span><br></pre></td></tr></table></figure>
+<p>当一个revision有自定义tag后默认的@latest tag就没有了, 开发者完全接管负载控制, 下面的操作:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"># 生成第三个revision</span><br><span class="line">$ kn -n demo service update helloworld --env TARGET=mate</span><br><span class="line">Updating Service &#x27;helloworld&#x27; in namespace &#x27;demo&#x27;:</span><br><span class="line"></span><br><span class="line"> 15.695s Ready to serve.</span><br><span class="line"></span><br><span class="line">Service &#x27;helloworld&#x27; updated to latest revision &#x27;helloworld-00003&#x27; is available at URL:</span><br><span class="line">http://helloworld.demo.xxxxxxxx.app.alicontainer.com</span><br><span class="line"></span><br><span class="line"># 查看路由</span><br><span class="line">$ kn -n demo route describe helloworld</span><br><span class="line">Name:       helloworld</span><br><span class="line">Namespace:  demo</span><br><span class="line">Age:        13h</span><br><span class="line">URL:        http://helloworld.demo.xxxxxxxx.app.alicontainer.com</span><br><span class="line">Service:    helloworld</span><br><span class="line"></span><br><span class="line">Traffic Targets:  </span><br><span class="line">   80%  helloworld-00001 #cn</span><br><span class="line">        URL:  http://cn-helloworld.demo.xxxxxxxx.app.alicontainer.com</span><br><span class="line">   20%  helloworld-00002 #en</span><br><span class="line">        URL:  http://en-helloworld.demo.xxxxxxxx.app.alicontainer.com</span><br><span class="line"></span><br><span class="line">Conditions:  </span><br><span class="line">  OK TYPE                      AGE REASON</span><br><span class="line">  ++ Ready                      9m </span><br><span class="line">  ++ AllTrafficAssigned        13h </span><br><span class="line">  ++ CertificateProvisioned    13h TLSNotEnabled</span><br><span class="line">  ++ IngressReady</span><br></pre></td></tr></table></figure>
+
+<p>上面的操作可以发现虽然第三个revision有了, 但是没有分配负载, 使用curl可以验证不会返回<code>mate</code>, 从revision列表也可应征:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ kn -n demo revision list -s helloworld</span><br><span class="line">NAME               SERVICE      TRAFFIC   TAGS   GENERATION   AGE     CONDITIONS   READY   REASON</span><br><span class="line">helloworld-00003   helloworld                    3            5m53s   3 OK / 4     True    </span><br><span class="line">helloworld-00002   helloworld   50%       en     2            13h     4 OK / 4     True    </span><br><span class="line">helloworld-00001   helloworld   50%       cn     1            13h     4 OK / 4     True </span><br></pre></td></tr></table></figure>
+
+<p>如果需要revision3接管流量, 需要手动修改:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"># revision 3 接管全部流量</span><br><span class="line">$ kn -n demo service update --traffic helloworld-00003=100</span><br><span class="line">Updating Service &#x27;helloworld&#x27; in namespace &#x27;demo&#x27;:</span><br><span class="line"></span><br><span class="line">  0.043s Ingress has not yet been reconciled.</span><br><span class="line"> 15.670s Ready to serve.</span><br><span class="line"></span><br><span class="line">Service &#x27;helloworld&#x27; with latest revision &#x27;helloworld-00003&#x27; (unchanged) is available at URL:</span><br><span class="line">http://helloworld.demo.xxxxxxxx.app.alicontainer.com</span><br><span class="line"></span><br><span class="line"># 查看revision列表</span><br><span class="line">NAME               SERVICE      TRAFFIC   TAGS   GENERATION   AGE     CONDITIONS   READY   REASON</span><br><span class="line">helloworld-00003   helloworld   100%             3            8m19s   3 OK / 4     True    </span><br><span class="line">helloworld-00002   helloworld             en     2            13h     3 OK / 4     True    </span><br><span class="line">helloworld-00001   helloworld             cn     1            13h     3 OK / 4     True</span><br><span class="line"></span><br><span class="line"># 查看路由</span><br><span class="line">$ kn -n demo route describe helloworld</span><br><span class="line">Name:       helloworld</span><br><span class="line">Namespace:  demo</span><br><span class="line">Age:        13h</span><br><span class="line">URL:        http://helloworld.demo.xxxxxxxx.app.alicontainer.com</span><br><span class="line">Service:    helloworld</span><br><span class="line"></span><br><span class="line">Traffic Targets:  </span><br><span class="line">    0%  helloworld-00001 #cn</span><br><span class="line">        URL:  http://cn-helloworld.demo.xxxxxxxx.app.alicontainer.com</span><br><span class="line">    0%  helloworld-00002 #en</span><br><span class="line">        URL:  http://en-helloworld.demo.xxxxxxxx.app.alicontainer.com</span><br><span class="line">  100%  helloworld-00003</span><br><span class="line"></span><br><span class="line">Conditions:  </span><br><span class="line">  OK TYPE                      AGE REASON</span><br><span class="line">  ++ Ready                      3m </span><br><span class="line">  ++ AllTrafficAssigned        13h </span><br><span class="line">  ++ CertificateProvisioned    13h TLSNotEnabled</span><br><span class="line">  ++ IngressReady               3m</span><br></pre></td></tr></table></figure>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2022/01/21/knative-service-on-aliyun/" class="article-next" title="阿里云Knative Serving一撇"><i class="icon-arrow-right"></i></a>
+
+
+<a id="pageprev" href="/2022/02/14/knative-autoscaling/" class="article-prev" title="knative自动伸缩"><i class="icon-arrow-left"></i></a>
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "8d112186fa85b43d2e8319b9f1d73774",
+        distractionFreeMode: true,
+        title: "阿里云Knative Serving路由控制",
+        body: "https://nnsay.github.io/2022/01/26/knative-serving-operation/",
+        labels: ["Aliyun","研究","DevOps","CloudNative"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    
+        <script src='https://unpkg.com/mermaid@8.14.0/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script>
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

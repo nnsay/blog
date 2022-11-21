@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>picgo | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="1. PicGo-CoreA tool for pictures uploading. Both CLI &amp;amp; API supportsPicGo-Core其实PicGo下的一个项目, PicGo是一个基于Electron的GUI客户端而PicGo-Core是做图床实现的核心,如其GitHub的描述, Core只是CLI和API, 其中API就是NPM package, API方式使用时更像是一个做图床的SDK. 本问主要介绍CLI的使用.2. PicGo CLI 使用2.1 安装1yar" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 5.4.2"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-PicGo-Core"><span class="toc-text">1. PicGo-Core</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-PicGo-CLI-%E4%BD%BF%E7%94%A8"><span class="toc-text">2. PicGo CLI 使用</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-%E5%AE%89%E8%A3%85"><span class="toc-text">2.1 安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="toc-text">2.2 配置文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3-%E9%85%8D%E7%BD%AE"><span class="toc-text">2.3 配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-4-%E9%85%8D%E7%BD%AE%E7%BB%93%E6%9E%9C%E5%B1%95%E7%A4%BA"><span class="toc-text">2.4 配置结果展示</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-5-%E5%88%87%E6%8D%A2%E5%9B%BE%E5%BA%8A"><span class="toc-text">2.5 切换图床</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E6%B5%8B%E8%AF%95%E4%B8%8A%E4%BC%A0"><span class="toc-text">3. 测试上传</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E4%B8%8ETypora%E9%85%8D%E5%90%88%E4%BD%BF%E7%94%A8"><span class="toc-text">4. 与Typora配合使用</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            picgo
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2022/04/07/picgo/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2022-04-07T03:06:53.000Z" itemprop="datePublished">2022-04-07</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/Tips/" rel="tag">Tips</a>, <a class="article-tag-link" href="/tags/%E5%B7%A5%E5%85%B7/" rel="tag">工具</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h1 id="1-PicGo-Core"><a href="#1-PicGo-Core" class="headerlink" title="1. PicGo-Core"></a>1. <a target="_blank" rel="noopener" href="https://github.com/PicGo/PicGo-Core">PicGo-Core</a></h1><blockquote>
+<p>A tool for pictures uploading. Both CLI &amp; API supports</p>
+</blockquote>
+<p>PicGo-Core其实PicGo下的一个项目, PicGo是一个基于Electron的GUI客户端而PicGo-Core是做图床实现的核心,如其GitHub的描述, Core只是CLI和API, 其中API就是NPM package, API方式使用时更像是一个做图床的SDK. 本问主要介绍CLI的使用.</p>
+<h1 id="2-PicGo-CLI-使用"><a href="#2-PicGo-CLI-使用" class="headerlink" title="2. PicGo CLI 使用"></a>2. PicGo CLI 使用</h1><h2 id="2-1-安装"><a href="#2-1-安装" class="headerlink" title="2.1 安装"></a>2.1 安装</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yarn global add picgo # 或者 npm install picgo -g</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-2-配置文件"><a href="#2-2-配置文件" class="headerlink" title="2.2 配置文件"></a>2.2 配置文件</h2><p>默认picgo cli的配置文件位置在: ~&#x2F;.picgo</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">.picgo</span><br><span class="line">├── config.json</span><br><span class="line">├── node_modules</span><br><span class="line">├── package-lock.json</span><br><span class="line">├── package.json</span><br><span class="line">└── picgo.log</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-3-配置"><a href="#2-3-配置" class="headerlink" title="2.3 配置"></a>2.3 配置</h2><ul>
+<li><p>GitHub: 使用GitHub作为图床, picgo内置, 直接进行配置</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://picgo.github.io/PicGo-Core-Doc/zh/guide/config.html#picbed">直接编辑config.json进行配置</a></li>
+<li><a target="_blank" rel="noopener" href="https://picgo.github.io/PicGo-Core-Doc/zh/guide/commands.html#config-set">使用命令行交互命令进行配置</a></li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">picgo set uploader github</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Gitee: GitHub因为网络等问题可能服务访问, 国内建议使用Gitee作为图床, 安装步骤如下:</p>
+<ul>
+<li><p>安装<a target="_blank" rel="noopener" href="https://github.com/lizhuangs/picgo-plugin-gitee-uploader">gitee-uploader</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">picgo install gitee-uploader</span><br></pre></td></tr></table></figure>
+
+<p>只有安装了该插件, gitee的uploader才能被使用</p>
+</li>
+<li><p>配置gitee-uploader</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">picgo set uploader github</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://github.com/PicGo/Awesome-PicGo">其他插件: 这里介绍了CLI和GUI的各种PicGo插件</a></p>
+</li>
+</ul>
+<h2 id="2-4-配置结果展示"><a href="#2-4-配置结果展示" class="headerlink" title="2.4 配置结果展示"></a>2.4 配置结果展示</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ cat ~/.picgo/config.json</span><br><span class="line">&#123;</span><br><span class="line">  &quot;picBed&quot;: &#123;</span><br><span class="line">    &quot;current&quot;: &quot;gitee&quot;,</span><br><span class="line">    &quot;uploader&quot;: &quot;gitee&quot;,</span><br><span class="line">    &quot;github&quot;: &#123;</span><br><span class="line">      &quot;branch&quot;: &quot;main&quot;,</span><br><span class="line">      &quot;customUrl&quot;: &quot;&quot;,</span><br><span class="line">      &quot;path&quot;: &quot;img/&quot;,</span><br><span class="line">      &quot;repo&quot;: &quot;xxxname/xxxrepo&quot;,</span><br><span class="line">      &quot;token&quot;: &quot;ghp_xxxx&quot;</span><br><span class="line">    &#125;,</span><br><span class="line">    &quot;transformer&quot;: &quot;path&quot;,</span><br><span class="line">    &quot;picgo-plugin-gitee-uploader&quot;: &#123;&#125;,</span><br><span class="line">    &quot;gitee&quot;: &#123;</span><br><span class="line">      &quot;repo&quot;: &quot;xxxname/xxxrepo&quot;,</span><br><span class="line">      &quot;branch&quot;: &quot;master&quot;,</span><br><span class="line">      &quot;token&quot;: &quot;xxxx&quot;,</span><br><span class="line">      &quot;path&quot;: &quot;&quot;,</span><br><span class="line">      &quot;customPath&quot;: &quot;default&quot;,</span><br><span class="line">      &quot;customUrl&quot;: &quot;&quot;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  &quot;picgoPlugins&quot;: &#123;</span><br><span class="line">    &quot;picgo-plugin-gitee-uploader&quot;: true</span><br><span class="line">  &#125;,</span><br><span class="line">  &quot;picgo-plugin-gitee-uploader&quot;: &#123;</span><br><span class="line">    &quot;lastSync&quot;: &quot;2022-04-07 10:17:54&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-5-切换图床"><a href="#2-5-切换图床" class="headerlink" title="2.5 切换图床"></a>2.5 切换图床</h2><p>如果有多个图床, 可以选择一个作为默认, 也可能根据情况切换, 方法如下:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ picgo use uploader</span><br><span class="line">? Use an uploader (Use arrow keys)</span><br><span class="line">❯ gitee </span><br><span class="line">  smms </span><br><span class="line">  tcyun </span><br><span class="line">  github </span><br><span class="line">  qiniu </span><br><span class="line">  imgur </span><br><span class="line">  aliyun</span><br><span class="line">  (Move up and down to reveal more choices)</span><br></pre></td></tr></table></figure>
+
+<p>这是一个交互的命令, 选择你需要的图床, 选择的图床名字会在配置文件中的: <code>picBed.current</code>和<code>picBed.uploader</code>zhong , 随意可以接直接编辑配置.</p>
+<h1 id="3-测试上传"><a href="#3-测试上传" class="headerlink" title="3. 测试上传"></a>3. 测试上传</h1><ul>
+<li><p>使用操作系统或者其他各类截图工具如微信, 选择一个区域截图, 截图会报错在粘贴板</p>
+</li>
+<li><p>上传粘贴板截图</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">➜  ~ picgo u</span><br><span class="line">[PicGo INFO]: Before transform</span><br><span class="line">[PicGo INFO]: Transforming... Current transformer is [path]</span><br><span class="line">[PicGo INFO]: Before upload</span><br><span class="line">[PicGo INFO]: Uploading... Current uploader is [gitee]</span><br><span class="line">[PicGo SUCCESS]: </span><br><span class="line">https://gitee.com/xxxname/xxxrepo/raw/master/20220407105320.png</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h1 id="4-与Typora配合使用"><a href="#4-与Typora配合使用" class="headerlink" title="4. 与Typora配合使用"></a>4. 与Typora配合使用</h1><ul>
+<li>选择图像, 选择自定义命令</li>
+<li>输入自定义命令</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/nnsay/gist/main/img/20220407113115.png" alt="image-20220407110157776"></p>
+<p>其中<code>命令</code>中的全文如下, 主要是增加了环境变量<code>PATH</code>的修改, 让其可以找到<code>picgo</code>命令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">export PATH=/usr/local/bin/:$PATH; picgo upload</span><br></pre></td></tr></table></figure>
+
+<p>注意: 命令picgo upload是picgo u的简写, 和上面测试步骤中的命令一致</p>
+<p>配置完成后, 当你截图复制到Typora的时候就自动会把图片上传到默认图床, 并且把图片地址从本地替换为图床文件.</p>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2022/03/16/java-learning/" class="article-next" title="Java小白速学手册"><i class="icon-arrow-right"></i></a>
+
+
+<a id="pageprev" href="/2022/05/07/volta/" class="article-prev" title="volta"><i class="icon-arrow-left"></i></a>
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "5710eeea0abeb290f99e8342d70f8faf",
+        distractionFreeMode: true,
+        title: "picgo",
+        body: "https://nnsay.github.io/2022/04/07/picgo/",
+        labels: ["Tips","工具"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    
+        <script src='https://unpkg.com/mermaid@8.14.0/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script>
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

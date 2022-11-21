@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>Java小白速学手册 | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="1. 创建项目安装依赖和CLI  1234brew install java11brew install gradle@6brew tap spring-io/tapbrew install spring-boot创建新项目1234spring help initspring init --listspring init -d=web --build=gradle -g=neuralgalaxy.com -n point --package-name=com.neuralgalaxy.point" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 5.4.2"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E5%88%9B%E5%BB%BA%E9%A1%B9%E7%9B%AE"><span class="toc-text">1. 创建项目</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E4%BD%BF%E7%94%A8%E6%95%B0%E6%8D%AE%E5%BA%93"><span class="toc-text">2. 使用数据库</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E5%AD%A6%E4%B9%A0%E8%A7%86%E9%A2%91"><span class="toc-text">3. 学习视频</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            Java小白速学手册
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2022/03/16/java-learning/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2022-03-16T09:08:34.000Z" itemprop="datePublished">2022-03-16</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/Code/" rel="tag">Code</a>, <a class="article-tag-link" href="/tags/Java/" rel="tag">Java</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h1 id="1-创建项目"><a href="#1-创建项目" class="headerlink" title="1. 创建项目"></a>1. 创建项目</h1><ul>
+<li><p>安装依赖和CLI</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">brew install java11</span><br><span class="line">brew install gradle@6</span><br><span class="line">brew tap spring-io/tap</span><br><span class="line">brew install spring-boot</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>创建新项目</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">spring <span class="built_in">help</span> init</span><br><span class="line">spring init --list</span><br><span class="line">spring init -d=web --build=gradle -g=neuralgalaxy.com -n point --package-name=com.neuralgalaxy.point point.zip</span><br><span class="line">unzip point.zip -d ./point</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>启动项目</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> ./point</span><br><span class="line">./gradlew build</span><br></pre></td></tr></table></figure>
+
+<p>  其中spring-boot CLI最用也是用的 <a target="_blank" rel="noopener" href="https://start.spring.io/">spring initializr</a> 进行项目模板的创建的. 详细的学习课程可查看附录课程SpringBoot2零基础入门.</p>
+</li>
+<li><p>代码练习: </p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://spring.io/guides/gs/rest-service/">Restful Service</a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.spring.io/spring-boot/docs/2.6.4/gradle-plugin/reference/htmlsingle/">Spring Boot Gradle Plugin Reference Guide</a></li>
+</ul>
+</li>
+</ul>
+<h1 id="2-使用数据库"><a href="#2-使用数据库" class="headerlink" title="2. 使用数据库"></a>2. 使用数据库</h1><p>使用MyBatisPlus进行数据开发, MyBatisPlush对Mybatis只做加强不做修改, 即可支持原来的xml方式执行SQL, 也支持ORM的方式操作数据库</p>
+<ul>
+<li><p><a target="_blank" rel="noopener" href="https://baomidou.com/">MyBatisPlush官网</a></p>
+</li>
+<li><p>Maven+SpringBoot+MyBatisPlush+MySQL+JUnit的方式讲解如何通过MyBatisPlush操作数据</p>
+</li>
+<li><p>开启数据库日志</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># dao层日志打开</span></span><br><span class="line"><span class="attr">logging:</span></span><br><span class="line">  <span class="attr">level:</span></span><br><span class="line">    <span class="attr">com:</span></span><br><span class="line">      <span class="attr">neuralgalaxy:</span></span><br><span class="line">        <span class="attr">apps:</span></span><br><span class="line">          <span class="attr">dao:</span> <span class="string">trace</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>代码练习: <a target="_blank" rel="noopener" href="https://b23.tv/wQxw0Pe">2022版MyBatisPlus教程</a> :官网在慕课网上提供的免费学习视频, 视频是</p>
+</li>
+</ul>
+<h1 id="3-学习视频"><a href="#3-学习视频" class="headerlink" title="3. 学习视频"></a>3. 学习视频</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://b23.tv/xcU4MzU">【尚硅谷雷神SpringBoot2零基础入门springboot全套完整版（spring boot2）-哔哩哔哩】</a> <ul>
+<li><a target="_blank" rel="noopener" href="https://www.yuque.com/atguigu/springboot">配套学习大纲和教学笔记</a></li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://b23.tv/wQxw0Pe">【【尚硅谷】2022版MyBatisPlus教程（一套玩转mybatis-plus）-哔哩哔哩】</a> </li>
+<li><a target="_blank" rel="noopener" href="https://www.apiref.com/spring-boot-zh/">Spring Boot 参考指南</a> 中文</li>
+</ul>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2022/02/21/yueqian/" class="article-next" title="跃迁:成为高手的技术"><i class="icon-arrow-right"></i></a>
+
+
+<a id="pageprev" href="/2022/04/07/picgo/" class="article-prev" title="picgo"><i class="icon-arrow-left"></i></a>
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "92cc7b598f082afdc9106804d490b94a",
+        distractionFreeMode: true,
+        title: "Java小白速学手册",
+        body: "https://nnsay.github.io/2022/03/16/java-learning/",
+        labels: ["Code","Java"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    
+        <script src='https://unpkg.com/mermaid@8.14.0/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script>
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

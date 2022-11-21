@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>knative自动伸缩 | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="1. KPA(knative’s pod autoscaler)KPA有三个组件:autoscaleractivatorquque-proxy自动伸缩有两种:预测型: 根据历史数据和当前容量判断如何伸缩反应型: 根据某些条件进行伸缩KPA是反应型的自动伸缩, Knative Serving会为每个Pod配置一个quque-proxy, 这里的Pod可以理解我一个实例, activator会报告实例的容量和并发指标.2. 自动伸缩工作场景: 没有实例没有流量时最终也就没有revision计算实例," />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 5.4.2"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-KPA-knative%E2%80%99s-pod-autoscaler"><span class="toc-text">1. KPA(knative’s pod autoscaler)</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E8%87%AA%E5%8A%A8%E4%BC%B8%E7%BC%A9%E5%B7%A5%E4%BD%9C%E5%9C%BA%E6%99%AF-%E6%B2%A1%E6%9C%89%E5%AE%9E%E4%BE%8B"><span class="toc-text">2. 自动伸缩工作场景: 没有实例</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E8%87%AA%E5%8A%A8%E4%BC%B8%E7%BC%A9%E8%AE%A1%E7%AE%97%E9%80%BB%E8%BE%91"><span class="toc-text">3. 自动伸缩计算逻辑</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E4%B8%A4%E7%A7%8D%E6%A8%A1%E5%BC%8F%E5%AF%B9%E6%AF%94"><span class="toc-text">4. 两种模式对比</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#5-%E9%85%8D%E7%BD%AE%E8%87%AA%E5%8A%A8%E4%BC%B8%E7%BC%A9"><span class="toc-text">5. 配置自动伸缩</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            knative自动伸缩
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2022/02/14/knative-autoscaling/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2022-02-13T16:36:33.000Z" itemprop="datePublished">2022-02-14</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/Aliyun/" rel="tag">Aliyun</a>, <a class="article-tag-link" href="/tags/CloudNative/" rel="tag">CloudNative</a>, <a class="article-tag-link" href="/tags/DevOps/" rel="tag">DevOps</a>, <a class="article-tag-link" href="/tags/%E7%A0%94%E7%A9%B6/" rel="tag">研究</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h1 id="1-KPA-knative’s-pod-autoscaler"><a href="#1-KPA-knative’s-pod-autoscaler" class="headerlink" title="1. KPA(knative’s pod autoscaler)"></a>1. KPA(knative’s pod autoscaler)</h1><p>KPA有三个组件:</p>
+<ul>
+<li>autoscaler</li>
+<li>activator</li>
+<li>quque-proxy</li>
+</ul>
+<p>自动伸缩有两种:</p>
+<ul>
+<li>预测型: 根据历史数据和当前容量判断如何伸缩</li>
+<li>反应型: 根据某些条件进行伸缩</li>
+</ul>
+<p>KPA是反应型的自动伸缩, Knative Serving会为每个<code>Pod</code>配置一个<code>quque-proxy</code>, 这里的<code>Pod</code>可以理解我一个实例, <code>activator</code>会报告实例的容量和并发指标.</p>
+<!-- more -->
+
+<h1 id="2-自动伸缩工作场景-没有实例"><a href="#2-自动伸缩工作场景-没有实例" class="headerlink" title="2. 自动伸缩工作场景: 没有实例"></a>2. 自动伸缩工作场景: 没有实例</h1><p>没有流量时最终也就没有revision计算实例, 此时<code>activator</code>作为流量目标, 如下图:<br><img src="https://gitee.com/nnsay/imagehost/raw/master/vnotebooks/default/it/study/knative%20autoscaling.md/32603699825999.png" alt="activator as gateway"><br>当有有一个请求发出时, 自动伸缩的步骤如下:</p>
+<ul>
+<li>请求被发送到<code>activator</code></li>
+<li><code>activator</code>缓存请求, 并且通知<code>autoscaler</code></li>
+<li><code>autoscaler</code>计算决定伸缩个数, 然后更新Knative Service期望伸缩状态</li>
+<li>最终伸缩<code>Revision</code>实例</li>
+<li><code>autoscaler</code>完成实例伸缩</li>
+<li><code>activator</code>检查到有可用的实例</li>
+<li><code>activator</code>将缓存的请求发送给实例</li>
+<li>实例将请求的返回通过<code>activator</code>网关返回给客户端</li>
+</ul>
+<p>以上步骤过程如下图:<br><img src="https://gitee.com/nnsay/imagehost/raw/master/vnotebooks/default/it/study/knative%20autoscaling.md/509745508615091.png" alt="send one request when no instance"><br>此时<code>activator</code>任然承接流量并导流到实例, 这个设计叫做: burst capacity, 可以防止突发容量<br><img src="https://gitee.com/nnsay/imagehost/raw/master/vnotebooks/default/it/study/knative%20autoscaling.md/322196431940842.png" alt="one instance"><br><code>activator</code>不负责决定伸缩多少, 只负责决定是否保留这种数据路径, 这依赖于可用实例服务请求的数量; 如果在没有实例时, 有很多请求在短时间内发送, 那么自动伸缩行为有所不同, 此时会进入 panic mode, 有两个不同的行为会发生:</p>
+<ul>
+<li><code>autoscaler</code>对于请求数量更敏感, 判断频率从60秒一次增加到6秒一次</li>
+<li>不进行实例缩放, 忽略任何缩放条件直到panic mode结束</li>
+</ul>
+<h1 id="3-自动伸缩计算逻辑"><a href="#3-自动伸缩计算逻辑" class="headerlink" title="3. 自动伸缩计算逻辑"></a>3. 自动伸缩计算逻辑</h1><ul>
+<li><code>逻辑图1</code></li>
+</ul>
+<pre class="mermaid">graph TD
+
+获取可用实例数 --> 等于0?
+等于0? --> | 是 | 设置可用实例数为1
+等于0? --> | 否 | 设置可用实例数为1
+设置可用实例数为1 --> 是否有metric?
+是否有metric? --> | 有 | 逻辑图2
+是否有metric? --> | 无 | 返回伸缩数0</pre>
+
+<ul>
+<li><code>逻辑图2</code></li>
+</ul>
+<pre class="mermaid">graph LR
+
+稳固窗口metric --> 逻辑图2
+Panic窗口metric --> 逻辑图2
+逻辑图2 --> 计算并发请求的平均数量
+计算并发请求的平均数量 --> 计算期望的pod数
+计算期望的pod数 --> 逻辑3</pre>
+
+<p>注意: 随着实例数变多, 实例上传的metric也会增多, 这会导致时间窗口内基于metric的计算变慢, 此时Knative使用抽样统计.</p>
+<ul>
+<li><code>逻辑3</code><br>$实例并发&#x3D;(当前在所有实例QueueProxy中的请求总数+当前所有实例处理中的请求总数)&#x2F;当前实例数$<br>在一个时间窗口内会进行多次抽样数据, 所以:<br>$平均抽样并发&#x3D;实例并发总和&#x2F;实例个数$<br>$平均时间窗口并发&#x3D;平均抽样并发总和&#x2F;总抽样次数$<br>所以期待的实例数为:<br>$期待实例数&#x3D;平均抽样并发总和&#x2F;实例目标并发$<br>其中<code>目标实例并发</code>是用户设置的, 比如设置最大<code>实例并发数</code>是10, <code>可用率</code>是80%,则实例目标并发是10*80%&#x3D;8</li>
+<li><code>逻辑4</code></li>
+</ul>
+<pre class="mermaid">graph TD
+
+逻辑4 --> 模式
+模式 --> |stable模式| 返回stable期望实例数
+模式 --> |panic模式| 伸缩活动
+伸缩活动 --> | 增加实例| 返回panic期望实例数
+伸缩活动 --> | 不变或减少 | 返回当前实例数</pre>
+
+<h1 id="4-两种模式对比"><a href="#4-两种模式对比" class="headerlink" title="4. 两种模式对比"></a>4. 两种模式对比</h1><table>
+<thead>
+<tr>
+<th></th>
+<th>panic模式</th>
+<th>stable模式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>伸缩实例数</td>
+<td>(目标实例数-实际实例数)&#x2F;(实际实例数)</td>
+<td>目标实例数-实际实例数</td>
+</tr>
+<tr>
+<td>计算持续时间</td>
+<td>6s</td>
+<td>60s</td>
+</tr>
+<tr>
+<td>操作</td>
+<td>只增加实例</td>
+<td>增加或减少实例</td>
+</tr>
+</tbody></table>
+<h1 id="5-配置自动伸缩"><a href="#5-配置自动伸缩" class="headerlink" title="5. 配置自动伸缩"></a>5. <a target="_blank" rel="noopener" href="https://knative.dev/docs/serving/autoscaling/">配置自动伸缩</a></h1><p>knative 官方网站有详细的关于自动伸缩的配置介绍, 可以查看: <a target="_blank" rel="noopener" href="https://knative.dev/docs/serving/autoscaling/">https://knative.dev/docs/serving/autoscaling/</a></p>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2022/01/26/knative-serving-operation/" class="article-next" title="阿里云Knative Serving路由控制"><i class="icon-arrow-right"></i></a>
+
+
+<a id="pageprev" href="/2022/02/21/yueqian/" class="article-prev" title="跃迁:成为高手的技术"><i class="icon-arrow-left"></i></a>
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "ea32f18624336b564faf951a9981aca5",
+        distractionFreeMode: true,
+        title: "knative自动伸缩",
+        body: "https://nnsay.github.io/2022/02/14/knative-autoscaling/",
+        labels: ["Aliyun","研究","DevOps","CloudNative"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    
+        <script src='https://unpkg.com/mermaid@8.14.0/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script>
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

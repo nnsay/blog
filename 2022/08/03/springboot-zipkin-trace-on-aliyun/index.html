@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>SpringBoot链路追踪服务在阿里云上的实践 | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="0. 背景介绍springboot集成了zipkin, 而阿里云上日志服务中可以新建Trace服务, 所以需要把trace数据推送到这个服务即可. 难点是如何上推送? 阿里云支持的trace推送的方式有两种: 1. 直接发送; 2. 通过collector发送. 相关文档可以看这里. 第一种是需要AccessKey ID和AccessKey Secre, 维护这个显然没有维护role方便(现实情况中已有所有服务都是用的role方式获取权限, 不想在新增一种), 其次第一种业务和云厂商绑定死了, " />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 5.4.2"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#0-%E8%83%8C%E6%99%AF%E4%BB%8B%E7%BB%8D"><span class="toc-text">0. 背景介绍</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="toc-text">1. 准备工作</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-Role%E6%8E%88%E6%9D%83"><span class="toc-text">1.1  Role授权</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-Collector%E9%95%9C%E5%83%8F"><span class="toc-text">1.2 Collector镜像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3-%E5%88%9B%E5%BB%BATrace%E5%AE%9E%E4%BE%8B"><span class="toc-text">1.3 创建Trace实例</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-Collector%E6%9C%8D%E5%8A%A1"><span class="toc-text">2. Collector服务</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C"><span class="toc-text">3. 测试结果</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            SpringBoot链路追踪服务在阿里云上的实践
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2022/08/03/springboot-zipkin-trace-on-aliyun/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2022-08-03T10:10:19.000Z" itemprop="datePublished">2022-08-03</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/Aliyun/" rel="tag">Aliyun</a>, <a class="article-tag-link" href="/tags/CloudNative/" rel="tag">CloudNative</a>, <a class="article-tag-link" href="/tags/DevOps/" rel="tag">DevOps</a>, <a class="article-tag-link" href="/tags/Tips/" rel="tag">Tips</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h1 id="0-背景介绍"><a href="#0-背景介绍" class="headerlink" title="0. 背景介绍"></a>0. 背景介绍</h1><p>springboot集成了zipkin, 而阿里云上<code>日志服务</code>中可以新建Trace服务, 所以需要把trace数据推送到这个服务即可. 难点是如何上推送? 阿里云支持的trace推送的方式有两种: 1. 直接发送; 2. 通过collector发送. 相关文档可以看<a target="_blank" rel="noopener" href="https://help.aliyun.com/document_detail/208913.html">这里</a>. </p>
+<p>第一种是需要AccessKey ID和AccessKey Secre, 维护这个显然没有维护role方便(现实情况中已有所有服务都是用的role方式获取权限, 不想在新增一种), 其次第一种业务和云厂商绑定死了, 因为直接发送的地址就是阿里云Trace服务暴露的地址.</p>
+<p>本文档使用第二种实现和搭建Trace, 这里借助了<a target="_blank" rel="noopener" href="https://github.com/open-telemetry/opentelemetry-collector-contrib">opentelemetry-collector-contrib</a>; collector支持role方式授权推送trace数据, 不直接和云厂商服务对接, 即opentelemetry-collector-contrib屏蔽了云厂商, 以后用别的厂商只需要修改collector的配置文件即可.</p>
+<h1 id="1-准备工作"><a href="#1-准备工作" class="headerlink" title="1. 准备工作"></a>1. 准备工作</h1><p>该文档使用opentelemetry-collector-contrib镜像自建deployment&#x2F;service等资源, 与使用controller方式相比这么做的优势是:</p>
+<ul>
+<li>添加云厂商的特殊注解. eg: k8s.aliyun.com&#x2F;eci-ram-role-name</li>
+<li>更精细化设置collector pod</li>
+</ul>
+<h2 id="1-1-Role授权"><a href="#1-1-Role授权" class="headerlink" title="1.1  Role授权"></a>1.1  Role授权</h2><ul>
+<li>授权日志服务</li>
+<li>授权日志服务使用的对象存储服务</li>
+</ul>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;Action&quot;</span><span class="punctuation">:</span> <span class="string">&quot;log:*&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;Effect&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Allow&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;Resource&quot;</span><span class="punctuation">:</span> <span class="string">&quot;acs:log:*:*:*&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;Action&quot;</span><span class="punctuation">:</span> <span class="string">&quot;oss:*&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;Effect&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Allow&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;Resource&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">		...</span><br><span class="line">    <span class="string">&quot;acs:oss:*:*:ngiq-cn-*-log&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="string">&quot;acs:oss:*:*:ngiq-cn-*-log/*&quot;</span></span><br><span class="line">  <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br></pre></td></tr></table></figure>
+
+<p>在这个文档, 这个Role是: <code>pnt-CodeRole</code></p>
+<h2 id="1-2-Collector镜像"><a href="#1-2-Collector镜像" class="headerlink" title="1.2 Collector镜像"></a>1.2 Collector镜像</h2><p>测试过程中发现官方opentelemetry-collector-contrib镜像有被不能加载的情况, 另外也每次使用官方镜像都走外网, 所以先把官方镜像推送自有仓库中, 例如使用CICD服务上传镜像到阿里云仓库</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">docker pull otel/opentelemetry-collector-contrib</span><br><span class="line"></span><br><span class="line">docker tag otel/opentelemetry-collector-contrib ngiq-registry-vpc.cn-hangzhou.cr.aliyuncs.com/ngiq-cr/opentelemetry-collector-contrib</span><br><span class="line"></span><br><span class="line">aliyun cr GetAuthorizationToken --InstanceId cri-xxxxx --force --version 2018-12-01 | jq -r .AuthorizationToken | docker login --username=cr_temp_user --password-stdin ngiq-registry-vpc.cn-hangzhou.cr.aliyuncs.com</span><br><span class="line"></span><br><span class="line">docker push ngiq-registry-vpc.cn-hangzhou.cr.aliyuncs.com/ngiq-cr/opentelemetry-collector-contrib</span><br></pre></td></tr></table></figure>
+
+<h2 id="1-3-创建Trace实例"><a href="#1-3-创建Trace实例" class="headerlink" title="1.3 创建Trace实例"></a>1.3 <a target="_blank" rel="noopener" href="https://help.aliyun.com/document_detail/208892.html">创建Trace实例</a></h2><h1 id="2-Collector服务"><a href="#2-Collector服务" class="headerlink" title="2. Collector服务"></a>2. Collector服务</h1><p>创建collector服务yaml文件opentelemetry-app.yaml, 内容如下:</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">ConfigMap</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">otel-collector</span></span><br><span class="line"><span class="attr">data:</span></span><br><span class="line">  <span class="attr">collector.yaml:</span> <span class="string">|</span></span><br><span class="line"><span class="string">    receivers:</span></span><br><span class="line"><span class="string">      zipkin:</span></span><br><span class="line"><span class="string">        endpoint: &quot;0.0.0.0:9411&quot;</span></span><br><span class="line"><span class="string">    exporters:</span></span><br><span class="line"><span class="string">      alibabacloud_logservice/sls-trace:</span></span><br><span class="line"><span class="string">        endpoint: &quot;cn-hangzhou-intranet.log.aliyuncs.com&quot;   </span></span><br><span class="line"><span class="string">        project: &quot;ngiq-cn-pnt-log&quot;               </span></span><br><span class="line"><span class="string">        logstore: &quot;ngiq-cn-pnt-trace-traces&quot;              </span></span><br><span class="line"><span class="string">        ecs_ram_role: &quot;pnt-CodeRole&quot;</span></span><br><span class="line"><span class="string">    service:</span></span><br><span class="line"><span class="string">      pipelines:</span></span><br><span class="line"><span class="string">        traces:</span></span><br><span class="line"><span class="string">          receivers: [zipkin]</span></span><br><span class="line"><span class="string">          exporters: [alibabacloud_logservice/sls-trace]</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">otel-collector</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">replicas:</span> <span class="number">1</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">matchLabels:</span></span><br><span class="line">      <span class="attr">app:</span> <span class="string">otel-collector</span></span><br><span class="line">  <span class="attr">template:</span></span><br><span class="line">    <span class="attr">metadata:</span></span><br><span class="line">      <span class="attr">labels:</span></span><br><span class="line">        <span class="attr">app:</span> <span class="string">otel-collector</span></span><br><span class="line">      <span class="attr">annotations:</span></span><br><span class="line">        <span class="attr">k8s.aliyun.com/eci-ram-role-name:</span> <span class="string">pnt-CodeRole</span></span><br><span class="line">        <span class="attr">k8s.aliyun.com/eci-image-cache:</span> <span class="string">&quot;true&quot;</span></span><br><span class="line">    <span class="attr">spec:</span></span><br><span class="line">      <span class="attr">volumes:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">otc-internal</span></span><br><span class="line">          <span class="attr">configMap:</span></span><br><span class="line">            <span class="attr">name:</span> <span class="string">otel-collector</span></span><br><span class="line">            <span class="attr">items:</span></span><br><span class="line">              <span class="bullet">-</span> <span class="attr">key:</span> <span class="string">collector.yaml</span></span><br><span class="line">                <span class="attr">path:</span> <span class="string">collector.yaml</span></span><br><span class="line">            <span class="attr">defaultMode:</span> <span class="number">420</span></span><br><span class="line">      <span class="attr">containers:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">otel-collector</span></span><br><span class="line">          <span class="attr">image:</span> <span class="string">ngiq-registry.cn-hangzhou.cr.aliyuncs.com/ngiq-cr/opentelemetry-collector-contrib:latest</span></span><br><span class="line">          <span class="attr">args:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="string">&#x27;--config=/conf/collector.yaml&#x27;</span></span><br><span class="line">          <span class="attr">resources:</span></span><br><span class="line">            <span class="attr">limits:</span></span><br><span class="line">              <span class="attr">cpu:</span> <span class="string">&#x27;1&#x27;</span></span><br><span class="line">              <span class="attr">memory:</span> <span class="string">2Gi</span></span><br><span class="line">            <span class="attr">requests:</span></span><br><span class="line">              <span class="attr">cpu:</span> <span class="string">&#x27;1&#x27;</span></span><br><span class="line">              <span class="attr">memory:</span> <span class="string">1Gi</span></span><br><span class="line">          <span class="attr">env:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">POD_NAME</span></span><br><span class="line">              <span class="attr">valueFrom:</span></span><br><span class="line">                <span class="attr">fieldRef:</span></span><br><span class="line">                  <span class="attr">fieldPath:</span> <span class="string">metadata.name</span></span><br><span class="line">          <span class="attr">volumeMounts:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">otc-internal</span></span><br><span class="line">              <span class="attr">mountPath:</span> <span class="string">/conf</span></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">otel-collector</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">selector:</span></span><br><span class="line">    <span class="attr">app:</span> <span class="string">otel-collector</span></span><br><span class="line">  <span class="attr">ports:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">port:</span> <span class="number">9411</span></span><br><span class="line">    <span class="attr">targetPort:</span> <span class="number">9411</span></span><br><span class="line">  <span class="attr">type:</span> <span class="string">ClusterIP</span></span><br><span class="line"></span><br><span class="line"><span class="meta">---</span></span><br><span class="line"><span class="meta"></span></span><br><span class="line"><span class="attr">apiVersion:</span> <span class="string">autoscaling/v2beta1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">HorizontalPodAutoscaler</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">otel-collector</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">scaleTargetRef:</span></span><br><span class="line">    <span class="attr">apiVersion:</span> <span class="string">apps/v1</span></span><br><span class="line">    <span class="attr">kind:</span> <span class="string">Deployment</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">otel-collector</span></span><br><span class="line">  <span class="attr">minReplicas:</span> <span class="number">1</span></span><br><span class="line">  <span class="attr">maxReplicas:</span> <span class="number">3</span></span><br><span class="line">  <span class="attr">metrics:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="attr">type:</span> <span class="string">Resource</span></span><br><span class="line">    <span class="attr">resource:</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">memory</span></span><br><span class="line">      <span class="attr">targetAverageUtilization:</span> <span class="number">70</span></span><br></pre></td></tr></table></figure>
+<p>创建collector:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl -n pnt apply -f opentelemetry-app.yaml</span><br></pre></td></tr></table></figure>
+
+
+
+<p>以下内容需要按需变化:</p>
+<ul>
+<li>ConfigMap.data.collector.yaml.exporters.alibabacloud_logservice&#x2F;sls-trace<ul>
+<li>project: 设置为您在创建Trace实例时所选择的Project</li>
+<li>logstore: 格式为: {trace_instance_id}-traces</li>
+<li>ecs_ram_role: 需提前设置role有sls和oss的权限</li>
+</ul>
+</li>
+<li>Deployment<ul>
+<li>metadata.annotations.k8s.aliyun.com&#x2F;eci-ram-role-name</li>
+</ul>
+</li>
+</ul>
+<h1 id="3-测试结果"><a href="#3-测试结果" class="headerlink" title="3. 测试结果"></a>3. 测试结果</h1><ul>
+<li><p>开启zipkin的服务</p>
+<figure class="highlight properties"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">spring.zipkin.enabled</span>=<span class="string">true</span></span><br><span class="line"><span class="attr">spring.zipkin.base-url</span>=<span class="string">http://otel-collector:9411/</span></span><br></pre></td></tr></table></figure>
+
+<p>调用几个服务提供的接口然后观察, 例如: get 请求一下 &#x2F;box&#x2F;org&#x2F;detail接口</p>
+</li>
+<li><p>查看结果</p>
+<p>  <img src="https://raw.githubusercontent.com/nnsay/gist/main/img/image-20220801160121197.png" alt="image-20220801160121197"></p>
+</li>
+</ul>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2022/07/01/mount-aliyun-drive/" class="article-next" title="阿里云盘挂载(MacOS)"><i class="icon-arrow-right"></i></a>
+
+
+<a id="pageprev" href="/2022/09/06/acme-sh/" class="article-prev" title="acme.sh"><i class="icon-arrow-left"></i></a>
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "5608e836b60903ad49f3ea696b5b1914",
+        distractionFreeMode: true,
+        title: "SpringBoot链路追踪服务在阿里云上的实践",
+        body: "https://nnsay.github.io/2022/08/03/springboot-zipkin-trace-on-aliyun/",
+        labels: ["Aliyun","Tips","DevOps","CloudNative"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    
+        <script src='https://unpkg.com/mermaid@8.14.0/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script>
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

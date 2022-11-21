@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>阿里云Knative Serving一撇 | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="1. 搭建Knative环境1.1 创建服务方式一: 创建一个ASK&amp;#x2F;ACK专有版集群, 创建时开启Knative选项方式二: 现有ASK&amp;#x2F;ACK专有版集群上安装Knative组件部署Knative-Serving组件部署Knative-Eventing组件搭建Knative后在阿里云上会得到两个东西:访问网关, 是个IP公网测试域名, 例如: *.xxxxxxxx.app.alicontainer.com1.2 安装CLIkubectlknhey以上都可以使用brew安装2" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 5.4.2"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E6%90%AD%E5%BB%BAKnative%E7%8E%AF%E5%A2%83"><span class="toc-text">1. 搭建Knative环境</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E5%88%9B%E5%BB%BA%E6%9C%8D%E5%8A%A1"><span class="toc-text">1.1 创建服务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E5%AE%89%E8%A3%85CLI"><span class="toc-text">1.2 安装CLI</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-Hello-World"><span class="toc-text">2.  Hello World</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E5%B8%AE%E5%8A%A9%E6%89%8B%E5%86%8C"><span class="toc-text">3. 帮助手册</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E5%BC%80%E5%90%AF%E9%9B%86%E7%BE%A4PrivateZone"><span class="toc-text">3.1  开启集群PrivateZone</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E5%8D%B8%E8%BD%BDKnative"><span class="toc-text">3.2 卸载Knative</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E5%8F%82%E8%80%83%E6%96%87%E4%BB%B6"><span class="toc-text">4. 参考文件</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            阿里云Knative Serving一撇
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2022/01/21/knative-service-on-aliyun/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2022-01-21T08:36:20.000Z" itemprop="datePublished">2022-01-21</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/Aliyun/" rel="tag">Aliyun</a>, <a class="article-tag-link" href="/tags/CloudNative/" rel="tag">CloudNative</a>, <a class="article-tag-link" href="/tags/DevOps/" rel="tag">DevOps</a>, <a class="article-tag-link" href="/tags/%E7%A0%94%E7%A9%B6/" rel="tag">研究</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h2 id="1-搭建Knative环境"><a href="#1-搭建Knative环境" class="headerlink" title="1. 搭建Knative环境"></a>1. <a target="_blank" rel="noopener" href="https://help.aliyun.com/document_detail/185057.html">搭建Knative环境</a></h2><h3 id="1-1-创建服务"><a href="#1-1-创建服务" class="headerlink" title="1.1 创建服务"></a>1.1 创建服务</h3><ul>
+<li>方式一: 创建一个ASK&#x2F;ACK专有版集群, 创建时开启Knative选项</li>
+<li>方式二: 现有ASK&#x2F;ACK专有版集群上安装Knative组件<ul>
+<li>部署Knative-Serving组件</li>
+<li>部署Knative-Eventing组件</li>
+</ul>
+</li>
+</ul>
+<p>搭建Knative后在阿里云上会得到两个东西:</p>
+<ul>
+<li>访问网关, 是个IP</li>
+<li>公网测试域名, 例如: *.xxxxxxxx.app.alicontainer.com</li>
+</ul>
+<h3 id="1-2-安装CLI"><a href="#1-2-安装CLI" class="headerlink" title="1.2 安装CLI"></a>1.2 安装CLI</h3><ul>
+<li>kubectl</li>
+<li>kn</li>
+<li>hey</li>
+</ul>
+<p>以上都可以使用<code>brew</code>安装</p>
+<!-- more -->
+
+<h2 id="2-Hello-World"><a href="#2-Hello-World" class="headerlink" title="2.  Hello World"></a>2.  Hello World</h2><ul>
+<li><p>准备服务文件helloworld-service.yaml</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">apiVersion:</span> <span class="string">serving.knative.dev/v1</span></span><br><span class="line"><span class="attr">kind:</span> <span class="string">Service</span></span><br><span class="line"><span class="attr">metadata:</span></span><br><span class="line">  <span class="attr">name:</span> <span class="string">helloworld-go</span></span><br><span class="line"><span class="attr">spec:</span></span><br><span class="line">  <span class="attr">template:</span></span><br><span class="line">    <span class="attr">metadata:</span></span><br><span class="line">      <span class="attr">labels:</span></span><br><span class="line">        <span class="attr">app:</span> <span class="string">helloworld-go</span></span><br><span class="line">      <span class="attr">annotations:</span></span><br><span class="line">        <span class="attr">autoscaling.knative.dev/target:</span> <span class="string">&quot;10&quot;</span></span><br><span class="line">    <span class="attr">spec:</span></span><br><span class="line">      <span class="attr">containers:</span></span><br><span class="line">        <span class="bullet">-</span> <span class="attr">image:</span> <span class="string">registry.cn-hangzhou.aliyuncs.com/knative-sample/helloworld-go:160e4dc8</span></span><br><span class="line">          <span class="attr">ports:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">http1</span></span><br><span class="line">              <span class="attr">containerPort:</span> <span class="number">8080</span></span><br><span class="line">          <span class="attr">env:</span></span><br><span class="line">            <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">TARGET</span></span><br><span class="line">              <span class="attr">value:</span> <span class="string">&quot;World&quot;</span></span><br></pre></td></tr></table></figure></li>
+<li><p>创建knative服务</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ kubectl create namespace demo</span><br><span class="line">namespace/demo created</span><br><span class="line">$ kubectl apply -n demo -f helloword-service.yaml</span><br><span class="line">service.serving.knative.dev/helloworld-go created</span><br></pre></td></tr></table></figure></li>
+<li><p>查看knative服务</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">$ kn -n demo service list</span><br><span class="line">NAME            URL                                                                  LATEST   AGE   CONDITIONS   READY     REASON</span><br><span class="line">helloworld-go   http://helloworld-go.demo.xxxxxxxx.app.alicontainer.com            10s   0 OK / 3     Unknown   RevisionMissing : Configuration <span class="string">&quot;helloworld-go&quot;</span> is waiting <span class="keyword">for</span> a Revision to become ready.</span><br><span class="line">$ kubectl -n demo get pod -w</span><br><span class="line">NAME                                                      READY   STATUS        RESTARTS   AGE</span><br><span class="line">helloworld-go-00001-deployment-7f7d75c465-88n4h           1/2     Terminating   0          96s</span><br><span class="line">helloworld-go-00001-deployment-reserve-7989bd95cf-2cn4r   2/2     Running       0          36s</span><br><span class="line">helloworld-go-00001-deployment-7f7d75c465-88n4h           0/2     Terminating   0          110s</span><br><span class="line">helloworld-go-00001-deployment-7f7d75c465-88n4h           0/2     Terminating   0          111s</span><br><span class="line">helloworld-go-00001-deployment-7f7d75c465-88n4h           1/2     Terminating   0          114s</span><br><span class="line">helloworld-go-00001-deployment-7f7d75c465-88n4h           1/2     Terminating   0          2m11s</span><br><span class="line">helloworld-go-00001-deployment-7f7d75c465-88n4h           1/2     Terminating   0          2m11s</span><br><span class="line">$ kubectl -n demo get service </span><br><span class="line">NAME                                  TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)                                      AGE</span><br><span class="line">helloworld-go                         ClusterIP   None           &lt;none&gt;        80/TCP                                       32m</span><br><span class="line">helloworld-go-00001                   ClusterIP   172.19.3.27    &lt;none&gt;        80/TCP                                       32m</span><br><span class="line">helloworld-go-00001-private           ClusterIP   172.19.5.43    &lt;none&gt;        80/TCP,9090/TCP,9091/TCP,8022/TCP,8012/TCP   32m</span><br><span class="line">helloworld-go-00001-reserve-private   ClusterIP   172.19.7.159   &lt;none&gt;        80/TCP,9090/TCP,9091/TCP,8022/TCP,8012/TCP   32m</span><br></pre></td></tr></table></figure>
+
+<p>从上面的检查命令可以得知: 一个服务会有一个常驻的reserve pod和若干server pod, 峰谷时server pod降低为0, 当有请求时server pod增加, 奇怪的是从0请求到1请求时reserve pod也进行了重建:<br><img src="https://gitee.com/nnsay/imagehost/raw/master/vnotebooks/default/it/study/knative%20on%20aliyun.md/114815115268392.png" alt="service pod"></p>
+</li>
+<li><p>测试knative服务</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">$ curl -i -XGET http://helloworld-go.demo.xxxxxxxx.app.alicontainer.com</span><br><span class="line">HTTP/1.1 200 OK</span><br><span class="line">Date: Fri, 21 Jan 2022 07:27:19 GMT</span><br><span class="line">Content-Type: text/plain; charset=utf-8</span><br><span class="line">Content-Length: 13</span><br><span class="line">Connection: keep-alive</span><br><span class="line"></span><br><span class="line">Hello World</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>压测</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line">$ hey -z 30s -c 50 http://helloworld-go.demo.xxxxxxxx.app.alicontainer.com/ &amp;&amp; kubectl -n demo get pod </span><br><span class="line">Summary:</span><br><span class="line">  Total:	30.0857 secs</span><br><span class="line">  Slowest:	0.6134 secs</span><br><span class="line">  Fastest:	0.0360 secs</span><br><span class="line">  Average:	0.0622 secs</span><br><span class="line">  Requests/sec:	802.3732</span><br><span class="line">  </span><br><span class="line">  Total data:	313820 bytes</span><br><span class="line">  Size/request:	13 bytes</span><br><span class="line"></span><br><span class="line">Response time histogram:</span><br><span class="line">  0.036 [1]	|</span><br><span class="line">  0.094 [21158]	|■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■</span><br><span class="line">  0.151 [2731]	|■■■■■</span><br><span class="line">  0.209 [84]	|</span><br><span class="line">  0.267 [46]	|</span><br><span class="line">  0.325 [22]	|</span><br><span class="line">  0.382 [0]	|</span><br><span class="line">  0.440 [46]	|</span><br><span class="line">  0.498 [4]	|</span><br><span class="line">  0.556 [5]	|</span><br><span class="line">  0.613 [43]	|</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">Latency distribution:</span><br><span class="line">  10% <span class="keyword">in</span> 0.0406 secs</span><br><span class="line">  25% <span class="keyword">in</span> 0.0435 secs</span><br><span class="line">  50% <span class="keyword">in</span> 0.0510 secs</span><br><span class="line">  75% <span class="keyword">in</span> 0.0724 secs</span><br><span class="line">  90% <span class="keyword">in</span> 0.0961 secs</span><br><span class="line">  95% <span class="keyword">in</span> 0.1023 secs</span><br><span class="line">  99% <span class="keyword">in</span> 0.1580 secs</span><br><span class="line"></span><br><span class="line">Details (average, fastest, slowest):</span><br><span class="line">  DNS+dialup:	0.0001 secs, 0.0360 secs, 0.6134 secs</span><br><span class="line">  DNS-lookup:	0.0000 secs, 0.0000 secs, 0.0199 secs</span><br><span class="line">  req write:	0.0000 secs, 0.0000 secs, 0.0020 secs</span><br><span class="line">  resp <span class="built_in">wait</span>:	0.0620 secs, 0.0358 secs, 0.6134 secs</span><br><span class="line">  resp <span class="built_in">read</span>:	0.0001 secs, 0.0000 secs, 0.0037 secs</span><br><span class="line"></span><br><span class="line">Status code distribution:</span><br><span class="line">  [200]	24140 responses</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">NAME                                              READY   STATUS    RESTARTS   AGE</span><br><span class="line">helloworld-go-00001-deployment-7f7d75c465-fl4g5   2/2     Running   0          82s</span><br><span class="line">helloworld-go-00001-deployment-7f7d75c465-xdr5k   2/2     Running   0          60s</span><br></pre></td></tr></table></figure>
+<p>期望看到pod是5, 因为yaml文件中<code>autoscaling.knative.dev/target</code>是10, 但是这里是2, 需要特别注意的是reserve pod没有在最后的结果里, 猜测在流量持续稳定时reserve pod没有存在意义, 所以reserve pod情况是:</p>
+</li>
+<li><p>没有流量: 仅有reserve pod</p>
+</li>
+<li><p>有少许流量: reserve pod 和 service pod 都有, 但是 reserve pod总试图退出</p>
+</li>
+<li><p>持续刘流量: 没有reserve pod, 此时没有意义<br>综上reserve pod是波峰到波谷是最后一个用于反馈下一次流量新建service pod的一种守护pod. 这种机制是knavite工作的重点, 其中serving组件的工作原理如下图:<br><img src="https://gitee.com/nnsay/imagehost/raw/master/vnotebooks/default/it/study/knative%20on%20aliyun.md/35640196825920.png" alt="components of serviing"><br>从0流量到1流量的工作细节如下:<br><img src="https://gitee.com/nnsay/imagehost/raw/master/vnotebooks/default/it/study/knative%20on%20aliyun.md/396041405615012.png" alt="0-1"></p>
+</li>
+</ul>
+<h2 id="3-帮助手册"><a href="#3-帮助手册" class="headerlink" title="3. 帮助手册"></a>3. 帮助手册</h2><h3 id="3-1-开启集群PrivateZone"><a href="#3-1-开启集群PrivateZone" class="headerlink" title="3.1  开启集群PrivateZone"></a>3.1  开启集群PrivateZone</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 编辑eci-profile文件</span><br><span class="line">kubectl -n kube-system edit configmap eci-profile</span><br><span class="line"># 修改 `enablePrivateZone` 为 `true`</span><br><span class="line">enablePrivateZone: &quot;true&quot;</span><br></pre></td></tr></table></figure>
+
+<h3 id="3-2-卸载Knative"><a href="#3-2-卸载Knative" class="headerlink" title="3.2 卸载Knative"></a>3.2 卸载Knative</h3><ul>
+<li>在集群卸载Knative组件</li>
+<li>恢复<code>eci-profile</code>文件<code>enablePrivateZone</code>属性为<code>false</code></li>
+</ul>
+<h2 id="4-参考文件"><a href="#4-参考文件" class="headerlink" title="4. 参考文件"></a>4. 参考文件</h2><ol>
+<li><a target="_blank" rel="noopener" href="https://help.aliyun.com/document_detail/184831.html">Knative概述</a></li>
+<li>Serverless容器集群ASK <a target="_blank" rel="noopener" href="https://help.aliyun.com/document_detail/184830.html">Knative</a></li>
+<li><a target="_blank" rel="noopener" href="https://knative-sample.com/">Knative云原生应用开发指南</a></li>
+</ol>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2021/10/26/helm/" class="article-next" title="helm"><i class="icon-arrow-right"></i></a>
+
+
+<a id="pageprev" href="/2022/01/26/knative-serving-operation/" class="article-prev" title="阿里云Knative Serving路由控制"><i class="icon-arrow-left"></i></a>
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "47369c6107f38242b87f02fec125793b",
+        distractionFreeMode: true,
+        title: "阿里云Knative Serving一撇",
+        body: "https://nnsay.github.io/2022/01/21/knative-service-on-aliyun/",
+        labels: ["Aliyun","研究","DevOps","CloudNative"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    
+        <script src='https://unpkg.com/mermaid@8.14.0/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script>
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

@@ -20,4 +20,7 @@ jobs:
       - name: generate static files
         run: npm run build
       - name: deployment static files
-        run: npm run deploy
+        run: |
+          git config --global user.name "Jimmy Wang"
+          git config --global user.email "jimmy.w@aliyun.com"
+          npm run deploy

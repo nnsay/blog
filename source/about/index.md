@@ -9,7 +9,7 @@ date: 2019-10-21 00:37:18
 |Name|Jimmy Wang|
 |Address|Beijing / Xi'an, China|
 |Job|DevOps / Backend Engineer|
-|Skill|Nodejs / Terraform / Aliyun|
+|Skill|Nodejs / Golang / Terraform / Aliyun / AWS |
 |Github|[nnsay](https://github.com/nnsay)|
 <!-- - name: Jimmy Wang
 - address: Beijing / Xi'an, China
@@ -18,8 +18,8 @@ date: 2019-10-21 00:37:18
 - github: [nnsay](https://github.com/nnsay) -->
 
 ### Achievement
-![ACP](./index/acp.jpg)
-![award1](./index/award1.jpg)
+![ACP](/about/index/acp.jpg)
+![award1](/about/index/award1.jpg)
 
 ### My Other Blogs 
 - [OSChina](https://my.oschina.net/jimmywa)

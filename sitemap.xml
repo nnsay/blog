@@ -9,20 +9,6 @@
   </url>
   
   <url>
-    <loc>https://nnsay.github.io/2022/02/13/knative-autoscaling/</loc>
-    
-    <lastmod>2023-01-07</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2022/01/21/knative-service-on-aliyun/</loc>
-    
-    <lastmod>2023-01-07</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>https://nnsay.github.io/2022/01/26/knative-serving-operation/</loc>
     
     <lastmod>2023-01-07</lastmod>
@@ -248,6 +234,20 @@
   
   <url>
     <loc>https://nnsay.github.io/2019/12/05/kiosk-research/</loc>
+    
+    <lastmod>2023-01-07</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2022/02/13/knative-autoscaling/</loc>
+    
+    <lastmod>2023-01-07</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2022/01/21/knative-service-on-aliyun/</loc>
     
     <lastmod>2023-01-07</lastmod>
     

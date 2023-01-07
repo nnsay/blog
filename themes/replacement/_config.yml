@@ -46,8 +46,8 @@ sitemap:
     rel: false
 
 # 百度统计
-# baidu:
-#   id: e4027971a230b210f4671f485b33846a
+baidu:
+  id: 1f97030bb3a44256d81e14447104bef8
 
 # Miscellaneous
 rss: /atom.xml

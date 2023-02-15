@@ -10,7 +10,7 @@ date: 2019-10-21 00:37:18
 |工作|DevOps / Backend Engineer|
 |技能|Nodejs/Golang/Terraform/Aliyun/AWS |
 |Github|[nnsay](https://github.com/nnsay)|
-|简历|[简历(2023-01-17版)](/about/index/王健的简历.pdf)|
+|简历|[简历(2023-02-15版)](/about/index/王健的简历.pdf)|
 
 <!-- - name: Jimmy Wang
 - address: Beijing / Xi'an, China

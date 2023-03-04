@@ -10,7 +10,7 @@
     <title>monorepo | Jimmy&#39;s Blog</title>
     <meta name="author" content="Jimmy Wang" />
     <meta name="keywords" content="" />
-    <meta name="description" content="1. 前提单体应用架构 vs 多仓多模块管理 vs 单仓多模块管理 三种代码组织和维护的方式各有有缺点:单体应用架构(monolithic): 软件开发前期, 业务不复杂, 依赖较少, 使用分层方式组织代码,  简单易用, 维护效率较高多仓多模块管理(multirepo): 因为业务复杂和代码量增多, 单体架构难以有效组织代码, 编译时间过长, code review和代码维护也面临困难, 通常从单体架构拆分为微服务, 每个微服务是一个代码仓库, 独立升&amp;#x2F;编译&amp;#x2F;维护&amp;#x2F" />
+    <meta name="description" content="1. 主题背景单体应用架构 vs 多仓多模块管理 vs 单仓多模块管理 三种代码组织和维护的方式各有有缺点:单体应用架构(monolithic): 软件开发前期, 业务不复杂, 依赖较少, 使用分层方式组织代码,  简单易用, 维护效率较高多仓多模块管理(multirepo): 因为业务复杂和代码量增多, 单体架构难以有效组织代码, 编译时间过长, code review和代码维护也面临困难, 通常从单体架构拆分为微服务, 每个微服务是一个代码仓库, 独立升&amp;#x2F;编译&amp;#x2F;维护&amp;#x" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
 
@@ -86,7 +86,7 @@
         
 
         
-        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E5%89%8D%E6%8F%90"><span class="toc-text">1. 前提</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E6%BC%94%E7%BB%83"><span class="toc-text">2. 演练</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-Nx%E6%A0%B8%E5%BF%83"><span class="toc-text">3. Nx核心</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E4%B8%BB%E9%A2%98%E8%83%8C%E6%99%AF"><span class="toc-text">1. 主题背景</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E6%BC%94%E7%BB%83"><span class="toc-text">2. 演练</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-Nx%E6%A0%B8%E5%BF%83"><span class="toc-text">3. Nx核心</span></a></li></ol>
         
     </div>
 </aside>
@@ -123,7 +123,7 @@
     
     <section class="article-body markdown-body">
         
-        <h1 id="1-前提"><a href="#1-前提" class="headerlink" title="1. 前提"></a>1. 前提</h1><p><strong>单体应用架构</strong> vs <strong>多仓多模块管理</strong> vs <strong>单仓多模块管理</strong> 三种代码组织和维护的方式各有有缺点:</p>
+        <h1 id="1-主题背景"><a href="#1-主题背景" class="headerlink" title="1. 主题背景"></a>1. 主题背景</h1><p><strong>单体应用架构</strong> vs <strong>多仓多模块管理</strong> vs <strong>单仓多模块管理</strong> 三种代码组织和维护的方式各有有缺点:</p>
 <ul>
 <li>单体应用架构(monolithic): 软件开发前期, 业务不复杂, 依赖较少, 使用分层方式组织代码,  简单易用, 维护效率较高</li>
 <li>多仓多模块管理(multirepo): 因为业务复杂和代码量增多, 单体架构难以有效组织代码, 编译时间过长, code review和代码维护也面临困难, 通常从单体架构拆分为微服务, 每个微服务是一个代码仓库, 独立升&#x2F;编译&#x2F;维护&#x2F;上线</li>

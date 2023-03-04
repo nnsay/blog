@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>monorepo | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="1. 前提单体应用架构 vs 多仓多模块管理 vs 单仓多模块管理 三种代码组织和维护的方式各有有缺点:单体应用架构(monolithic): 软件开发前期, 业务不复杂, 依赖较少, 使用分层方式组织代码,  简单易用, 维护效率较高多仓多模块管理(multirepo): 因为业务复杂和代码量增多, 单体架构难以有效组织代码, 编译时间过长, code review和代码维护也面临困难, 通常从单体架构拆分为微服务, 每个微服务是一个代码仓库, 独立升&amp;#x2F;编译&amp;#x2F;维护&amp;#x2F" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 5.4.2"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E5%89%8D%E6%8F%90"><span class="toc-text">1. 前提</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E6%BC%94%E7%BB%83"><span class="toc-text">2. 演练</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-Nx%E6%A0%B8%E5%BF%83"><span class="toc-text">3. Nx核心</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            monorepo
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2023/03/04/monorepo/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2023-03-04T04:59:59.000Z" itemprop="datePublished">2023-03-04</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/Code/" rel="tag">Code</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h1 id="1-前提"><a href="#1-前提" class="headerlink" title="1. 前提"></a>1. 前提</h1><p><strong>单体应用架构</strong> vs <strong>多仓多模块管理</strong> vs <strong>单仓多模块管理</strong> 三种代码组织和维护的方式各有有缺点:</p>
+<ul>
+<li>单体应用架构(monolithic): 软件开发前期, 业务不复杂, 依赖较少, 使用分层方式组织代码,  简单易用, 维护效率较高</li>
+<li>多仓多模块管理(multirepo): 因为业务复杂和代码量增多, 单体架构难以有效组织代码, 编译时间过长, code review和代码维护也面临困难, 通常从单体架构拆分为微服务, 每个微服务是一个代码仓库, 独立升&#x2F;编译&#x2F;维护&#x2F;上线</li>
+<li>单仓多模块管理(monorepo): 多仓库模式在仓库数量持续增加后面临公共资源重复引用, CI&#x2F;CD等脚本重复分散到各个项目维护, 单仓多模块管理的组织方式减轻了重复项维护的痛点, 另外在主干开发的GitFlow模式中单仓库更简单, 无需在多仓库模式中分别创建和维护主干分支</li>
+</ul>
+<p>参考文档:</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://developer.aliyun.com/article/1067018">Monorepo，大型前端项目管理模式实践</a></li>
+<li><a target="_blank" rel="noopener" href="https://nx.dev/more-concepts/why-monorepos#monorepos">Why Monorepos</a></li>
+<li><a target="_blank" rel="noopener" href="https://monorepo.tools/">monorepo.tools</a>: 一个专门讲monorepo的网站</li>
+</ul>
+<h1 id="2-演练"><a href="#2-演练" class="headerlink" title="2. 演练"></a>2. 演练</h1><p>nx命令行不需要额外, npm安装后默认自带这个子命令, 可以使用一下命令验证:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npx nx --version</span><br></pre></td></tr></table></figure>
+<p>演练主要使用<a target="_blank" rel="noopener" href="https://nx.dev/packages/nest/documents/overview">nest插件</a>作为脚手架工具</p>
+<ul>
+<li><p>创建工作区</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">npx create-nx-workspace nx-tutorial --preset=nest --appName tutotial --nxCloud <span class="literal">false</span></span><br><span class="line"><span class="built_in">cd</span> nx-tutorial/ &amp;&amp; npm install -D @nrwl/nest</span><br><span class="line"></span><br><span class="line"><span class="comment"># or</span></span><br><span class="line">yarn create nx-workspace nx-tutorial --preset=nest --appName tutotial --nxCloud <span class="literal">false</span></span><br><span class="line"><span class="built_in">cd</span> nx-tutorial/ &amp;&amp; yarn add -D @nrwl/nest</span><br><span class="line"></span><br><span class="line">tree . -L 1</span><br><span class="line">.</span><br><span class="line">├── README.md</span><br><span class="line">├── node_modules</span><br><span class="line">├── nx.json</span><br><span class="line">├── package-lock.json</span><br><span class="line">├── package.json</span><br><span class="line">├── apps</span><br><span class="line">├── libs</span><br><span class="line">├── tools</span><br><span class="line">└── tsconfig.base.json</span><br></pre></td></tr></table></figure>
+<p>上面的<code>apps</code>和<code>libs</code>是存放自项目的位置</p>
+</li>
+<li><p>创建演练项目</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">yarn nx generate @nrwl/nest:app main-api</span><br><span class="line"></span><br><span class="line">yarn nx generate @nrwl/nest:lib auth --publishable --importPath=@org/auth --buildable</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>编写测试代码</p>
+</li>
+</ul>
+<p>在main-api中调用auth lib中的一个方法</p>
+<ul>
+<li>运行和验证<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 手动执行</span></span><br><span class="line">yarn nx build auth</span><br><span class="line">yarn nx build main-api</span><br><span class="line"><span class="comment"># 一次性执行多个</span></span><br><span class="line">yarn nx run-many  --projects=auth,main-api --target=build</span><br><span class="line"><span class="comment"># 使用affect执行</span></span><br><span class="line">yarn nx affected --target=build</span><br><span class="line"><span class="comment"># 启动服务</span></span><br><span class="line">yarn nx serve main-api</span><br><span class="line"><span class="comment"># or</span></span><br><span class="line">yarn nx affected --target=serve</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>**演练代码仓库: **<a target="_blank" rel="noopener" href="https://github.com/nnsay/nx-tutorial"><strong>nx-tutorial</strong></a></p>
+</blockquote>
+</li>
+</ul>
+<h1 id="3-Nx核心"><a href="#3-Nx核心" class="headerlink" title="3. Nx核心"></a>3. <a target="_blank" rel="noopener" href="https://nx.dev/core-features">Nx核心</a></h1><ul>
+<li><p>工作区 workspace</p>
+<ul>
+<li><code>工作区</code>是monorepo组织多个<code>项目</code>框架, 这个概念和golang&#x2F;yarn等技术中的工作区概念一致</li>
+<li>工作区是<code>nx.json</code>所在的文件夹, 而项目一般存放到 packages&#x2F;apps&#x2F;libs等目录下</li>
+<li>项目存放的目录名称可以在在nx.json中配置, 并不一定使用自动生成的目录<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;workspaceLayout&quot;</span>: &#123;</span><br><span class="line">  <span class="string">&quot;appsDir&quot;</span>: <span class="string">&quot;demos&quot;</span>,</span><br><span class="line">  <span class="string">&quot;libsDir&quot;</span>: <span class="string">&quot;packages&quot;</span></span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p>项目 project</p>
+<ul>
+<li>项目是组织单仓库多项目架构的基础概念, 项目会被放置在一个workspace中</li>
+</ul>
+</li>
+<li><p>命令 target</p>
+<ul>
+<li>提供一种命令的定义, 可以定义在工作区(nx.json)和项目(project.json)级别</li>
+<li>优先使用项目级别的, 项目级别的target是和工作区的target做合并的</li>
+</ul>
+</li>
+<li><p>执行任务</p>
+<ul>
+<li>任务定义位置有两处<ul>
+<li>package.json中的scripts</li>
+<li>project.json中的targets</li>
+</ul>
+</li>
+<li>执行任务的方式<ul>
+<li>nx [project] [target]</li>
+<li>nx run [project][:target][:configuration] [_..]</li>
+<li>nx run-many: 执行全部</li>
+</ul>
+</li>
+<li>支持并行</li>
+<li>支持依赖执行: nx affected –targets&#x3D;a,b,c,d</li>
+</ul>
+</li>
+<li><p>缓存任务结果</p>
+<ul>
+<li><p>目的: 方式代码未变更却重复的执行任务, 减少执行次数, 增加执行效率</p>
+</li>
+<li><p>执行任务缓存可配置(nx.json)</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;tasksRunnerOptions&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;default&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;runner&quot;</span><span class="punctuation">:</span> <span class="string">&quot;nx/tasks-runners/default&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;options&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;cacheableOperations&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;build&quot;</span><span class="punctuation">,</span> <span class="string">&quot;test&quot;</span><span class="punctuation">]</span></span><br><span class="line">      <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>使用缓存: 任务执行之前通过任务的<code>input</code>结合缓存判断代码是否发生变更, 如果未发生变更则从缓存中恢复<code>output</code>, 例如: 文件&#x2F;终端输出</p>
+</li>
+<li><p>缓存位置和文件: node_modules&#x2F;.cache&#x2F;nx&#x2F;run.json</p>
+</li>
+<li><p>清除缓存: nx reset</p>
+</li>
+</ul>
+</li>
+<li><p>生成器 generator</p>
+<ul>
+<li>对工作区和项目进行代码组织和修改的工具</li>
+</ul>
+</li>
+<li><p>命令行 CLI</p>
+<ul>
+<li>nx affected:graph: 可以开启一个本地website,在该界面上可以查看依赖关系和<code>target</code></li>
+</ul>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://nx.dev/core-features/enforce-project-boundaries">自动更新依赖</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Step1: 检查和更新依赖, 修改package.json生成migrations.json</span></span><br><span class="line">yarn nx migrate latest</span><br><span class="line"><span class="comment"># Step2: 执行更新依赖</span></span><br><span class="line">yarn nx migrate --run-migrations</span><br><span class="line"><span class="comment"># Step3: 清除</span></span><br><span class="line"><span class="built_in">rm</span> migrations.json</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://nx.dev/core-features/enforce-project-boundaries">强制限定项目边界</a></p>
+</li>
+</ul>
+<p>为了方式项目引用到其他项目内部的的对象, 让依赖关系变得凌乱, 为此可以通过强制限定项目边界限定依赖关系仅通过项目引用.</p>
+<ul>
+<li><p>安装插件</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yarn add npm i @nrwl/eslint-plugin-nx @nrwl/devkit -D</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>设置tags, 可选</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	<span class="string">&quot;tags&quot;</span>: [</span><br><span class="line">    <span class="string">&quot;scope:lib&quot;</span>,</span><br><span class="line">    <span class="string">&quot;scope:app&quot;</span></span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>配置eslint检查规则</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  // ... more ESLint config here</span><br><span class="line"></span><br><span class="line">  // @nrwl/nx/enforce-module-boundaries should already exist within an <span class="string">&quot;overrides&quot;</span> block using `<span class="string">&quot;files&quot;</span>: [<span class="string">&quot;*.ts&quot;</span>, <span class="string">&quot;*.tsx&quot;</span>, <span class="string">&quot;*.js&quot;</span>, <span class="string">&quot;*.jsx&quot;</span>,]`</span><br><span class="line">  <span class="string">&quot;@nrwl/nx/enforce-module-boundaries&quot;</span>: [</span><br><span class="line">    <span class="string">&quot;error&quot;</span>,</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="string">&quot;allow&quot;</span>: [],</span><br><span class="line">      // update depConstraints based on your tags</span><br><span class="line">      <span class="string">&quot;depConstraints&quot;</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="string">&quot;sourceTag&quot;</span>: <span class="string">&quot;scope:lib&quot;</span>,</span><br><span class="line">          <span class="string">&quot;onlyDependOnLibsWithTags&quot;</span>: [<span class="string">&quot;scope:lib&quot;</span>]</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="string">&quot;sourceTag&quot;</span>: <span class="string">&quot;scope:app&quot;</span>,</span><br><span class="line">          <span class="string">&quot;onlyDependOnLibsWithTags&quot;</span>: [<span class="string">&quot;scope:app&quot;</span>, <span class="string">&quot;scope:lib&quot;</span>]</span><br><span class="line">        &#125;</span><br><span class="line">      ]</span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line"></span><br><span class="line">  // ... more ESLint config here</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2023/02/17/helm-trraform/" class="article-next" title="Helm结合Trraform使用"><i class="icon-arrow-right"></i></a>
+
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "7df62c7bef5aaf0f058042e64864ecdc",
+        distractionFreeMode: true,
+        title: "monorepo",
+        body: "https://nnsay.github.io/2023/03/04/monorepo/",
+        labels: ["Code"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?1f97030bb3a44256d81e14447104bef8";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+    
+    
+        <script src='https://unpkg.com/mermaid@8.14.0/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script>
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

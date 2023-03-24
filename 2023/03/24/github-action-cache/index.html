@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>github action cache | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="1. 问题场景最近在使用 Github Action 做 CICD 的过程中发现了一个问题: 构建很慢. 除了 Runner 冷启动外还有一些流水线业务本身的问题, 例如: 安装依赖.当使用 Monorepo 后依赖的安装增多了, 使得 yarn&amp;#x2F;npm install 的速度变得很慢, 经过探索得知: 可以通过使用缓存安装依赖包的速度, 本文介绍缓存方式.2. 缓存全局包数据这是一种非缓存node_modules目录的方式, 缓存的是全局包数据, 底层使用 action&amp;#x2F;c" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 5.4.2"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E9%97%AE%E9%A2%98%E5%9C%BA%E6%99%AF"><span class="toc-text">1. 问题场景</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E7%BC%93%E5%AD%98%E5%85%A8%E5%B1%80%E5%8C%85%E6%95%B0%E6%8D%AE"><span class="toc-text">2. 缓存全局包数据</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E7%BC%93%E5%AD%98%E4%BE%9D%E8%B5%96%E6%96%87%E4%BB%B6-%E7%9B%AE%E5%BD%95"><span class="toc-text">3. 缓存依赖文件(目录)</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E6%B5%8B%E8%AF%95%E5%92%8C%E9%AA%8C%E8%AF%81"><span class="toc-text">4. 测试和验证</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            github action cache
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2023/03/24/github-action-cache/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2023-03-24T03:58:46.000Z" itemprop="datePublished">2023-03-24</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/Tips/" rel="tag">Tips</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h1 id="1-问题场景"><a href="#1-问题场景" class="headerlink" title="1. 问题场景"></a>1. 问题场景</h1><p>最近在使用 Github Action 做 CICD 的过程中发现了一个问题: 构建很慢. 除了 Runner 冷启动外还有一些流水线业务本身的问题, 例如: 安装依赖.</p>
+<p>当使用 Monorepo 后依赖的安装增多了, 使得 yarn&#x2F;npm install 的速度变得很慢, 经过探索得知: 可以通过使用缓存安装依赖包的速度, 本文介绍缓存方式.</p>
+<h1 id="2-缓存全局包数据"><a href="#2-缓存全局包数据" class="headerlink" title="2. 缓存全局包数据"></a>2. <a target="_blank" rel="noopener" href="https://github.com/actions/setup-node#caching-global-packages-data">缓存全局包数据</a></h1><p>这是一种非缓存<code>node_modules</code>目录的方式, 缓存的是全局包数据, 底层使用 action&#x2F;cache, 但是封装的比较好, 自动化程度高, 配置少, 具体的做法是在 github workflow 使用<code>actions/setup-node</code>并启用缓存:</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Setup</span> <span class="string">Node.js</span></span><br><span class="line">  <span class="attr">uses:</span> <span class="string">actions/setup-node@v3</span></span><br><span class="line">  <span class="attr">with:</span></span><br><span class="line">  <span class="attr">node-version:</span> <span class="number">16</span></span><br><span class="line">  <span class="attr">cache:</span> <span class="string">yarn</span></span><br></pre></td></tr></table></figure>
+
+<p>cache 支持三种缓存: <code>npm</code>&#x2F;<code>yarn</code>&#x2F;<code>pnpm</code>, 且自动寻找缓存依赖文件: <code>package-lock.json</code>&#x2F;<code>npm-shrinkwrap.json</code>&#x2F; <code>yarn.lock</code></p>
+<h1 id="3-缓存依赖文件-目录"><a href="#3-缓存依赖文件-目录" class="headerlink" title="3. 缓存依赖文件(目录)"></a>3. <a target="_blank" rel="noopener" href="https://github.com/actions/cache">缓存依赖文件(目录)</a></h1><p>直接使用<code>actions/cache</code>进行缓存, 完整的测试例子如下, 其中<code>actions/cache</code>是核心:</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">action</span> <span class="string">catch</span> <span class="string">test</span></span><br><span class="line"></span><br><span class="line"><span class="attr">run-name:</span> <span class="string">&quot;action: $<span class="template-variable">&#123;&#123; inputs.action &#125;&#125;</span>&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">workflow_dispatch:</span></span><br><span class="line">    <span class="attr">inputs:</span></span><br><span class="line">      <span class="attr">action:</span></span><br><span class="line">        <span class="attr">type:</span> <span class="string">string</span></span><br><span class="line">        <span class="attr">description:</span> <span class="string">operation</span> <span class="string">what?</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">yarn:</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">actions/checkout@v3</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">actions/setup-node@v3</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">node-version:</span> <span class="string">&quot;16.x&quot;</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">uses:</span> <span class="string">actions/cache@v3</span></span><br><span class="line">        <span class="attr">id:</span> <span class="string">cache-node-module</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">key:</span> <span class="string">$&#123;&#123;</span> <span class="string">runner.os</span> <span class="string">&#125;&#125;-modules-$&#123;&#123;</span> <span class="string">hashFiles(&#x27;yarn.lock&#x27;)</span> <span class="string">&#125;&#125;</span></span><br><span class="line">          <span class="attr">path:</span> <span class="string">node_modules</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Install</span> <span class="string">Depedency</span></span><br><span class="line">        <span class="attr">if:</span> <span class="string">steps.cache-node-module.outputs.cache-hit</span> <span class="type">!=</span> <span class="string">&#x27;true&#x27;</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">yarn</span> <span class="string">install</span></span><br></pre></td></tr></table></figure>
+
+<p><a target="_blank" rel="noopener" href="https://github.com/actions/cache#inputs"><code>actions/cache</code>属性介绍</a>:</p>
+<ul>
+<li><p>input:</p>
+<ul>
+<li><p>key: 缓存的名字标识</p>
+</li>
+<li><p>path: 缓存文件或者目录</p>
+</li>
+</ul>
+</li>
+<li><p>output</p>
+<ul>
+<li>cache-hit: 缓存是否命中</li>
+</ul>
+</li>
+</ul>
+<h1 id="4-测试和验证"><a href="#4-测试和验证" class="headerlink" title="4. 测试和验证"></a>4. 测试和验证</h1><p>测试验证针对的是<code>actions/cache</code>方式缓存, 而不是<code>actions/setup-node</code>, 这种日常已经使用加速效果不大, 需要两个文件:</p>
+<ul>
+<li><p>package.json: 里面配置了<code>dependencies</code>&#x2F;<code>devDependencies</code>, 尽量多一点</p>
+</li>
+<li><p>yarn.lock: 和上面的 package.json 对应起来</p>
+</li>
+<li><p>测试步骤: 分别手动 run 两次<code>yarn</code>这个<code>job</code>, 断言如下:</p>
+<ul>
+<li><p>第一次: 没有命中缓存执行了 yarn install, 时间较长</p>
+</li>
+<li><p>第二次: 命中的缓存没有执行 yarn install, 时间较短</p>
+</li>
+</ul>
+</li>
+<li><p>测试结果</p>
+</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/nnsay/gist/main/imgimage-20230324123135048.png" alt="image-20230324123135048"></p>
+<ul>
+<li><p>测试结论</p>
+<ul>
+<li>通过缓存目录极大的加快了依赖安装的时间, 该方式加速效果明显</li>
+<li>该方式缓存文件较多, 需要注意不要触发 Github 的限制: 10GB&#x2F;repo</li>
+<li>缓存较大时下载缓存可能耗时</li>
+</ul>
+<p>总体上该方式值得尝试!</p>
+</li>
+</ul>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2023/03/04/monorepo/" class="article-next" title="monorepo"><i class="icon-arrow-right"></i></a>
+
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "829dda99334c8c65a74bfe631f4b0e2d",
+        distractionFreeMode: true,
+        title: "github action cache",
+        body: "https://nnsay.github.io/2023/03/24/github-action-cache/",
+        labels: ["Tips"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?1f97030bb3a44256d81e14447104bef8";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+    
+    
+        <script src='https://unpkg.com/mermaid@8.14.0/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script>
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

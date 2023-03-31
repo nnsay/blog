@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>迁移aws lambda到vpc | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="1. 问题背景​	目前后端架构是lambda不在vpc网络, 依赖的计算资源有: sqs&amp;#x2F;dynamodb&amp;#x2F;s3&amp;#x2F;第三方服务, 最近有一个新的需求是需要增加一个资源: redis. 增加redis的目的是使用缓存逻辑, 经过调研技术选型后的服务是: aws elasticache for redis(以下简称redis). 而redis必须在vpc内才可以创建, 所以在访问性上架构面临选择:方案一: lambda放到vpc里面, 这个时需要解决的问题有: 访问vpc" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 5.4.2"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E9%97%AE%E9%A2%98%E8%83%8C%E6%99%AF"><span class="toc-text">1. 问题背景</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E8%A7%A3%E5%86%B3%E9%97%AE%E9%A2%98"><span class="toc-text">2. 解决问题</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-NAT-Gateway-vs-VPC-Endpoint"><span class="toc-text">3. NAT Gateway vs VPC Endpoint</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            迁移aws lambda到vpc
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2023/03/31/move-aws-lambda-into-vpc/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2023-03-31T11:18:49.000Z" itemprop="datePublished">2023-03-31</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/DevOps/" rel="tag">DevOps</a>, <a class="article-tag-link" href="/tags/Tips/" rel="tag">Tips</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h1 id="1-问题背景"><a href="#1-问题背景" class="headerlink" title="1. 问题背景"></a>1. 问题背景</h1><p>​	目前后端架构是lambda不在vpc网络, 依赖的计算资源有: sqs&#x2F;dynamodb&#x2F;s3&#x2F;第三方服务, 最近有一个新的需求是需要增加一个资源: redis. 增加redis的目的是使用缓存逻辑, 经过调研技术选型后的服务是: aws elasticache for redis(以下简称redis). 而redis必须在vpc内才可以创建, 所以在访问性上架构面临选择:</p>
+<ul>
+<li>方案一: lambda放到vpc里面, 这个时需要解决的问题有: <ul>
+<li>访问vpc外的dynamodb</li>
+<li>访问vpc外的sqs</li>
+<li>访问vpc外的s3</li>
+<li>访问公网(第三方服务)</li>
+</ul>
+</li>
+</ul>
+<p>​		<img src="https://raw.githubusercontent.com/nnsay/gist/main/imgimage-20230331191211434.png" alt="image-20230331191211434" style="zoom: 33%;" /></p>
+<ul>
+<li>方案二: lambda继续保留在vpc外, 这时需要解决的问题是:<ul>
+<li>如何访问vpc里的redis</li>
+</ul>
+</li>
+</ul>
+<p>​	经过一系列的讨论和研究, 从长远计未来我们的服务是要放到vpc中的, 宜早不宜迟, 所以我们选择迁移lambda进入vpc, 本文即讨论如何解决迁移后方案一中的4个访问问题.</p>
+<h1 id="2-解决问题"><a href="#2-解决问题" class="headerlink" title="2. 解决问题"></a>2. 解决问题</h1><p>方案一种四个需要解决的问题可以分为两类: 访问vpc外aws服务和访问外网, 两类问题最终调研和实行的解决方案如下:</p>
+<ul>
+<li><p>访问vpc外aws服务: 使用<code>vpc endpoint</code>(vpc终端节点)的方式解决, 截取一段vpc endpoint的介绍如下</p>
+<blockquote>
+<p>VPC 终端节点支持 Virtual Private Cloud (VPC) 与受支持的服务之间的连接，而无需您使用互联网网关、NAT 设备、VPN 连接或 AWS Direct Connect 连接。因此，您的 VPC 不会暴露在公共互联网上</p>
+</blockquote>
+<p>具体操作如下:</p>
+<ul>
+<li>创建s3 gateway类型的vpc终端节点</li>
+<li>创建dynamodb gateway类型的vpc终端节点</li>
+<li>创建sqs interface类型的vpc终端节点</li>
+</ul>
+<p>三种终端节点创建完后可以解决: vpc内lambda访问原有aws资源的问题.</p>
+</li>
+<li><p>访问外网: 使用nat gateway的方式解决, 具体操作如下:</p>
+<ul>
+<li><p>获取lambda vpc的subnet(子网) </p>
+<p>简单起见假设vpc的public和island子网各有一个</p>
+</li>
+<li><p>创建eip(弹性ip), 创建public类型nat gateway: 使用eip分配的ip + vpc pubic subnet</p>
+</li>
+<li><p>创建route table(路由表), 并关联vpc</p>
+</li>
+<li><p>编辑route table 子网关联, 将vpc的island子网关联上</p>
+</li>
+<li><p>编辑route table  路由, 添加路由: <code>0.0.0.0/0</code>-&gt; nat gateway</p>
+</li>
+</ul>
+<p>创建和配置nat gateway结束后vpc lambda即可以访问公网, 访问路径大致是: vpc island subnet-&gt; route -&gt; nat gateway -&gt; Internet</p>
+</li>
+</ul>
+<h1 id="3-NAT-Gateway-vs-VPC-Endpoint"><a href="#3-NAT-Gateway-vs-VPC-Endpoint" class="headerlink" title="3. NAT Gateway vs VPC Endpoint"></a>3. NAT Gateway vs VPC Endpoint</h1><p>理论上有了NAT Gateway之后vpc里的lambda就可以像重构之前一样通过公网访问aws的各类服务, 为什么还需要创新vpc endpoint? 这里以sqs interface终端节点为例讲解:</p>
+<ul>
+<li>interface类型的终端节点是按量收费的, gateway的终端节点是免费的</li>
+<li><a target="_blank" rel="noopener" href="https://www.amazonaws.cn/privatelink/pricing/">终端节点的收费</a>标准比<a target="_blank" rel="noopener" href="https://www.amazonaws.cn/vpc/pricing/">nat gateway</a>低</li>
+<li>终端节点访问aws服务走的aws内网, 而不是走公网, 所以效率比较高</li>
+</ul>
+<p>综上选择vpc终端节点是比较好的选择(在阿里云中例如OSS,创建后会有三个地址: vpc&#x2F;public&#x2F;intranet, 个人感觉这个vpc终端节点起的作用类似阿里云的vpc地址)</p>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2023/03/24/github-action-cache/" class="article-next" title="github action cache"><i class="icon-arrow-right"></i></a>
+
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "78862acf5a45e94a14d836e67b974825",
+        distractionFreeMode: true,
+        title: "迁移aws lambda到vpc",
+        body: "https://nnsay.github.io/2023/03/31/move-aws-lambda-into-vpc/",
+        labels: ["Tips","DevOps"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?1f97030bb3a44256d81e14447104bef8";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+    
+    
+        <script src='https://unpkg.com/mermaid@8.14.0/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script>
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

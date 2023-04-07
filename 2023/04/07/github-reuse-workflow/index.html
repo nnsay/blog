@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>Github Action复用工作流 | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="1. 问题介绍在使用Github Action做CICD的过程中会编写很多Workflow脚本, 很多脚本又有很多相似性, 例如针对开发(dev)&amp;#x2F;预生成(staging)和生成(prod)三个场景中只有触发工作流时事件(Event)和环境(Environment)不同, 而核心工作流步骤(Step)是差不多的, 如下:dev.github&amp;#x2F;workflows&amp;#x2F;dev-release.yml:1234567891011121314151617181920212223" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 5.4.2"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E9%97%AE%E9%A2%98%E4%BB%8B%E7%BB%8D"><span class="toc-text">1. 问题介绍</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E5%A4%8D%E7%94%A8%E5%B7%A5%E4%BD%9C%E6%B5%81"><span class="toc-text">2. 复用工作流</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E6%80%BB%E7%BB%93"><span class="toc-text">3. 总结</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            Github Action复用工作流
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2023/04/07/github-reuse-workflow/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2023-04-07T09:54:27.000Z" itemprop="datePublished">2023-04-07</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/DevOps/" rel="tag">DevOps</a>, <a class="article-tag-link" href="/tags/Tips/" rel="tag">Tips</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h1 id="1-问题介绍"><a href="#1-问题介绍" class="headerlink" title="1. 问题介绍"></a>1. 问题介绍</h1><p>在使用Github Action做CICD的过程中会编写很多Workflow脚本, 很多脚本又有很多相似性, 例如针对开发(dev)&#x2F;预生成(staging)和生成(prod)三个场景中只有<a target="_blank" rel="noopener" href="https://docs.github.com/zh/actions/using-workflows/events-that-trigger-workflows">触发工作流时事件(Event)</a>和<a target="_blank" rel="noopener" href="https://docs.github.com/zh/actions/deployment/targeting-different-environments/using-environments-for-deployment">环境(Environment)</a>不同, 而核心工作流步骤(Step)是差不多的, 如下:</p>
+<ul>
+<li><p>dev</p>
+<p>.github&#x2F;workflows&#x2F;dev-release.yml:</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">Dev(master)</span> <span class="string">release</span></span><br><span class="line"></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">master</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">	<span class="attr">version-bump:</span></span><br><span class="line">		<span class="comment"># ...</span></span><br><span class="line">	<span class="attr">deploy-aws:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">Deploy</span> <span class="string">AWS</span> <span class="bullet">-</span> <span class="string">Dev</span> <span class="string">environment</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">needs:</span> <span class="string">version-bump</span></span><br><span class="line">    <span class="attr">environment:</span> <span class="string">dev</span></span><br><span class="line"></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Check</span> <span class="string">out</span> <span class="string">git</span> <span class="string">repository</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">actions/checkout@v3</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">fetch-depth:</span> <span class="number">0</span></span><br><span class="line">          <span class="attr">ref:</span> <span class="string">$&#123;&#123;</span> <span class="string">needs.version-bump.outputs.release-sha</span> <span class="string">&#125;&#125;</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Setup</span> <span class="string">Node.js</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">actions/setup-node@v3</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">node-version:</span> <span class="number">16</span></span><br><span class="line">          <span class="attr">cache:</span> <span class="string">yarn</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Install</span> <span class="string">CI</span> <span class="string">dependencies</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">yarn</span> <span class="string">install</span> <span class="string">--frozen-lockfile</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Build</span> <span class="string">and</span> <span class="string">deploy</span> <span class="string">applications</span> <span class="string">to</span> <span class="string">AWS</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">npx</span> <span class="string">nx</span> <span class="string">affected</span> <span class="string">--target=deploy</span> <span class="string">--configuration=$&#123;&#123;</span> <span class="string">vars.ENV_NAME</span> <span class="string">&#125;&#125;</span></span><br><span class="line">        <span class="attr">env:</span></span><br><span class="line">          <span class="attr">AWS_ACCESS_KEY_ID:</span> <span class="string">$&#123;&#123;</span> <span class="string">secrets.AWS_ACCESS_KEY_ID</span> <span class="string">&#125;&#125;</span></span><br><span class="line">          <span class="attr">AWS_SECRET_ACCESS_KEY:</span> <span class="string">$&#123;&#123;</span> <span class="string">secrets.AWS_SECRET_ACCESS_KEY</span> <span class="string">&#125;&#125;</span></span><br><span class="line">          <span class="attr">ENV_NAME:</span> <span class="string">$&#123;&#123;</span> <span class="string">vars.ENV_NAME</span> <span class="string">&#125;&#125;</span></span><br><span class="line">          <span class="attr">AWS_DEFAULT_REGION:</span> <span class="string">cn-northwest-1</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>staging</p>
+<p>.github&#x2F;workflows&#x2F;staging-release.yml:</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">Staging</span> <span class="string">release</span></span><br><span class="line"></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">release/*</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">	<span class="attr">deploy-aws:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">Deploy</span> <span class="string">AWS</span> <span class="bullet">-</span> <span class="string">Staging</span> <span class="string">environment</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">environment:</span> <span class="string">staging</span></span><br><span class="line"></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Check</span> <span class="string">out</span> <span class="string">git</span> <span class="string">repository</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">actions/checkout@v3</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">fetch-depth:</span> <span class="number">0</span></span><br><span class="line">          </span><br><span class="line">      <span class="comment"># ...</span></span><br><span class="line">      <span class="comment"># be same with the dev workflow yaml L24~L39</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>prod</p>
+<p>.github&#x2F;workflows&#x2F;prod-release.yml:</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">Production</span> <span class="string">release</span></span><br><span class="line"></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">workflow_dispatch:</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">	<span class="attr">deploy-aws:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">Deploy</span> <span class="string">AWS</span> <span class="bullet">-</span> <span class="string">Production</span> <span class="string">environment</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">environment:</span> <span class="string">production</span></span><br><span class="line"></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Check</span> <span class="string">out</span> <span class="string">git</span> <span class="string">repository</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">actions/checkout@v3</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">fetch-depth:</span> <span class="number">0</span></span><br><span class="line">          </span><br><span class="line">      <span class="comment"># ...</span></span><br><span class="line">      <span class="comment"># be same with the dev workflow yaml L24~L39</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>结合上面的例子分析可知:</p>
+<ul>
+<li><p>不同点:</p>
+<ul>
+<li><p>dev是代码push到master触发; staging是push release分支触发; prod是手动触发</p>
+</li>
+<li><p>dev&#x2F;staging&#x2F;prod三个工作流中的<code>environment</code>是不一样的&#96;</p>
+</li>
+</ul>
+</li>
+<li><p>相同点</p>
+<ul>
+<li>L24~L39是完全相同的</li>
+</ul>
+</li>
+<li><p>略有不同</p>
+<ul>
+<li>dev和checkout逻辑和staging&#x2F;prod不同, 多了一个<code>ref</code></li>
+</ul>
+</li>
+</ul>
+<p>综上, <code>相同点</code>+<code>略有不同</code> 这两部分其实可以想办法复用, 而这个技术就是: <a target="_blank" rel="noopener" href="https://docs.github.com/zh/actions/using-workflows/reusing-workflows">复用工作流</a></p>
+<h1 id="2-复用工作流"><a href="#2-复用工作流" class="headerlink" title="2. 复用工作流"></a>2. <a target="_blank" rel="noopener" href="https://docs.github.com/zh/actions/using-workflows/reusing-workflows">复用工作流</a></h1><p>复用工作流简而言之: 将类似的工作流, 这里主要就是相似的Step抽出到一个新的工作流, 而这个新的工作流可以被重复调用. 在实践之前需要简单介绍些理论:</p>
+<ul>
+<li>被调用方<ul>
+<li>复用工作流的触发事件是: workflow_call, 即被调用方</li>
+<li>在复用工作流可以继续调用其他服用工作流, 但是最多四层, 如: root-&gt;reuse1-&gt;reuse2记作2层</li>
+<li>复用工作流定义在事件处定义: <code>inputs</code>和<code>secrets</code>两种变量用于传递参数</li>
+<li>复用工作流永远仅使用调用方的环境和上下文信息, 与自己所在位置无关</li>
+</ul>
+</li>
+<li>调用方<ul>
+<li>使用复用工作流的一方称为调用方, 调用方使用<code>uses</code>关键词来调用复用工作流</li>
+<li>调用方使用<code>with</code>关键词设置<code>inputs</code>参数设置</li>
+<li>调用方使用<code>secrets</code>进行机密参数设置<ul>
+<li>secrets变量支持继承: <code>inherit</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>结合上面的例子实现步骤如下:</p>
+<ul>
+<li><p>被调用方: 定义复用工作流</p>
+<p>github&#x2F;workflows&#x2F;deploy-aws.yml:</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">AWS</span> <span class="string">deployment</span></span><br><span class="line"></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">workflow_call:</span></span><br><span class="line">    <span class="attr">inputs:</span></span><br><span class="line">      <span class="attr">envName:</span> <span class="comment"># 支持环境切换</span></span><br><span class="line">        <span class="attr">type:</span> <span class="string">string</span></span><br><span class="line">        <span class="attr">description:</span> <span class="string">the</span> <span class="string">deployment</span> <span class="string">environment</span></span><br><span class="line">        <span class="attr">required:</span> <span class="literal">true</span></span><br><span class="line">      <span class="attr">releaseSha:</span> <span class="comment"># 支持两种checkout</span></span><br><span class="line">        <span class="attr">type:</span> <span class="string">string</span></span><br><span class="line">        <span class="attr">description:</span> <span class="string">the</span> <span class="string">git</span> <span class="string">head</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">deploy:</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">Deploy</span> <span class="string">AWS</span></span><br><span class="line">    <span class="attr">runs-on:</span> <span class="string">ubuntu-latest</span></span><br><span class="line">    <span class="attr">environment:</span> <span class="string">$&#123;&#123;</span> <span class="string">inputs.envName</span> <span class="string">&#125;&#125;</span> <span class="comment"># 切换环境</span></span><br><span class="line"></span><br><span class="line">    <span class="attr">steps:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Check</span> <span class="string">out</span> <span class="string">git</span> <span class="string">repository</span></span><br><span class="line">        <span class="attr">if:</span> <span class="string">inputs.releaseSha</span> <span class="type">!=</span> <span class="string">&#x27;&#x27;</span> <span class="comment"># 支持ref的checkout</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">actions/checkout@v3</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">fetch-depth:</span> <span class="number">0</span></span><br><span class="line">          <span class="attr">ref:</span> <span class="string">$&#123;&#123;</span> <span class="string">inputs.releaseSha</span> <span class="string">&#125;&#125;</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Check</span> <span class="string">out</span> <span class="string">git</span> <span class="string">repository</span></span><br><span class="line">        <span class="attr">if:</span> <span class="string">inputs.releaseSha</span> <span class="string">==</span> <span class="string">&#x27;&#x27;</span> <span class="comment"># 支持默认的checkout</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">actions/checkout@v3</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">fetch-depth:</span> <span class="number">0</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Setup</span> <span class="string">Node.js</span></span><br><span class="line">        <span class="attr">uses:</span> <span class="string">actions/setup-node@v3</span></span><br><span class="line">        <span class="attr">with:</span></span><br><span class="line">          <span class="attr">node-version:</span> <span class="number">16</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Install</span> <span class="string">CI</span> <span class="string">dependencies</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">yarn</span> <span class="string">install</span> <span class="string">--frozen-lockfile</span></span><br><span class="line"></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Build</span> <span class="string">and</span> <span class="string">deploy</span> <span class="string">applications</span> <span class="string">to</span> <span class="string">AWS</span></span><br><span class="line">        <span class="attr">run:</span> <span class="string">npx</span> <span class="string">nx</span> <span class="string">affected</span> <span class="string">--target=deploy</span> <span class="string">--configuration=$&#123;&#123;</span> <span class="string">inputs.envName</span> <span class="string">&#125;&#125;</span> <span class="comment"># 引用变量</span></span><br><span class="line">        <span class="attr">env:</span></span><br><span class="line">          <span class="attr">AWS_ACCESS_KEY_ID:</span> <span class="string">$&#123;&#123;</span> <span class="string">secrets.AWS_ACCESS_KEY_ID</span> <span class="string">&#125;&#125;</span></span><br><span class="line">          <span class="attr">AWS_SECRET_ACCESS_KEY:</span> <span class="string">$&#123;&#123;</span> <span class="string">secrets.AWS_SECRET_ACCESS_KEY</span> <span class="string">&#125;&#125;</span></span><br><span class="line">          <span class="attr">ENV_NAME:</span> <span class="string">$&#123;&#123;</span> <span class="string">inputs.envName&#125;&#125;</span> <span class="comment"># 引用变量</span></span><br><span class="line">          <span class="attr">AWS_DEFAULT_REGION:</span> <span class="string">cn-northwest-1</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>以上yaml中<code>#</code>注释部分是需要着重观察的地方</p>
+</blockquote>
+</li>
+<li><p>dev调用方改造</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">Dev(master)</span> <span class="string">release</span></span><br><span class="line"></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">master</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">	<span class="attr">version-bump:</span></span><br><span class="line">		<span class="comment"># ...</span></span><br><span class="line">	<span class="attr">deploy-aws:</span></span><br><span class="line">		<span class="attr">uses:</span> <span class="string">./.github/workflows/deploy-aws.yml</span> <span class="comment"># 调用复用工作流</span></span><br><span class="line">    <span class="attr">with:</span> <span class="comment"># 复用工作流参数设置</span></span><br><span class="line">      <span class="attr">envName:</span> <span class="string">dev</span></span><br><span class="line">      <span class="attr">releaseSha:</span> <span class="string">$&#123;&#123;</span> <span class="string">needs.version-bump.outputs.release-sha</span> <span class="string">&#125;&#125;</span></span><br><span class="line">    <span class="attr">secrets:</span> <span class="string">inherit</span> <span class="comment"># 复用工作流机密参数设置</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">Deploy</span> <span class="string">AWS</span> <span class="bullet">-</span> <span class="string">Dev</span> <span class="string">environment</span></span><br><span class="line">    <span class="attr">needs:</span> <span class="string">version-bump</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>staging调用方改造</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">Staging</span> <span class="string">release</span></span><br><span class="line"></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">push:</span></span><br><span class="line">    <span class="attr">branches:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">release/*</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">deploy-aws:</span></span><br><span class="line">    <span class="attr">uses:</span> <span class="string">./.github/workflows/deploy-aws.yml</span> <span class="comment"># 调用复用工作流</span></span><br><span class="line">    <span class="attr">with:</span> <span class="comment"># 复用工作流参数设置</span></span><br><span class="line">      <span class="attr">envName:</span> <span class="string">staging</span></span><br><span class="line">    <span class="attr">secrets:</span> <span class="string">inherit</span> <span class="comment"># 复用工作流机密参数设置</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">Deploy</span> <span class="string">AWS</span> <span class="bullet">-</span> <span class="string">Staging</span> <span class="string">environment</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>prod调用方改造</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">Production</span> <span class="string">release</span></span><br><span class="line"></span><br><span class="line"><span class="attr">on:</span></span><br><span class="line">  <span class="attr">workflow_dispatch:</span></span><br><span class="line"></span><br><span class="line"><span class="attr">jobs:</span></span><br><span class="line">  <span class="attr">deploy-aws:</span></span><br><span class="line">    <span class="attr">uses:</span> <span class="string">./.github/workflows/deploy-aws.yml</span> <span class="comment"># 调用复用工作流</span></span><br><span class="line">    <span class="attr">with:</span> <span class="comment"># 复用工作流参数设置</span></span><br><span class="line">      <span class="attr">envName:</span> <span class="string">prod</span></span><br><span class="line">    <span class="attr">secrets:</span> <span class="string">inherit</span> <span class="comment"># 复用工作流机密参数设置</span></span><br><span class="line">    <span class="attr">name:</span> <span class="string">Deploy</span> <span class="string">AWS</span> <span class="bullet">-</span> <span class="string">Production</span> <span class="string">environment</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h1 id="3-总结"><a href="#3-总结" class="headerlink" title="3. 总结"></a>3. 总结</h1><p>复用工作流不仅支持在同一个代码仓库中创建和调用复用工作流, 也支持跨仓库调用复用工作流; </p>
+<p>复用工作流的<code>secrets</code>继承机制可以让我们在定义复用工作流时少些很多机密参数,  又因为复用工作永远使用调用方的上下文所以结合Github Envivronment使用切换环境和参数很方便; </p>
+<p>复用工作流在代码工程&#x2F;并行协作上也增加了质量和效率;</p>
+<p>总之, 复用工作流是Github Action的一个最佳实践, 推荐使用!</p>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2023/03/31/move-aws-lambda-into-vpc/" class="article-next" title="迁移aws lambda到vpc"><i class="icon-arrow-right"></i></a>
+
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "56ce32240e3446cc5570b21c939b0eb6",
+        distractionFreeMode: true,
+        title: "Github Action复用工作流",
+        body: "https://nnsay.github.io/2023/04/07/github-reuse-workflow/",
+        labels: ["Tips","DevOps"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?1f97030bb3a44256d81e14447104bef8";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+    
+    
+        <script src='https://unpkg.com/mermaid@8.14.0/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script>
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

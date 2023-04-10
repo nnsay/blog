@@ -6,7 +6,7 @@
   <link href="https://nnsay.github.io/atom.xml" rel="self"/>
   
   <link href="https://nnsay.github.io/"/>
-  <updated>2023-04-07T10:00:23.560Z</updated>
+  <updated>2023-04-10T03:43:39.637Z</updated>
   <id>https://nnsay.github.io/</id>
   
   <author>
@@ -21,7 +21,7 @@
     <link href="https://nnsay.github.io/2023/04/07/github-reuse-workflow/"/>
     <id>https://nnsay.github.io/2023/04/07/github-reuse-workflow/</id>
     <published>2023-04-07T09:54:27.000Z</published>
-    <updated>2023-04-07T10:00:23.560Z</updated>
+    <updated>2023-04-10T03:43:39.637Z</updated>
     
     
     <summary type="html">使用Github Action复用工作流优化代码工程</summary>
@@ -40,7 +40,7 @@
     <link href="https://nnsay.github.io/2023/03/31/move-aws-lambda-into-vpc/"/>
     <id>https://nnsay.github.io/2023/03/31/move-aws-lambda-into-vpc/</id>
     <published>2023-03-31T11:18:49.000Z</published>
-    <updated>2023-04-07T10:00:23.560Z</updated>
+    <updated>2023-04-10T03:43:39.637Z</updated>
     
     
     <summary type="html">解决vpc lambda访问各种外部资源和服务问题</summary>
@@ -59,7 +59,7 @@
     <link href="https://nnsay.github.io/2023/03/24/github-action-cache/"/>
     <id>https://nnsay.github.io/2023/03/24/github-action-cache/</id>
     <published>2023-03-24T03:58:46.000Z</published>
-    <updated>2023-04-07T10:00:23.560Z</updated>
+    <updated>2023-04-10T03:43:39.637Z</updated>
     
     
     <summary type="html">使用github action cache加快流水线速度</summary>
@@ -76,7 +76,7 @@
     <link href="https://nnsay.github.io/2023/03/04/monorepo/"/>
     <id>https://nnsay.github.io/2023/03/04/monorepo/</id>
     <published>2023-03-04T04:59:59.000Z</published>
-    <updated>2023-04-07T10:00:23.560Z</updated>
+    <updated>2023-04-10T03:43:39.637Z</updated>
     
     
     <summary type="html">代码工程管理--monorepo实践</summary>
@@ -93,7 +93,7 @@
     <link href="https://nnsay.github.io/2023/02/17/helm-trraform/"/>
     <id>https://nnsay.github.io/2023/02/17/helm-trraform/</id>
     <published>2023-02-17T04:57:42.000Z</published>
-    <updated>2023-04-07T10:00:23.560Z</updated>
+    <updated>2023-04-10T03:43:39.637Z</updated>
     
     
     <summary type="html">helm+terraform实现资源编排</summary>
@@ -112,7 +112,7 @@
     <link href="https://nnsay.github.io/2023/02/03/async-call-compute-service/"/>
     <id>https://nnsay.github.io/2023/02/03/async-call-compute-service/</id>
     <published>2023-02-03T02:04:43.000Z</published>
-    <updated>2023-04-07T10:00:23.560Z</updated>
+    <updated>2023-04-10T03:43:39.637Z</updated>
     
     
     <summary type="html">AWS/Aliyun函数计算异步调用</summary>
@@ -133,7 +133,7 @@
     <link href="https://nnsay.github.io/2022/09/06/acme-sh/"/>
     <id>https://nnsay.github.io/2022/09/06/acme-sh/</id>
     <published>2022-09-06T04:04:12.000Z</published>
-    <updated>2023-04-07T10:00:23.552Z</updated>
+    <updated>2023-04-10T03:43:39.629Z</updated>
     
     
     <summary type="html">使用证书管理客户端(acme.sh)快速管理和维护证书</summary>
@@ -154,7 +154,7 @@
     <link href="https://nnsay.github.io/2022/08/03/springboot-zipkin-trace-on-aliyun/"/>
     <id>https://nnsay.github.io/2022/08/03/springboot-zipkin-trace-on-aliyun/</id>
     <published>2022-08-03T10:10:19.000Z</published>
-    <updated>2023-04-07T10:00:23.560Z</updated>
+    <updated>2023-04-10T03:43:39.637Z</updated>
     
     
     <summary type="html">如何在阿里云上搭建Springboot微服务链路追踪系统</summary>
@@ -177,7 +177,7 @@
     <link href="https://nnsay.github.io/2022/07/01/mount-aliyun-drive/"/>
     <id>https://nnsay.github.io/2022/07/01/mount-aliyun-drive/</id>
     <published>2022-07-01T08:24:56.000Z</published>
-    <updated>2023-04-07T10:00:23.560Z</updated>
+    <updated>2023-04-10T03:43:39.637Z</updated>
     
     
     <summary type="html">挂载阿里云盘到本地(MacOS)</summary>
@@ -196,7 +196,7 @@
     <link href="https://nnsay.github.io/2022/05/07/volta/"/>
     <id>https://nnsay.github.io/2022/05/07/volta/</id>
     <published>2022-05-07T02:52:18.000Z</published>
-    <updated>2023-04-07T10:00:23.560Z</updated>
+    <updated>2023-04-10T03:43:39.637Z</updated>
     
     
     <summary type="html">全局和项目级别的javascrpt工具版本控制工具</summary>
@@ -215,7 +215,7 @@
     <link href="https://nnsay.github.io/2022/04/07/picgo/"/>
     <id>https://nnsay.github.io/2022/04/07/picgo/</id>
     <published>2022-04-07T03:06:53.000Z</published>
-    <updated>2023-04-07T10:00:23.560Z</updated>
+    <updated>2023-04-10T03:43:39.637Z</updated>
     
     
     <summary type="html">使用PicGo提供图床服务使Typora协作更优雅</summary>
@@ -234,7 +234,7 @@
     <link href="https://nnsay.github.io/2022/03/16/java-learning/"/>
     <id>https://nnsay.github.io/2022/03/16/java-learning/</id>
     <published>2022-03-16T09:08:34.000Z</published>
-    <updated>2023-04-07T10:00:23.560Z</updated>
+    <updated>2023-04-10T03:43:39.637Z</updated>
     
     
     <summary type="html">SpringBoot+MybatisPlus+JUnit</summary>
@@ -253,7 +253,7 @@
     <link href="https://nnsay.github.io/2022/02/21/yueqian/"/>
     <id>https://nnsay.github.io/2022/02/21/yueqian/</id>
     <published>2022-02-21T07:18:46.000Z</published>
-    <updated>2023-04-07T10:00:23.564Z</updated>
+    <updated>2023-04-10T03:43:39.641Z</updated>
     
     
     <summary type="html">&lt;&lt;跃迁:成为高手的技术&gt;&gt;阅读笔记</summary>
@@ -270,7 +270,7 @@
     <link href="https://nnsay.github.io/2022/02/13/knative-autoscaling/"/>
     <id>https://nnsay.github.io/2022/02/13/knative-autoscaling/</id>
     <published>2022-02-13T16:36:33.000Z</published>
-    <updated>2023-04-07T10:00:23.560Z</updated>
+    <updated>2023-04-10T03:43:39.637Z</updated>
     
     
     <summary type="html">Knative自动伸缩三个组件的工作原理及协同</summary>
@@ -293,7 +293,7 @@
     <link href="https://nnsay.github.io/2022/01/26/knative-serving-operation/"/>
     <id>https://nnsay.github.io/2022/01/26/knative-serving-operation/</id>
     <published>2022-01-26T06:35:06.000Z</published>
-    <updated>2023-04-07T10:00:23.560Z</updated>
+    <updated>2023-04-10T03:43:39.637Z</updated>
     
     
     <summary type="html">Knative的路由是如何工作</summary>
@@ -316,7 +316,7 @@
     <link href="https://nnsay.github.io/2022/01/21/knative-service-on-aliyun/"/>
     <id>https://nnsay.github.io/2022/01/21/knative-service-on-aliyun/</id>
     <published>2022-01-21T08:36:20.000Z</published>
-    <updated>2023-04-07T10:00:23.560Z</updated>
+    <updated>2023-04-10T03:43:39.637Z</updated>
     
     
     <summary type="html">在阿里云创建Knative服务并练手</summary>
@@ -339,7 +339,7 @@
     <link href="https://nnsay.github.io/2021/10/26/helm/"/>
     <id>https://nnsay.github.io/2021/10/26/helm/</id>
     <published>2021-10-26T06:21:48.000Z</published>
-    <updated>2023-04-07T10:00:23.560Z</updated>
+    <updated>2023-04-10T03:43:39.637Z</updated>
     
     
     <summary type="html">Helm的安装和基本使用</summary>
@@ -360,7 +360,7 @@
     <link href="https://nnsay.github.io/2021/09/15/use-submodule-theme/"/>
     <id>https://nnsay.github.io/2021/09/15/use-submodule-theme/</id>
     <published>2021-09-15T06:05:41.000Z</published>
-    <updated>2023-04-07T10:00:23.560Z</updated>
+    <updated>2023-04-10T03:43:39.637Z</updated>
     
     
     <summary type="html">如何使用子模块的方式管理代码依赖, 以hexo博客主题为例</summary>
@@ -377,7 +377,7 @@
     <link href="https://nnsay.github.io/2021/08/26/markdown-to-pdf/"/>
     <id>https://nnsay.github.io/2021/08/26/markdown-to-pdf/</id>
     <published>2021-08-26T10:09:17.000Z</published>
-    <updated>2023-04-07T10:00:23.560Z</updated>
+    <updated>2023-04-10T03:43:39.637Z</updated>
     
     
     <summary type="html">使用marked+wkhtmltopdf转为mk为pdf</summary>
@@ -396,7 +396,7 @@
     <link href="https://nnsay.github.io/2021/08/17/aliyun-migration-case-study/"/>
     <id>https://nnsay.github.io/2021/08/17/aliyun-migration-case-study/</id>
     <published>2021-08-17T03:50:57.000Z</published>
-    <updated>2023-04-07T10:00:23.552Z</updated>
+    <updated>2023-04-10T03:43:39.629Z</updated>
     
     
     <summary type="html">AWS迁移到阿里云过程中遭遇的问题以及解决方案</summary>

@@ -1,0 +1,27 @@
+<footer class="footer">
+    <%= __('powered_by') %> <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    <% if( theme.baidu && theme.baidu.id ) { %>
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?<%= theme.baidu.id %>";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+    <% } %>
+    <% if (config.mermaid && config.mermaid.enable) { %>
+      <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@<%= config.mermaid.version %>/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: '<%= config.mermaid.options.theme %>' });
+      </script>
+        <!-- <script src='https://unpkg.com/mermaid@<%= config.mermaid.version %>/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script> -->
+    <% } %>
+</footer>

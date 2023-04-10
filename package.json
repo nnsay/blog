@@ -7,7 +7,7 @@
     "clean": "hexo clean",
     "deploy": "npm run me && hexo deploy",
     "server": "npm run me && hexo server",
-    "lnconfig": "ln -f themes/replacement/_config.yml themes/concise/_config.yml",
+    "lnconfig": "ln -f themes/replacement/_config.yml themes/concise/_config.yml && cat themes/replacement/footer.ejs > themes/concise/layout/_partial/footer.ejs",
     "me": "npm run lnconfig && cp themes/images/* themes/concise/source/images/"
   },
   "hexo": {

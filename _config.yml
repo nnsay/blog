@@ -101,9 +101,10 @@ feed:
 # mermaid chart
 mermaid: ## mermaid url https://github.com/knsv/mermaid
   enable: true  # default true
-  version: "8.14.0" # default v8.14.0
+  version: "10" # default v8.14.0
   options:  # find more api options from https://github.com/knsv/mermaid/blob/master/src/mermaidAPI.js
     #startOnload: true  // default true
+    theme: forest
 
 baidu:
   id: 1f97030bb3a44256d81e14447104bef8

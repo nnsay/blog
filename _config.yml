@@ -104,7 +104,7 @@ mermaid: ## mermaid url https://github.com/knsv/mermaid
   version: "10" # default v8.14.0
   options:  # find more api options from https://github.com/knsv/mermaid/blob/master/src/mermaidAPI.js
     #startOnload: true  // default true
-    theme: forest
+    theme: dark #default/neutral/forest/dark/forest/base https://mermaid.js.org/config/theming.html
 
 baidu:
   id: 1f97030bb3a44256d81e14447104bef8

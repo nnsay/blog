@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>自定义Nx插件 | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="1. 创建自定义插件项目Nx作为Monorepo的一个框架方便了monorepo的开发和协作, 如果现有的生成器无法满足业务需求, 可以通过自定义插件的方式自定义生成器, 解决特殊的工程需求. 自定义插件首先需要安装@nrwl/nx-plugin, 使用它可以创建一个新Library的空项目, 在此项目上进行自定义开发, 具体操作如下:12yarn add @nrwl/nx-plugin@latest --devyarn nx g @nrwl/nx-plugin:plugin albedo-nx" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 5.4.2"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E5%88%9B%E5%BB%BA%E8%87%AA%E5%AE%9A%E4%B9%89%E6%8F%92%E4%BB%B6%E9%A1%B9%E7%9B%AE"><span class="toc-text">1. 创建自定义插件项目</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E8%87%AA%E5%AE%9A%E4%B9%89%E4%B8%9A%E5%8A%A1%E9%80%BB%E8%BE%91"><span class="toc-text">2. 自定义业务逻辑</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E6%B5%8B%E8%AF%95%E5%8F%8A%E4%BD%BF%E7%94%A8"><span class="toc-text">3. 测试及使用</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="toc-text">4. 参考文档</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            自定义Nx插件
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2023/04/11/nx-local-plugin/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2023-04-11T04:15:40.000Z" itemprop="datePublished">2023-04-11</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/DevOps/" rel="tag">DevOps</a>, <a class="article-tag-link" href="/tags/Tips/" rel="tag">Tips</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h1 id="1-创建自定义插件项目"><a href="#1-创建自定义插件项目" class="headerlink" title="1. 创建自定义插件项目"></a>1. 创建自定义插件项目</h1><p>Nx作为Monorepo的一个框架方便了monorepo的开发和协作, 如果现有的生成器无法满足业务需求, 可以通过自定义插件的方式自定义生成器, 解决特殊的工程需求. 自定义插件首先需要安装<code>@nrwl/nx-plugin</code>, 使用它可以创建一个新<code>Library</code>的空项目, 在此项目上进行自定义开发, 具体操作如下:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">yarn add @nrwl/nx-plugin@latest --dev</span><br><span class="line">yarn nx g @nrwl/nx-plugin:plugin albedo-nx-plugin --importPath @albedo-inc/albedo-nx-plugin</span><br></pre></td></tr></table></figure>
+
+<p>生成自定义生成器后核心代码如下:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">libs/albedo-nx-plugin</span><br><span class="line">├── README.md</span><br><span class="line">├── executors.json</span><br><span class="line">├── generators.json</span><br><span class="line">├── jest.config.ts</span><br><span class="line">├── package.json</span><br><span class="line">├── project.json</span><br><span class="line">├── src</span><br><span class="line">│   ├── executors</span><br><span class="line">│   │   └── build</span><br><span class="line">│   │       ├── executor.spec.ts</span><br><span class="line">│   │       ├── executor.ts</span><br><span class="line">│   │       ├── schema.d.ts</span><br><span class="line">│   │       └── schema.json</span><br><span class="line">│   ├── generators</span><br><span class="line">│   │   └── albedo-nx-plugin</span><br><span class="line">│   │       ├── files</span><br><span class="line">│   │       │   └── src</span><br><span class="line">│   │       │       └── index.ts__template__</span><br><span class="line">│   │       ├── generator.spec.ts</span><br><span class="line">│   │       ├── generator.ts</span><br><span class="line">│   │       ├── schema.d.ts</span><br><span class="line">│   │       └── schema.json</span><br><span class="line">│   └── index.ts</span><br><span class="line">├── tsconfig.json</span><br><span class="line">├── tsconfig.lib.json</span><br><span class="line">└── tsconfig.spec.json</span><br></pre></td></tr></table></figure>
+
+<p>需要注意的是创建plugin会引起<code>package.json</code>新增依赖项:</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">	<span class="attr">&quot;dependencies&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">		<span class="attr">&quot;@swc/helpers&quot;</span><span class="punctuation">:</span> <span class="string">&quot;~0.4.11&quot;</span></span><br><span class="line">	<span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;devDependencies&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;jsonc-eslint-parser&quot;</span><span class="punctuation">:</span> <span class="string">&quot;^2.1.0&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;@swc-node/register&quot;</span><span class="punctuation">:</span> <span class="string">&quot;^1.4.2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;@swc/cli&quot;</span><span class="punctuation">:</span> <span class="string">&quot;~0.1.55&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;@swc/core&quot;</span><span class="punctuation">:</span> <span class="string">&quot;^1.2.173&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;@types/node&quot;</span><span class="punctuation">:</span> <span class="string">&quot;16.11.7&quot;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h1 id="2-自定义业务逻辑"><a href="#2-自定义业务逻辑" class="headerlink" title="2. 自定义业务逻辑"></a>2. 自定义业务逻辑</h1><p>为了讲解和说明这里定义一个用户故事: 使用生成器选择已经存在应用类型的项目对其<code>project.json</code>中的build taget进行多环境配置修改. 具体操作如下:</p>
+<ul>
+<li><p>删除必要的文件</p>
+<ul>
+<li><p>src&#x2F;executors: 根据用户故事插件是一个生成器&#x2F;修改器不是执行器, 所以这个目录可以删除</p>
+</li>
+<li><p>executors.json: 同上</p>
+</li>
+<li><p>src&#x2F;generators&#x2F;files: 不需要生成新文件</p>
+</li>
+</ul>
+</li>
+<li><p>修改生成器的名字</p>
+<p><code>generators.json</code> L6</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;$schema&quot;</span><span class="punctuation">:</span> <span class="string">&quot;http://json-schema.org/schema&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;albedo-nx-plugin&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;version&quot;</span><span class="punctuation">:</span> <span class="string">&quot;0.0.1&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;generators&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;env-config&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;factory&quot;</span><span class="punctuation">:</span> <span class="string">&quot;./src/generators/env-config/generator&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;schema&quot;</span><span class="punctuation">:</span> <span class="string">&quot;./src/generators/env-config/schema.json&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span> <span class="string">&quot;env-config generator&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>修改schema, 选择project</p>
+<p>修改生成器文件<code>src/generators/schema.json</code></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;$schema&quot;</span><span class="punctuation">:</span> <span class="string">&quot;http://json-schema.org/schema&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;cli&quot;</span><span class="punctuation">:</span> <span class="string">&quot;nx&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;$id&quot;</span><span class="punctuation">:</span> <span class="string">&quot;EnvConfig&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;title&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;object&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;properties&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;projectName&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;type&quot;</span><span class="punctuation">:</span> <span class="string">&quot;string&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;description&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Application project name&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;$default&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;$source&quot;</span><span class="punctuation">:</span> <span class="string">&quot;argv&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="attr">&quot;index&quot;</span><span class="punctuation">:</span> <span class="number">0</span></span><br><span class="line">      <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;x-prompt&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Which project to change?&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;x-dropdown&quot;</span><span class="punctuation">:</span> <span class="string">&quot;projects&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;required&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;projectName&quot;</span><span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>同时需要修: <code>src/generators/schema.d.ts</code> 这个类型需要和<code>src/generators/schema.json</code>对应</p>
+</blockquote>
+</li>
+<li><p>加载project的配置&#x2F;修改&#x2F;保存</p>
+<p>修改自定义生成器<code>generator.ts</code>文件, 编写业务逻辑</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; readProjectConfiguration, <span class="title class_">Tree</span>, updateProjectConfiguration &#125; <span class="keyword">from</span> <span class="string">&#x27;@nrwl/devkit&#x27;</span></span><br><span class="line"><span class="keyword">import</span> &#123; <span class="title class_">EnvConfigGeneratorSchema</span> &#125; <span class="keyword">from</span> <span class="string">&#x27;./schema&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> <span class="keyword">async</span> <span class="keyword">function</span> (<span class="params">tree: Tree, options: EnvConfigGeneratorSchema</span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> projectConfig = <span class="title function_">readProjectConfiguration</span>(tree, options.<span class="property">projectName</span>)</span><br><span class="line">  <span class="keyword">if</span> (projectConfig.<span class="property">projectType</span> === <span class="string">&#x27;application&#x27;</span>) &#123;</span><br><span class="line">    projectConfig.<span class="property">targets</span>.<span class="property">build</span>.<span class="property">configurations</span> = &#123;</span><br><span class="line">      <span class="attr">sandbox</span>: &#123;</span><br><span class="line">        <span class="attr">mode</span>: <span class="string">&#x27;development&#x27;</span>,</span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="attr">dev</span>: &#123;</span><br><span class="line">        <span class="attr">mode</span>: <span class="string">&#x27;development&#x27;</span>,</span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="attr">staging</span>: &#123;</span><br><span class="line">        <span class="attr">mode</span>: <span class="string">&#x27;proudction&#x27;</span>,</span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="attr">prod</span>: &#123;</span><br><span class="line">        <span class="attr">mode</span>: <span class="string">&#x27;proudction&#x27;</span>,</span><br><span class="line">      &#125;,</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="title function_">updateProjectConfiguration</span>(tree, options.<span class="property">projectName</span>, projectConfig)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h1 id="3-测试及使用"><a href="#3-测试及使用" class="headerlink" title="3. 测试及使用"></a>3. 测试及使用</h1><ul>
+<li><p>使用交互式方式</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># frontend</span></span><br><span class="line">yarn nx g @albedo-inc/albedo-nx-plugin:env-config</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>直接传递参数方式</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yarn nx g @albedo-inc/albedo-nx-plugin:env-config --projectName albedo-dashboard</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h1 id="4-参考文档"><a href="#4-参考文档" class="headerlink" title="4. 参考文档"></a>4. 参考文档</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://nx.dev/recipes/generators">nx generators</a></li>
+<li><a target="_blank" rel="noopener" href="https://nx.dev/packages/devkit/documents/nrwl_devkit">nrwl_devkit</a></li>
+</ul>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2023/04/07/github-reuse-workflow/" class="article-next" title="Github Action复用工作流"><i class="icon-arrow-right"></i></a>
+
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "6c15245f63ff7dba14bfd7aa3e5cff88",
+        distractionFreeMode: true,
+        title: "自定义Nx插件",
+        body: "https://nnsay.github.io/2023/04/11/nx-local-plugin/",
+        labels: ["Tips","DevOps"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?1f97030bb3a44256d81e14447104bef8";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+    
+    
+      <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+      </script>
+        <!-- <script src='https://unpkg.com/mermaid@10/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script> -->
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

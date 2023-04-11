@@ -9,139 +9,6 @@
   </url>
   
   <url>
-    <loc>https://nnsay.github.io/2022/01/26/knative-serving-operation/</loc>
-    
-    <lastmod>2023-04-11</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2020/09/16/log-server-custom-domain-does-not-work/</loc>
-    
-    <lastmod>2023-04-11</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2019/12/04/make-effective-communication/</loc>
-    
-    <lastmod>2023-04-11</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2021/08/26/markdown-to-pdf/</loc>
-    
-    <lastmod>2023-04-11</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2023/03/04/monorepo/</loc>
-    
-    <lastmod>2023-04-11</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2022/07/01/mount-aliyun-drive/</loc>
-    
-    <lastmod>2023-04-11</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2023/03/31/move-aws-lambda-into-vpc/</loc>
-    
-    <lastmod>2023-04-11</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2019/10/21/multi-key-for-git/</loc>
-    
-    <lastmod>2023-04-11</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2021/01/14/nodejs-OOM-in-production/</loc>
-    
-    <lastmod>2023-04-11</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2023/04/11/nx-local-plugin/</loc>
-    
-    <lastmod>2023-04-11</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2019/10/20/okr/</loc>
-    
-    <lastmod>2023-04-11</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2022/04/07/picgo/</loc>
-    
-    <lastmod>2023-04-11</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2020/02/06/s3-file-zip-download-by-stream/</loc>
-    
-    <lastmod>2023-04-11</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2021/04/16/setup%20docker%20registry%20with%20custom%20auth/</loc>
-    
-    <lastmod>2023-04-11</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2020/11/04/setup-develop-environment-under-the-ubuntu-os/</loc>
-    
-    <lastmod>2023-04-11</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2019/10/24/shell-script-pass-parameter/</loc>
-    
-    <lastmod>2023-04-11</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2019/10/20/shell-weather/</loc>
-    
-    <lastmod>2023-04-11</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2020/11/13/simple-three-step-to-publish-local-server-or-website/</loc>
-    
-    <lastmod>2023-04-11</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2019/11/18/soft-delete/</loc>
-    
-    <lastmod>2023-04-11</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>https://nnsay.github.io/2022/08/03/springboot-zipkin-trace-on-aliyun/</loc>
     
     <lastmod>2023-04-11</lastmod>
@@ -297,6 +164,139 @@
   
   <url>
     <loc>https://nnsay.github.io/2022/01/21/knative-service-on-aliyun/</loc>
+    
+    <lastmod>2023-04-11</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2022/01/26/knative-serving-operation/</loc>
+    
+    <lastmod>2023-04-11</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2020/09/16/log-server-custom-domain-does-not-work/</loc>
+    
+    <lastmod>2023-04-11</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2019/12/04/make-effective-communication/</loc>
+    
+    <lastmod>2023-04-11</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2021/08/26/markdown-to-pdf/</loc>
+    
+    <lastmod>2023-04-11</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2023/03/04/monorepo/</loc>
+    
+    <lastmod>2023-04-11</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2022/07/01/mount-aliyun-drive/</loc>
+    
+    <lastmod>2023-04-11</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2023/03/31/move-aws-lambda-into-vpc/</loc>
+    
+    <lastmod>2023-04-11</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2019/10/21/multi-key-for-git/</loc>
+    
+    <lastmod>2023-04-11</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2021/01/14/nodejs-OOM-in-production/</loc>
+    
+    <lastmod>2023-04-11</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2023/04/11/nx-local-plugin/</loc>
+    
+    <lastmod>2023-04-11</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2019/10/20/okr/</loc>
+    
+    <lastmod>2023-04-11</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2022/04/07/picgo/</loc>
+    
+    <lastmod>2023-04-11</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2020/02/06/s3-file-zip-download-by-stream/</loc>
+    
+    <lastmod>2023-04-11</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2021/04/16/setup%20docker%20registry%20with%20custom%20auth/</loc>
+    
+    <lastmod>2023-04-11</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2020/11/04/setup-develop-environment-under-the-ubuntu-os/</loc>
+    
+    <lastmod>2023-04-11</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2019/10/24/shell-script-pass-parameter/</loc>
+    
+    <lastmod>2023-04-11</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2019/10/20/shell-weather/</loc>
+    
+    <lastmod>2023-04-11</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2020/11/13/simple-three-step-to-publish-local-server-or-website/</loc>
+    
+    <lastmod>2023-04-11</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2019/11/18/soft-delete/</loc>
     
     <lastmod>2023-04-11</lastmod>
     

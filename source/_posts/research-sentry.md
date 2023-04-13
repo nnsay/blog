@@ -146,11 +146,11 @@ Error: some error: 2023-3-13 15:5:4
 
 > 注意: NODE_OPTIONS=--enable-source-maps 这是可以获取源代码行号的关键
 
-### 2.2 Sentry Issue 列表:
+### 2.2 Sentry Issue 列表
 
 ![image-20230413161640874](https://raw.githubusercontent.com/nnsay/gist/main/imgimage-20230413161640874.png)
 
-### 2.3 Sentry Issue 详情:
+### 2.3 Sentry Issue 详情
 
 ![image-20230413161714352](https://raw.githubusercontent.com/nnsay/gist/main/imgimage-20230413161714352.png)
 
@@ -186,3 +186,9 @@ Error: some error: 2023-3-13 15:5:4
     ```
 
   另外使用`source-map-support`可以不用`NODE_OPTIONS`
+
+## 4. 其他
+
+- 性能取舍
+
+  添加 source map 后肯定会影响性能, 但是这种方式给开发者了快速定位了问题. 在测试 lambda 的过程中发现 sentry 的 sdk 会生成一个跳转到 cloudwatch 的日志, 所以可以做一个平衡: _监控报警使用 sentry, 而具体问题排查使用日志_.

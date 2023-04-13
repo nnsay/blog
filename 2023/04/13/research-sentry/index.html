@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>Sentry+Nestjs | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="0. 业务背景介绍Nestjs: 一个 nodejs 后端开发框架, 类似与 express 和 koa, 但是特点是: 面向 OOP 编程方式Sentry: 一个基于事件的应用程序监控服务, 通过在应用程序中使用其 sdk 可以无侵入性的捕获程序异常和错误的问题, 然后发送到 sentry SAAS, 开发者可以通过 SAAS 平台对问题进行分析&amp;#x2F;分配&amp;#x2F;解决.​ 本文重点介绍针对已经有的 Nestjs 应用程序如何添加和配置 Sentry, 达到服务监控的目的. 在实践之前" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 5.4.2"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0-%E4%B8%9A%E5%8A%A1%E8%83%8C%E6%99%AF%E4%BB%8B%E7%BB%8D"><span class="toc-text">0. 业务背景介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E9%85%8D%E7%BD%AE-Sentry"><span class="toc-text">1. 配置 Sentry</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-1-%E5%AE%89%E8%A3%85%E4%BE%9D%E8%B5%96"><span class="toc-text">1.1 安装依赖</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-2-%E9%9B%86%E6%88%90-Sentry"><span class="toc-text">1.2 集成 Sentry</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-3-webpack-%E9%85%8D%E7%BD%AE"><span class="toc-text">1.3 webpack 配置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#1-4-%E6%89%93%E5%8C%85"><span class="toc-text">1.4 打包</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E6%89%A7%E8%A1%8C%E5%92%8C%E9%AA%8C%E8%AF%81"><span class="toc-text">2. 执行和验证</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-%E8%A7%A6%E5%8F%91%E9%94%99%E8%AF%AF%E6%97%A5%E5%BF%97"><span class="toc-text">2.1 触发错误日志</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-Sentry-Issue-%E5%88%97%E8%A1%A8"><span class="toc-text">2.2 Sentry Issue 列表:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-Sentry-Issue-%E8%AF%A6%E6%83%85"><span class="toc-text">2.3 Sentry Issue 详情:</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-4-%E5%85%B6%E4%BB%96%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C"><span class="toc-text">2.4 其他测试结果</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-Troubleshooting"><span class="toc-text">3. Troubleshooting</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            Sentry+Nestjs
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2023/04/13/research-sentry/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2023-04-13T09:56:48.000Z" itemprop="datePublished">2023-04-13</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/DevOps/" rel="tag">DevOps</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h2 id="0-业务背景介绍"><a href="#0-业务背景介绍" class="headerlink" title="0. 业务背景介绍"></a>0. 业务背景介绍</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://nestjs.com/">Nestjs:</a> 一个 nodejs 后端开发框架, 类似与 express 和 koa, 但是特点是: 面向 OOP 编程方式</li>
+<li><a target="_blank" rel="noopener" href="https://sentry.io/">Sentry</a>: 一个基于事件的应用程序监控服务, 通过在应用程序中使用其 sdk 可以无侵入性的捕获程序异常和错误的问题, 然后发送到 sentry SAAS, 开发者可以通过 SAAS 平台对问题进行分析&#x2F;分配&#x2F;解决.</li>
+</ul>
+<p>​ 本文重点介绍针对已经有的 Nestjs 应用程序如何添加和配置 Sentry, 达到服务监控的目的. 在实践之前需要提前做的准备有:</p>
+<ul>
+<li>一个 nestjs 应用程序<ul>
+<li>至少有一个路由可以出发一个自定义异常</li>
+</ul>
+</li>
+<li>注册完成 sentry<ul>
+<li>创建一个<code>node-express</code>的项目</li>
+<li><strong>获取 dsn 信息</strong></li>
+</ul>
+</li>
+</ul>
+<h2 id="1-配置-Sentry"><a href="#1-配置-Sentry" class="headerlink" title="1. 配置 Sentry"></a>1. 配置 Sentry</h2><h3 id="1-1-安装依赖"><a href="#1-1-安装依赖" class="headerlink" title="1.1 安装依赖"></a>1.1 安装依赖</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yarn add @sentry/node</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-2-集成-Sentry"><a href="#1-2-集成-Sentry" class="headerlink" title="1.2 集成 Sentry"></a>1.2 集成 Sentry</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Sentry</span>.<span class="title function_">init</span>(&#123;</span><br><span class="line">  <span class="attr">dsn</span>: <span class="string">&quot;https://xxxx@oyyyy.ingest.sentry.io/zzzz&quot;</span>,</span><br><span class="line">  <span class="attr">integrations</span>: [</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">Sentry</span>.<span class="property">Integrations</span>.<span class="title class_">Http</span>(&#123; <span class="attr">tracing</span>: <span class="literal">true</span> &#125;),</span><br><span class="line">    ...<span class="title class_">Sentry</span>.<span class="title function_">autoDiscoverNodePerformanceMonitoringIntegrations</span>(),</span><br><span class="line">  ],</span><br><span class="line">  <span class="attr">release</span>: <span class="string">&quot;research&quot;</span>, <span class="comment">// should be same with webpack source map release, that means the same version</span></span><br><span class="line">  <span class="attr">tracesSampleRate</span>: <span class="number">1.0</span>,</span><br><span class="line">&#125;);</span><br><span class="line">app.<span class="title function_">useGlobalInterceptors</span>(<span class="keyword">new</span> <span class="title class_">SentryInterceptor</span>());</span><br></pre></td></tr></table></figure>
+
+<p>在 nest 中<code>SentryInterceptor</code>设计如下:</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123;</span><br><span class="line">  <span class="title class_">Injectable</span>,</span><br><span class="line">  <span class="title class_">NestInterceptor</span>,</span><br><span class="line">  <span class="title class_">ExecutionContext</span>,</span><br><span class="line">  <span class="title class_">CallHandler</span>,</span><br><span class="line">&#125; <span class="keyword">from</span> <span class="string">&quot;@nestjs/common&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; <span class="title class_">Observable</span> &#125; <span class="keyword">from</span> <span class="string">&quot;rxjs&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; tap &#125; <span class="keyword">from</span> <span class="string">&quot;rxjs/operators&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> <span class="title class_">Sentry</span> <span class="keyword">from</span> <span class="string">&quot;@sentry/node&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Injectable</span>()</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> <span class="title class_">SentryInterceptor</span> <span class="keyword">implements</span> <span class="title class_">NestInterceptor</span> &#123;</span><br><span class="line">  <span class="title function_">intercept</span>(<span class="attr">context</span>: <span class="title class_">ExecutionContext</span>, <span class="attr">next</span>: <span class="title class_">CallHandler</span>): <span class="title class_">Observable</span>&lt;<span class="built_in">any</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> next.<span class="title function_">handle</span>().<span class="title function_">pipe</span>(</span><br><span class="line">      <span class="title function_">tap</span>(<span class="literal">null</span>, <span class="function">(<span class="params">exception</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="title class_">Sentry</span>.<span class="title function_">captureException</span>(exception);</span><br><span class="line">      &#125;)</span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-3-webpack-配置"><a href="#1-3-webpack-配置" class="headerlink" title="1.3 webpack 配置"></a>1.3 webpack 配置</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* eslint-disable @typescript-eslint/no-var-requires */</span></span><br><span class="line"><span class="keyword">const</span> path = <span class="built_in">require</span>(<span class="string">&quot;path&quot;</span>);</span><br><span class="line"><span class="comment">// const SentryWebpackPlugin = require(&quot;@sentry/webpack-plugin&quot;);</span></span><br><span class="line"></span><br><span class="line"><span class="variable language_">module</span>.<span class="property">exports</span> = <span class="function">(<span class="params">options, webpack</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">const</span> lazyImports = [</span><br><span class="line">    <span class="string">&quot;@nestjs/microservices/microservices-module&quot;</span>,</span><br><span class="line">    <span class="string">&quot;@nestjs/websockets/socket-module&quot;</span>,</span><br><span class="line">    <span class="string">&quot;class-transformer/storage&quot;</span>,</span><br><span class="line">  ];</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> &#123;</span><br><span class="line">    ...options,</span><br><span class="line">    <span class="attr">devtool</span>: <span class="string">&quot;source-map&quot;</span>,</span><br><span class="line">    <span class="attr">entry</span>: path.<span class="title function_">resolve</span>(__dirname, <span class="string">&quot;src/main.ts&quot;</span>),</span><br><span class="line">    <span class="attr">output</span>: &#123;</span><br><span class="line">      <span class="attr">filename</span>: <span class="string">&quot;main.js&quot;</span>,</span><br><span class="line">      <span class="attr">path</span>: path.<span class="title function_">resolve</span>(__dirname, <span class="string">&quot;dist&quot;</span>),</span><br><span class="line">      <span class="attr">sourceMapFilename</span>: <span class="string">&quot;main.js.map&quot;</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">externals</span>: [],</span><br><span class="line">    <span class="attr">plugins</span>: [</span><br><span class="line">      ...options.<span class="property">plugins</span>,</span><br><span class="line">      <span class="keyword">new</span> webpack.<span class="title class_">IgnorePlugin</span>(&#123;</span><br><span class="line">        <span class="title function_">checkResource</span>(<span class="params">resource</span>) &#123;</span><br><span class="line">          <span class="keyword">if</span> (lazyImports.<span class="title function_">includes</span>(resource)) &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">              <span class="built_in">require</span>.<span class="title function_">resolve</span>(resource);</span><br><span class="line">            &#125; <span class="keyword">catch</span> (err) &#123;</span><br><span class="line">              <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">            &#125;</span><br><span class="line">          &#125;</span><br><span class="line">          <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">        &#125;,</span><br><span class="line">      &#125;),</span><br><span class="line">    ],</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3 id="1-4-打包"><a href="#1-4-打包" class="headerlink" title="1.4 打包"></a>1.4 打包</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">➜  npm run build</span><br><span class="line">➜  tree dist</span><br><span class="line">dist</span><br><span class="line">├── lambda.js</span><br><span class="line">└── lambda.js.map</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-执行和验证"><a href="#2-执行和验证" class="headerlink" title="2. 执行和验证"></a>2. 执行和验证</h2><pre class="mermaid">flowchart TD
+R(运行程序)-.->T(触发错误)
+T(触发错误)-.->C(检查错误)
+T(触发错误)-.->L(日志行号)</pre>
+
+<h3 id="2-1-触发错误日志"><a href="#2-1-触发错误日志" class="headerlink" title="2.1 触发错误日志"></a>2.1 触发错误日志</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 运行程序,触发错误,观察日志</span></span><br><span class="line">NODE_OPTIONS=--enable-source-maps node dist/main.js</span><br><span class="line">...</span><br><span class="line">[Nest] 23930  - 2023/04/13 15:05:04   ERROR [ExceptionsHandler] some error: 2023-3-13 15:5:4</span><br><span class="line">Error: some error: 2023-3-13 15:5:4</span><br><span class="line">    at AppController.error (webpack://serverless-tutorial/./src/app.controller.ts:35:11)</span><br><span class="line">    at webpack://serverless-tutorial/./node_modules/@nestjs/core/router/router-execution-context.js:38:1</span><br><span class="line">    at InterceptorsConsumer.transformDeferred (webpack://serverless-tutorial/./node_modules/@nestjs/core/interceptors/interceptors-consumer.js:31:1)</span><br><span class="line">    at webpack://serverless-tutorial/./node_modules/@nestjs/core/interceptors/interceptors-consumer.js:15:1</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意: NODE_OPTIONS&#x3D;–enable-source-maps 这是可以获取源代码行号的关键</p>
+</blockquote>
+<h3 id="2-2-Sentry-Issue-列表"><a href="#2-2-Sentry-Issue-列表" class="headerlink" title="2.2 Sentry Issue 列表:"></a>2.2 Sentry Issue 列表:</h3><p><img src="https://raw.githubusercontent.com/nnsay/gist/main/imgimage-20230413161640874.png" alt="image-20230413161640874"></p>
+<h3 id="2-3-Sentry-Issue-详情"><a href="#2-3-Sentry-Issue-详情" class="headerlink" title="2.3 Sentry Issue 详情:"></a>2.3 Sentry Issue 详情:</h3><p><img src="https://raw.githubusercontent.com/nnsay/gist/main/imgimage-20230413161714352.png" alt="image-20230413161714352"></p>
+<h3 id="2-4-其他测试结果"><a href="#2-4-其他测试结果" class="headerlink" title="2.4 其他测试结果"></a>2.4 其他测试结果</h3><table>
+<thead>
+<tr>
+<th>测试项</th>
+<th>SourceMap 工作?</th>
+<th>Sentry 工作?</th>
+<th>注意</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>本地 nest api service</td>
+<td>y</td>
+<td>y</td>
+<td>使用@sentry&#x2F;node</td>
+</tr>
+<tr>
+<td>本地 aws lambda</td>
+<td>y</td>
+<td>y</td>
+<td>使用@sentry&#x2F;serverless</td>
+</tr>
+<tr>
+<td>aws lambda</td>
+<td>no</td>
+<td>y</td>
+<td>使用@sentry&#x2F;serverless<br />lambda 使用 serverless 框架创建</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>aws lambda source map 问题见 Troubleshooting</p>
+</blockquote>
+<h2 id="3-Troubleshooting"><a href="#3-Troubleshooting" class="headerlink" title="3. Troubleshooting"></a>3. Troubleshooting</h2><ul>
+<li><p>aws lambda 为什么 SourceMap 不工作?</p>
+<p>这可能与 aws lambda nodejs 运行时有关, 可以从<a target="_blank" rel="noopener" href="https://github.com/aws/aws-cdk/issues/19067">这个 issue</a>获取信息 <a target="_blank" rel="noopener" href="https://serverless.pub/aws-lambda-node-sourcemaps/">解决方案</a>: 使用<a target="_blank" rel="noopener" href="https://www.npmjs.com/package/source-map-support">source-map-support</a>包, 具体做法如下:</p>
+<ul>
+<li><p>安装包</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yarn add source-map-support</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>修改入口文件, 增加如下代码在顶部</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># nodejs</span><br><span class="line"><span class="built_in">require</span>(<span class="string">&#x27;source-map-support&#x27;</span>).<span class="title function_">install</span>();</span><br><span class="line"># es6 or typescript</span><br><span class="line"><span class="keyword">import</span> <span class="string">&#x27;source-map-support/register&#x27;</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>另外使用<code>source-map-support</code>可以不用<code>NODE_OPTIONS</code></p>
+</li>
+</ul>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2023/04/11/nx-local-plugin/" class="article-next" title="自定义Nx插件"><i class="icon-arrow-right"></i></a>
+
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "26d9fbc4887f5779e1a1e48891f51d41",
+        distractionFreeMode: true,
+        title: "Sentry+Nestjs",
+        body: "https://nnsay.github.io/2023/04/13/research-sentry/",
+        labels: ["DevOps"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?1f97030bb3a44256d81e14447104bef8";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+    
+    
+      <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+      </script>
+        <!-- <script src='https://unpkg.com/mermaid@10/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script> -->
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

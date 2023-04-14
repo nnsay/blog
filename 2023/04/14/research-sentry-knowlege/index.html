@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>Sentry快速上手 | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="0. 背景介绍Sentry 是个较为庞大的监控系统, 本文第一节: 旨在介绍核心知识: Issue; 第二节: 使用 code 展示 sentry sdk 的使用方式和技巧, 这些技巧涉及普通应用程序和 lambda, 监控内容上以监控异常为主性能为辅; 第三节: 介绍 sentry 的消息通知方式, 默认是邮件, 本文介绍和 slack 进行结合. 三个章节之后, 开发者可快速了解并实现一套完整的应用程序异常&amp;#x2F;性能捕获和通知提醒的流程.1. IssueIssue: 是一类 bug 或" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 5.4.2"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0-%E8%83%8C%E6%99%AF%E4%BB%8B%E7%BB%8D"><span class="toc-text">0. 背景介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-Issue"><span class="toc-text">1. Issue</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-SDK"><span class="toc-text">2. SDK</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-sentry-x2F-node"><span class="toc-text">2.1 @sentry&#x2F;node</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-sentry-x2F-serverless"><span class="toc-text">2.2 @sentry&#x2F;serverless</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-SDK-%E4%BD%BF%E7%94%A8%E6%8A%80%E5%B7%A7"><span class="toc-text">2.3 SDK 使用技巧</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E8%AD%A6%E6%8A%A5%E9%80%9A%E7%9F%A5"><span class="toc-text">3. 警报通知</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            Sentry快速上手
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2023/04/14/research-sentry-knowlege/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2023-04-14T09:46:40.000Z" itemprop="datePublished">2023-04-14</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/DevOps/" rel="tag">DevOps</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h2 id="0-背景介绍"><a href="#0-背景介绍" class="headerlink" title="0. 背景介绍"></a>0. 背景介绍</h2><p>Sentry 是个较为庞大的监控系统, 本文第一节: 旨在介绍核心知识: Issue; 第二节: 使用 code 展示 sentry sdk 的使用方式和技巧, 这些技巧涉及普通应用程序和 lambda, 监控内容上以监控异常为主性能为辅; 第三节: 介绍 sentry 的消息通知方式, 默认是邮件, 本文介绍和 slack 进行结合. 三个章节之后, 开发者可快速了解并实现一套完整的应用程序异常&#x2F;性能捕获和通知提醒的流程.</p>
+<h2 id="1-Issue"><a href="#1-Issue" class="headerlink" title="1. Issue"></a>1. Issue</h2><ul>
+<li><p>Issue: 是一类 bug 或者 exception(异常), 使用 fingerprint(指纹)定义, 一个 issue 下有一个或者多个 event(事件), 简单起见可以直接理解为 github 的 issue</p>
+</li>
+<li><p>fingerprin: t 定义 event 的一组特征 具体特征有</p>
+<ul>
+<li>events type(事件类型): 可以理解为异常类, 例如: Error&#x2F;TypeError&#x2F;BadRequestException</li>
+<li>value(事件值): 可以理解为异常的 message</li>
+<li>exception stack trace(异常栈跟踪): 这个栈是 sentry 自己的概念</li>
+<li>In-app exception stack trace(应用异常栈跟踪): 这个应用程序本身异常堆栈但是被 sentry 包装了, 可以理解为异常栈</li>
+</ul>
+<blockquote>
+<p><strong>总结</strong></p>
+<p>指纹可以被开发者设置, 如果不设置异常的话, 会对比以上特征</p>
+</blockquote>
+</li>
+<li><p>issue 分类</p>
+<ul>
+<li><p>error issue: 因平台而不同, 通常的代码异常属于该类型, 比如 nodejs 的一些异常</p>
+<ul>
+<li>exception</li>
+<li>uncaught exceptions</li>
+<li>unhandled rejections</li>
+</ul>
+</li>
+<li><p>performance issue: 一组业务的性能问题, 于 error issue 相比, 该类型 issue 通过 trace+metric 方式实现, sentry 支持几种不同自由度的性能分析的实现方式:</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://docs.sentry.io/platforms/node/performance/instrumentation/automatic-instrumentation/">自动测量</a>: sentry sdk 开箱即用的特性, 默认开启</li>
+<li><a target="_blank" rel="noopener" href="https://docs.sentry.io/platforms/node/performance/instrumentation/custom-instrumentation/">自定义测量</a>: 客户端和分析平台还是 sentry, 但是可以自定义 metric</li>
+<li><a target="_blank" rel="noopener" href="https://docs.sentry.io/platforms/node/performance/instrumentation/opentelemetry/">OpenTelemetry</a>: 客户端是 sentry, 分析平台是第三方, 即把 sentry 的 metric 发送到第三方</li>
+</ul>
+<p>除了监控应用程序性能, sentry 也支持<a target="_blank" rel="noopener" href="https://docs.sentry.io/platforms/node/performance/database/">数据性能监控,</a> 该方式也是开箱即用, 如下:</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="title class_">Sentry</span> = <span class="built_in">require</span>(<span class="string">&quot;@sentry/node&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> mongodb = <span class="built_in">require</span>(<span class="string">&quot;mongodb&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 自动检测</span></span><br><span class="line"><span class="title class_">Sentry</span>.<span class="title function_">init</span>(&#123;</span><br><span class="line">  <span class="attr">dsn</span>: <span class="string">&quot;https://xxxx@oyyyy.ingest.sentry.io/zzzz&quot;</span>,</span><br><span class="line">  <span class="attr">integrations</span>: [</span><br><span class="line">    ...<span class="title class_">Sentry</span>.<span class="title function_">autoDiscoverNodePerformanceMonitoringIntegrations</span>(),</span><br><span class="line">  ],</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 指定</span></span><br><span class="line"><span class="title class_">Sentry</span>.<span class="title function_">init</span>(&#123;</span><br><span class="line">  <span class="attr">dsn</span>: <span class="string">&quot;https://xxxx@oyyyy.ingest.sentry.io/zzzz&quot;</span>,</span><br><span class="line">  <span class="attr">integrations</span>: [</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">Sentry</span>.<span class="property">Integrations</span>.<span class="title class_">Mongo</span>(&#123;</span><br><span class="line">      <span class="attr">useMongoose</span>: <span class="literal">true</span>, <span class="comment">// Default: false</span></span><br><span class="line">    &#125;),</span><br><span class="line">  ],</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure></li>
+</ul>
+<blockquote>
+<p>本文重点是 error issue, 性能 issue 仅采用默认开箱即用的方式</p>
+</blockquote>
+</li>
+<li><p>tag(标签): 标签是一组 key-value 值, 可以在<code>captureException</code>的时候自定义,例如</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123;</span><br><span class="line">  <span class="title class_">Injectable</span>,</span><br><span class="line">  <span class="title class_">NestInterceptor</span>,</span><br><span class="line">  <span class="title class_">ExecutionContext</span>,</span><br><span class="line">  <span class="title class_">CallHandler</span>,</span><br><span class="line">&#125; <span class="keyword">from</span> <span class="string">&quot;@nestjs/common&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; <span class="title class_">Observable</span> &#125; <span class="keyword">from</span> <span class="string">&quot;rxjs&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; tap &#125; <span class="keyword">from</span> <span class="string">&quot;rxjs/operators&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> <span class="title class_">Sentry</span> <span class="keyword">from</span> <span class="string">&quot;@sentry/serverless&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; <span class="title class_">Response</span> &#125; <span class="keyword">from</span> <span class="string">&quot;express&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Injectable</span>()</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> <span class="title class_">SentryInterceptor</span> <span class="keyword">implements</span> <span class="title class_">NestInterceptor</span> &#123;</span><br><span class="line">  <span class="title function_">intercept</span>(<span class="attr">context</span>: <span class="title class_">ExecutionContext</span>, <span class="attr">next</span>: <span class="title class_">CallHandler</span>): <span class="title class_">Observable</span>&lt;<span class="built_in">any</span>&gt; &#123;</span><br><span class="line">    <span class="keyword">return</span> next.<span class="title function_">handle</span>().<span class="title function_">pipe</span>(</span><br><span class="line">      <span class="title function_">tap</span>(<span class="literal">null</span>, <span class="function">(<span class="params">exception</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> functionName = context.<span class="title function_">getHandler</span>().<span class="property">name</span>;</span><br><span class="line">        <span class="keyword">const</span> className = context.<span class="title function_">getClass</span>().<span class="property">name</span>;</span><br><span class="line">        <span class="keyword">const</span> cxt = context.<span class="title function_">switchToHttp</span>();</span><br><span class="line">        <span class="keyword">const</span> res = cxt.<span class="property">getResponse</span>&lt;<span class="title class_">Response</span>&gt;();</span><br><span class="line">        <span class="keyword">const</span> captureContext = &#123;</span><br><span class="line">          <span class="attr">extra</span>: &#123;</span><br><span class="line">            <span class="attr">request</span>: &#123;</span><br><span class="line">              <span class="attr">method</span>: res.<span class="property">req</span>.<span class="property">method</span>,</span><br><span class="line">              <span class="attr">params</span>: res.<span class="property">req</span>.<span class="property">params</span>,</span><br><span class="line">              <span class="attr">query</span>: res.<span class="property">req</span>.<span class="property">query</span>,</span><br><span class="line">              <span class="attr">body</span>: res.<span class="property">req</span>.<span class="property">body</span>,</span><br><span class="line">              <span class="attr">url</span>: res.<span class="property">req</span>.<span class="property">url</span>,</span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="attr">response</span>: &#123;</span><br><span class="line">              <span class="attr">statusCode</span>: res.<span class="property">statusCode</span>,</span><br><span class="line">            &#125;,</span><br><span class="line">          &#125;,</span><br><span class="line">          <span class="attr">tags</span>: &#123;</span><br><span class="line">            functionName,</span><br><span class="line">            className,</span><br><span class="line">          &#125;,</span><br><span class="line">        &#125;;</span><br><span class="line">        <span class="title class_">Sentry</span>.<span class="title function_">captureException</span>(exception, captureContext);</span><br><span class="line">      &#125;)</span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>状态</p>
+<table>
+<thead>
+<tr>
+<th>状态</th>
+<th>描述</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>unresolved</td>
+<td>未被解决</td>
+<td></td>
+</tr>
+<tr>
+<td>resolved</td>
+<td>已解决</td>
+<td></td>
+</tr>
+<tr>
+<td>unassigned</td>
+<td>未分配给某人负责解决</td>
+<td></td>
+</tr>
+<tr>
+<td>assigned</td>
+<td>已分配</td>
+<td></td>
+</tr>
+<tr>
+<td>ignored</td>
+<td>已忽略</td>
+<td></td>
+</tr>
+<tr>
+<td>deleted</td>
+<td>已删除 删除后控制台看到</td>
+<td></td>
+</tr>
+</tbody></table>
+</li>
+</ul>
+<p>​ 处以上状态外 issue 还有<code>linked</code>和<code>unlinked</code>的状态, 这个状态和 Github 有关, 指的是关联到 Github Issue.</p>
+<ul>
+<li>Event(事件): sentry 每捕获和发送一个异常就是一个事件, 同一类型的事件以<code>issue</code>的方式呈现</li>
+</ul>
+<h2 id="2-SDK"><a href="#2-SDK" class="headerlink" title="2. SDK"></a>2. SDK</h2><p>因为个人采用 nodejs 进行开发, 所以 SDK 上介绍两种 nodejs sentry 的 sdk: <strong>@sentry&#x2F;node</strong>和**@sentry&#x2F;serverless**.</p>
+<h3 id="2-1-sentry-x2F-node"><a href="#2-1-sentry-x2F-node" class="headerlink" title="2.1 @sentry&#x2F;node"></a>2.1 @sentry&#x2F;node</h3><ul>
+<li><p>默认集成以下插件</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> defaultIntegrations = [</span><br><span class="line">  <span class="comment">// Common</span></span><br><span class="line">  <span class="keyword">new</span> <span class="title class_">CoreIntegrations</span>.<span class="title class_">InboundFilters</span>(),</span><br><span class="line">  <span class="keyword">new</span> <span class="title class_">CoreIntegrations</span>.<span class="title class_">FunctionToString</span>(),</span><br><span class="line">  <span class="comment">// Native Wrappers</span></span><br><span class="line">  <span class="keyword">new</span> <span class="title class_">Console</span>(),</span><br><span class="line">  <span class="keyword">new</span> <span class="title class_">Http</span>(),</span><br><span class="line">  <span class="comment">// Global Handlers</span></span><br><span class="line">  <span class="keyword">new</span> <span class="title class_">OnUncaughtException</span>(),</span><br><span class="line">  <span class="keyword">new</span> <span class="title class_">OnUnhandledRejection</span>(),</span><br><span class="line">  <span class="comment">// Event Info</span></span><br><span class="line">  <span class="keyword">new</span> <span class="title class_">ContextLines</span>(),</span><br><span class="line">  <span class="keyword">new</span> <span class="title class_">LocalVariables</span>(),</span><br><span class="line">  <span class="keyword">new</span> <span class="title class_">Context</span>(),</span><br><span class="line">  <span class="keyword">new</span> <span class="title class_">Modules</span>(),</span><br><span class="line">  <span class="keyword">new</span> <span class="title class_">RequestData</span>(),</span><br><span class="line">  <span class="comment">// Misc</span></span><br><span class="line">  <span class="keyword">new</span> <span class="title class_">LinkedErrors</span>(),</span><br><span class="line">];</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>初始化代码如下:</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> <span class="title class_">Sentry</span> <span class="keyword">from</span> <span class="string">&quot;@sentry/node&quot;</span>;</span><br><span class="line"><span class="title class_">Sentry</span>.<span class="title function_">init</span>(&#123;</span><br><span class="line">  <span class="attr">dsn</span>: <span class="string">&quot;https://xxxx@oyyyy.ingest.sentry.io/zzzz&quot;</span>,</span><br><span class="line">  <span class="attr">integrations</span>: [</span><br><span class="line">    <span class="comment">// Automatically instrument Node.js libraries and frameworks</span></span><br><span class="line">    ...<span class="title class_">Sentry</span>.<span class="title function_">autoDiscoverNodePerformanceMonitoringIntegrations</span>(),</span><br><span class="line">  ],</span><br><span class="line">  <span class="attr">release</span>: <span class="string">&quot;research&quot;</span>,</span><br><span class="line">  <span class="comment">// Set tracesSampleRate to 1.0 to capture 100%</span></span><br><span class="line">  <span class="comment">// of transactions for performance monitoring.</span></span><br><span class="line">  <span class="comment">// We recommend adjusting this value in production</span></span><br><span class="line">  <span class="attr">tracesSampleRate</span>: <span class="number">1.0</span>,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>其他</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://docs.sentry.io/platforms/node/performance/#enable-tracing">该包默认开启了 trancing, 所以可以监控性能问题</a></li>
+</ul>
+</li>
+</ul>
+<h3 id="2-2-sentry-x2F-serverless"><a href="#2-2-sentry-x2F-serverless" class="headerlink" title="2.2 @sentry&#x2F;serverless"></a>2.2 @sentry&#x2F;serverless</h3><p>对@sentry&#x2F;node 的包装, 针对 lambda 特别提供, 具体使用如下</p>
+<ul>
+<li><p>初始化</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> <span class="title class_">Sentry</span> <span class="keyword">from</span> <span class="string">&#x27;@sentry/serverless&#x27;</span></span><br><span class="line"><span class="title class_">Sentry</span>.<span class="property">AWSLambda</span>.<span class="title function_">init</span>(&#123;</span><br><span class="line">  <span class="attr">dsn</span>: <span class="string">&#x27;https://xxxx@oyyyy.ingest.sentry.io/zzzz&#x27;</span></span><br><span class="line">  <span class="attr">release</span>: <span class="string">&#x27;research&#x27;</span>,</span><br><span class="line">	<span class="attr">integrations</span>: [<span class="keyword">new</span> <span class="title class_">CaptureConsole</span>()], <span class="comment">// 捕获console</span></span><br><span class="line">  <span class="comment">// Set tracesSampleRate to 1.0 to capture 100%</span></span><br><span class="line">  <span class="attr">tracesSampleRate</span>: <span class="number">1.0</span>,</span><br><span class="line">  <span class="attr">attachStacktrace</span>: <span class="literal">true</span>,</span><br><span class="line"></span><br><span class="line">  <span class="attr">environment</span>: process.<span class="property">env</span>.<span class="property">ENV_NAME</span> || <span class="string">&#x27;unknown&#x27;</span>,</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>注意</strong><br>integrations 配置不影响默认集成, 默认集成列表在 defaultIntegrations 属性配置, 不配置默认采用@sentry&#x2F;node 默认集成插件</p>
+</blockquote>
+</li>
+<li><p>handler 处理</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> handler = <span class="title class_">Sentry</span>.<span class="property">AWSLambda</span>.<span class="title function_">wrapHandler</span>(</span><br><span class="line">  <span class="function">(<span class="params">event, context, callback</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">Error</span>(<span class="string">&quot;oh, hello there!&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">);</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h3 id="2-3-SDK-使用技巧"><a href="#2-3-SDK-使用技巧" class="headerlink" title="2.3 SDK 使用技巧"></a>2.3 SDK 使用技巧</h3><ul>
+<li><p><a target="_blank" rel="noopener" href="https://docs.sentry.io/platforms/javascript/configuration/">初始化</a></p>
+<ul>
+<li>environment: 同一套代码会运行在不同的环境下, 每个环境都会发送事件, 可以使用<code>environment</code>区分环</li>
+<li>release: 每个环境会迭代不同的版本使用<code>release</code>区分版本</li>
+<li>tracesSampleRate: 设置采样率, 监控很重要但是也不能影响业务逻辑, 一定程度的丢失采样是可以接受的, 另外发送采样也是影响性能的, 所以开发者可以权衡后设置采样率</li>
+</ul>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> <span class="title class_">Sentry</span> <span class="keyword">from</span> <span class="string">&#x27;@sentry/serverless&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="title class_">Sentry</span>.<span class="property">AWSLambda</span>.<span class="title function_">init</span>(&#123;</span><br><span class="line">  <span class="attr">dsn</span>: <span class="string">&#x27;https://xxxx@oyyyy.ingest.sentry.io/zzzz&#x27;</span></span><br><span class="line">  <span class="attr">release</span>: <span class="string">&#x27;research&#x27;</span>,</span><br><span class="line">  <span class="attr">tracesSampleRate</span>: <span class="number">1.0</span>,   <span class="comment">// Set tracesSampleRate to 1.0 to capture 100%</span></span><br><span class="line">  <span class="attr">environment</span>: process.<span class="property">env</span>.<span class="property">ENV_NAME</span> || <span class="string">&#x27;unknown&#x27;</span>,</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>捕获 console</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; <span class="title class_">CaptureConsole</span> &#125; <span class="keyword">from</span> <span class="string">&#x27;@sentry/integrations&#x27;</span></span><br><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> <span class="title class_">Sentry</span> <span class="keyword">from</span> <span class="string">&#x27;@sentry/serverless&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="title class_">Sentry</span>.<span class="property">AWSLambda</span>.<span class="title function_">init</span>(&#123;</span><br><span class="line">  <span class="attr">dsn</span>: <span class="string">&#x27;https://xxxx@oyyyy.ingest.sentry.io/zzzz&#x27;</span></span><br><span class="line">  <span class="attr">release</span>: <span class="string">&#x27;research&#x27;</span>,</span><br><span class="line">	<span class="attr">integrations</span>: [<span class="keyword">new</span> <span class="title class_">CaptureConsole</span>()],</span><br><span class="line">  <span class="comment">// Set tracesSampleRate to 1.0 to capture 100%</span></span><br><span class="line">  <span class="attr">tracesSampleRate</span>: <span class="number">1.0</span>,</span><br><span class="line">  <span class="attr">attachStacktrace</span>: <span class="literal">true</span>,</span><br><span class="line"></span><br><span class="line">  <span class="attr">environment</span>: process.<span class="property">env</span>.<span class="property">ENV_NAME</span> || <span class="string">&#x27;unknown&#x27;</span>,</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p><strong>注意</strong><br>integrations 配置不影响默认集成, 默认集成列表在 defaultIntegrations 属性配置, 不配置默认采用@sentry&#x2F;node 默认集成插件</p>
+</blockquote>
+</li>
+<li><p>捕获 try-catch</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">  <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">Error</span>(<span class="string">&quot;try catch error&quot;</span>);</span><br><span class="line">&#125; <span class="keyword">catch</span> (err) &#123;</span><br><span class="line">  <span class="title class_">Sentry</span>.<span class="property">AWSLambda</span>.<span class="title function_">captureException</span>(err);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>中间件捕获</p>
+<p>依赖<code>captureException</code>方法, 参考<code>1. Issue</code>中标签的例子中的<code>SentryInterceptor</code>的拦截器的设计</p>
+</li>
+<li><p>提交异常额外信息</p>
+<p>依赖<code>captureException</code>方法, 参考<code>1. Issue</code>中标签的例子中的<code>SentryInterceptor</code>的拦截器中<em>L17</em>的定义</p>
+</li>
+<li><p>自定义异常标签</p>
+<p>依赖<code>captureException</code>方法, 参考<code>1. Issue</code>中标签的例子中的<code>SentryInterceptor</code>的拦截器中<em>L29</em>的定义</p>
+</li>
+<li><p>自定义上下文信息</p>
+<p>在 sentry 控制台可以看到 issue 的详细信息, 在 lambda 中还有非常有用的上下文信息, 这里以 lambda 中 cloudwatch 的链接为例, 在 sentry 源码中 cloudwatch 的地址域名是写死的, 我们可以使用<code>Sentry.AWSLambda.configureScope</code>定义自己的上下文, 代码如下:</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> handler = <span class="title class_">Sentry</span>.<span class="property">AWSLambda</span>.<span class="title function_">wrapHandler</span>(</span><br><span class="line">  <span class="function">(<span class="params">event, context, callback</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="title class_">Sentry</span>.<span class="property">AWSLambda</span>.<span class="title function_">configureScope</span>(<span class="function">(<span class="params">scope</span>) =&gt;</span> &#123;</span><br><span class="line">      scope.<span class="title function_">setContext</span>(<span class="string">&quot;aws.cloudwatch.logs.cn&quot;</span>, &#123;</span><br><span class="line">        <span class="attr">log_group</span>: context.<span class="property">logGroupName</span>,</span><br><span class="line">        <span class="attr">log_stream</span>: context.<span class="property">logStreamName</span>,</span><br><span class="line">        <span class="attr">url</span>: <span class="string">`https://<span class="subst">$&#123;</span></span></span><br><span class="line"><span class="subst"><span class="string">          process.env.AWS_REGION.startsWith(<span class="string">&quot;cn-&quot;</span>)</span></span></span><br><span class="line"><span class="subst"><span class="string">            ? <span class="string">`<span class="subst">$&#123;process.env.AWS_REGION&#125;</span>.console.amazonaws.cn`</span></span></span></span><br><span class="line"><span class="subst"><span class="string">            : <span class="string">&quot;console.aws.amazon.com&quot;</span></span></span></span><br><span class="line"><span class="subst"><span class="string">        &#125;</span>/cloudwatch/home?region=<span class="subst">$&#123;</span></span></span><br><span class="line"><span class="subst"><span class="string">          process.env.AWS_REGION</span></span></span><br><span class="line"><span class="subst"><span class="string">        &#125;</span>#logsV2:log-groups/log-group/<span class="subst">$&#123;<span class="built_in">encodeURIComponent</span>(</span></span></span><br><span class="line"><span class="subst"><span class="string">          context.logGroupName</span></span></span><br><span class="line"><span class="subst"><span class="string">        )&#125;</span>/log-events/<span class="subst">$&#123;<span class="built_in">encodeURIComponent</span>(</span></span></span><br><span class="line"><span class="subst"><span class="string">          context.logStreamName</span></span></span><br><span class="line"><span class="subst"><span class="string">        )&#125;</span>?filterPattern=&quot;<span class="subst">$&#123;context.awsRequestId&#125;</span>&quot;`</span>,</span><br><span class="line">      &#125;);</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">Error</span>(<span class="string">&quot;oh, hello there!&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<p>效果如下:</p>
+<p><img src="https://raw.githubusercontent.com/nnsay/gist/main/imgimage-20230414153606979.png" alt="image-20230414153606979"></p>
+</li>
+</ul>
+<h2 id="3-警报通知"><a href="#3-警报通知" class="headerlink" title="3. 警报通知"></a>3. 警报通知</h2><p>sentry 的通知有两类: issue 警报和 metric 警报, 本文主要介绍 issue 警报, 用户故事是: 配置一个针对 sandbox 环境的警报, 当 1 小时内有 issue 中有新增超过 1 的事件时就发送警报, 发送方式是 slack. 具体做法如下:</p>
+<ul>
+<li><p>集成 Slack</p>
+<p>登录进入控制台-&gt;<code>Settings</code>-&gt; <code>Integrations</code> -&gt; <code>Slack</code> -&gt; <code>Add WorkSpace</code></p>
+</li>
+<li><p>创建警报: 参考文档: <a target="_blank" rel="noopener" href="https://docs.sentry.io/product/alerts/create-alerts/">https://docs.sentry.io/product/alerts/create-alerts/</a></p>
+<ul>
+<li>选择项目和环境<ul>
+<li>项目: 使用 sentry 捕获异常发送的哪个项目, 项目和应用程序对应</li>
+<li>环境: 在 sentry init 的时候配置了<code>environment</code>, 这里指的是通知应用的环境可以选择全部或者某个一项目, 按照用户故事这里选择 sandbox</li>
+</ul>
+</li>
+<li>设置条件<ul>
+<li>WHEN(设置何时触发条件):<ul>
+<li>状态改变: 指的是 issue 的状态发生改变, 例如有新的 Issue 产生或者</li>
+<li>频率改变: 指的是某个时间阶段 issue 的 event 数量变化, 按照用户故事本文使用该种触发条件</li>
+</ul>
+</li>
+<li>IF(过滤): 设置过滤, 可以保持默认即不做过滤</li>
+<li>THEN(行为): 通知行为<ul>
+<li>发送通知到: 选择 Slack 上自己的组织</li>
+<li>Slack worksapce: workspace 类似群组, 这路需要一个组织内 public 的群组, 当然群组需要提前创建好, 例如: #backend-alert</li>
+<li>在通知中显示 tag: 这个对看通知的人很有用, 这里的 tag 是 tag 的名字, 可以从 Issue 详情页面看到, 这里填写: sandbox</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>添加消息 Owner: owner 的名字自定义, 这个名字会被显示在消息中, 点击这个名字可跳转到警告详情页面</li>
+</ul>
+</li>
+<li><p>发送测试通知: 在配置好后可以发送测试通知, 检查是否配置有误, 这个测试通知无法应用真是项目 Issue 中的信息, 例如<code>environment </code>标签, 仅是测试是否联通</p>
+</li>
+<li><p>警报通知测试结果</p>
+<ul>
+<li>警报配置结果</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/nnsay/gist/main/imgimage-20230414183025855.png" alt="image-20230414183025855"></p>
+<ul>
+<li>通知结果</li>
+</ul>
+<p><img src="https://raw.githubusercontent.com/nnsay/gist/main/imgimage-20230414183157698.png" alt="image-20230414183157698"></p>
+</li>
+</ul>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2023/04/13/research-sentry/" class="article-next" title="Sentry+Nestjs"><i class="icon-arrow-right"></i></a>
+
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "6aaf2180cc17907ff01690068225fb8c",
+        distractionFreeMode: true,
+        title: "Sentry快速上手",
+        body: "https://nnsay.github.io/2023/04/14/research-sentry-knowlege/",
+        labels: ["DevOps"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?1f97030bb3a44256d81e14447104bef8";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+    
+    
+      <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+      </script>
+        <!-- <script src='https://unpkg.com/mermaid@10/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script> -->
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

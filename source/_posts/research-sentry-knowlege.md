@@ -352,3 +352,182 @@ sentry 的通知有两类: issue 警报和 metric 警报, 本文主要介绍 iss
 - 最多只能创建 10 个警报规则
 - 每分钟最多只能发送一次警报通知。
 - **只支持邮件通知方式，不支持集成其他第三方应用或通知渠道**
+
+## 5. 自定义 Slack 通知
+
+自定义的通知是因为根据上面第 4 节, 开发者免费版本是无第三通知集成了, 这里提供一个实验性的`typecript`脚本, 演示如何通过访问 Sentry API 和 Slack Webhook 进行通知, 更复杂的业务代码可根据这个 demo 继续修改和演进.
+
+在代码生效前需要一些预先准备:
+
+- [创建 Slack App, 获取 Webhook 地址](https://api.slack.com/messaging/webhooks): 该步骤很简单, 类似于创建一个群, 群里加入一个机器人, 假设我们的群是: devops; webhook url 通过环境变量`SLACK_HOOK`传入程序
+- 创建一个 Stack 项目, 并触发一些 Issue: 略
+- 创建 Stack Auth Token: `Users Settings` -> `Auth Token` -> `Create New Token`, 至少设置`project:read`, auth token 通过环境变量`SENTRY_TOKEN`传入程序
+
+示例程序如下:
+
+```typescript
+import axios from 'axios'
+
+// Types
+type Issue = {
+  annotations: string[]
+  assignedTo: {
+    [k: string]: unknown
+  }
+  count: string
+  culprit: string
+  firstSeen: string
+  hasSeen: boolean
+  id: string
+  isBookmarked: boolean
+  isPublic: boolean
+  isSubscribed: boolean
+  lastSeen: string
+  level: string
+  logger: string
+  metadata:
+    | {
+        filename: string
+        type: string
+        value: string
+        [k: string]: unknown
+      }
+    | {
+        title: string
+        [k: string]: unknown
+      }
+  numComments: number
+  permalink: string
+  project: {
+    id?: string
+    name?: string
+    slug?: string
+    [k: string]: unknown
+  }
+  shareId: string
+  shortId: string
+  stats: {
+    '24h'?: number[][]
+    [k: string]: unknown
+  }
+  status: 'resolved' | 'unresolved' | 'ignored'
+  statusDetails: {
+    [k: string]: unknown
+  }
+  subscriptionDetails: {
+    [k: string]: unknown
+  }
+  title: string
+  type: string
+  userCount: number
+  [k: string]: unknown
+}
+// Constants
+const SENTRY_TOKEN =
+  process.env.SENTRY_TOKEN
+const SLACK_HOOK =
+  process.env.SLACK_HOOK'
+
+// Functiions
+// https://api.slack.com/messaging/webhooks
+const notice = async (data: Issue, withMarkdonw: boolean = true) => {
+  const message = {
+    channel: '#devops',
+    text: withMarkdonw! ? undefined : JSON.stringify(data),
+    // https://api.slack.com/reference/surfaces/formatting
+    blocks: withMarkdonw
+      ? [
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: `异常通知`,
+            },
+          },
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: `类型: *${data.type}*\n标题: ${data.title}`,
+            },
+          },
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: `最近发生: ${data.lastSeen}`,
+            },
+          },
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: `事件次数: ${data.count}`,
+            },
+          },
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: `<${data.permalink}|点击这里查看问题详情>`,
+            },
+          },
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: `<${data.permalink + 'events'}|点击这里查看问题详情所有事件>`,
+            },
+          },
+        ]
+      : [],
+  }
+  await axios.post(SLACK_HOOK, message, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+}
+
+// https://docs.sentry.io/api/events/list-a-projects-issues/
+const listProjectIssue = async (orgSlug: string, projectSlug: string): Promise<Issue[]> => {
+  const url = `https://sentry.io/api/0/projects/${orgSlug}/${projectSlug}/issues/?query=is:unresolved`
+  const respose = await axios.get(url, {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${SENTRY_TOKEN}`,
+    },
+  })
+  return respose.data
+}
+
+;(async () => {
+  const issues = await listProjectIssue('visualdynamics', 'albedo-services')
+  for (const issue of issues) {
+    const issueInfo = {
+      title: issue.title,
+      type: issue.type,
+      lastSeen: issue.lastSeen,
+      status: issue.status,
+      level: issue.level,
+      count: issue.count,
+      permalink: issue.permalink,
+    }
+    console.log(issueInfo)
+    await notice(issue)
+  }
+})()
+  .then(() => {
+    console.log('all done')
+  })
+  .catch(err => {
+    console.error(err)
+  })
+
+```
+
+> 上面代码中有一些链接, 每个链接都是相关行代码的文档引用, 可以查看文档更好的自定义代码
+
+示例消息如下:
+
+![image-20230417191645375](https://raw.githubusercontent.com/nnsay/gist/main/imgimage-20230417191645375.png)

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>Dynamodb在Nest框架中如何写单元测试 | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="1. 问题背景因为 Nestjs 是高度抽象的框架, 而单元测试通常是比较聚焦到某个文件(service&amp;#x2F;controller)的测试, 这个时候能 mock 这些文件的依赖对于单元测试来说至关重要. 本文以测试 service 文件为例, 通过 mock service 依赖注入的 DynamoDB 为例来做单元测试. 本文使用的开发框架和工具有:Nestjs: Nodejs 后端开发框架, 支持多种模式nestjs-dynamoose: 一个针对dynamoose ORM 的 Ne" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 5.4.2"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E9%97%AE%E9%A2%98%E8%83%8C%E6%99%AF"><span class="toc-text">1. 问题背景</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E4%BB%A3%E7%A0%81%E5%AE%9E%E7%8E%B0"><span class="toc-text">2. 代码实现</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-%E7%BC%96%E5%86%99-servie"><span class="toc-text">2.1 编写 servie</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-%E5%8D%95%E5%85%83%E6%B5%8B%E8%AF%95"><span class="toc-text">2.2 单元测试</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3-%E6%80%BB%E7%BB%93"><span class="toc-text">2.3 总结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="toc-text">3. 参考文档</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            Dynamodb在Nest框架中如何写单元测试
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2023/04/18/nest-dynamodb-unit-test/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2023-04-18T11:24:24.000Z" itemprop="datePublished">2023-04-18</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/Code/" rel="tag">Code</a>, <a class="article-tag-link" href="/tags/Tips/" rel="tag">Tips</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h1 id="1-问题背景"><a href="#1-问题背景" class="headerlink" title="1. 问题背景"></a>1. 问题背景</h1><p>因为 Nestjs 是高度抽象的框架, 而单元测试通常是比较聚焦到某个文件(service&#x2F;controller)的测试, 这个时候能 mock 这些文件的依赖对于单元测试来说至关重要. 本文以测试 service 文件为例, 通过 mock service 依赖注入的 DynamoDB 为例来做单元测试. 本文使用的开发框架和工具有:</p>
+<ul>
+<li>Nestjs: Nodejs 后端开发框架, 支持多种模式</li>
+<li>nestjs-dynamoose: 一个针对<code>dynamoose</code> ORM 的 Nest 封装, 适应 Nest 的 model 组织方式</li>
+<li>jest: 单元测试框架, 本文使用它 mock DB 操作的返回值</li>
+</ul>
+<h1 id="2-代码实现"><a href="#2-代码实现" class="headerlink" title="2. 代码实现"></a>2. 代码实现</h1><h2 id="2-1-编写-servie"><a href="#2-1-编写-servie" class="headerlink" title="2.1 编写 servie"></a>2.1 编写 servie</h2><p>假设使用<code>app.service.ts</code>文件, 具体代码如下:</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; <span class="title class_">Injectable</span> &#125; <span class="keyword">from</span> <span class="string">&quot;@nestjs/common&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; <span class="title class_">InjectModel</span>, <span class="title class_">Model</span> &#125; <span class="keyword">from</span> <span class="string">&quot;nestjs-dynamoose&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; <span class="title class_">UserRecord</span>, <span class="title class_">UserRecordKey</span> &#125; <span class="keyword">from</span> <span class="string">&quot;./app.schema&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Injectable</span>()</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> <span class="title class_">AppService</span> &#123;</span><br><span class="line">  <span class="title function_">constructor</span>(<span class="params"></span></span><br><span class="line"><span class="params">    <span class="meta">@InjectModel</span>(<span class="string">&quot;User&quot;</span>)</span></span><br><span class="line"><span class="params">    <span class="keyword">private</span> <span class="keyword">readonly</span> userModule: Model&lt;UserRecord, UserRecordKey&gt;</span></span><br><span class="line"><span class="params">  </span>) &#123;&#125;</span><br><span class="line"></span><br><span class="line">  <span class="title function_">addData</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="variable language_">this</span>.<span class="property">userModule</span>.<span class="title function_">create</span>(&#123;</span><br><span class="line">      <span class="attr">userId</span>: <span class="string">`uid-<span class="subst">$&#123;<span class="built_in">Date</span>.now()&#125;</span>`</span>,</span><br><span class="line">      <span class="attr">info</span>: &#123;</span><br><span class="line">        <span class="attr">name</span>: <span class="string">&quot;demoUser&quot;</span>,</span><br><span class="line">        <span class="attr">age</span>: <span class="number">100</span>,</span><br><span class="line">      &#125;,</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="title function_">listData</span>(<span class="params"></span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="variable language_">this</span>.<span class="property">userModule</span>.<span class="title function_">scan</span>().<span class="title function_">exec</span>();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码是一个常见的 Nest service, 需要注意的地方如下:</p>
+<ul>
+<li>在构造函数中依赖注入<code>User</code> 的 DynamoDB Table</li>
+<li>实际上<code>User</code>对象是<code>dynamoose</code>的<code>model</code>, 这里是我们 mock 的重点</li>
+</ul>
+<h2 id="2-2-单元测试"><a href="#2-2-单元测试" class="headerlink" title="2.2 单元测试"></a>2.2 单元测试</h2><p>使用<code>app.service.spec.ts</code>文件, 具体代码如下:</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; <span class="title class_">Test</span> &#125; <span class="keyword">from</span> <span class="string">&quot;@nestjs/testing&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; <span class="title class_">AppService</span> &#125; <span class="keyword">from</span> <span class="string">&quot;./app.service&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; <span class="title class_">DemoSchema</span>, <span class="title class_">UserRecord</span> &#125; <span class="keyword">from</span> <span class="string">&quot;./app.schema&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> dynamoose <span class="keyword">from</span> <span class="string">&quot;dynamoose&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="title function_">describe</span>(<span class="string">&quot;AppService&quot;</span>, <span class="function">() =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">let</span> <span class="attr">service</span>: <span class="title class_">AppService</span>;</span><br><span class="line">  <span class="keyword">const</span> <span class="attr">createdUser</span>: <span class="title class_">UserRecord</span> = &#123;</span><br><span class="line">    <span class="attr">userId</span>: <span class="string">&quot;1&quot;</span>,</span><br><span class="line">    <span class="attr">info</span>: &#123;</span><br><span class="line">      <span class="attr">name</span>: <span class="string">&quot;John Doe&quot;</span>,</span><br><span class="line">      <span class="attr">age</span>: <span class="number">30</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;;</span><br><span class="line">  <span class="keyword">const</span> userModel = dynamoose.<span class="title function_">model</span>(<span class="string">&quot;User&quot;</span>, <span class="title class_">DemoSchema</span>);</span><br><span class="line">  <span class="keyword">const</span> now = <span class="keyword">new</span> <span class="title class_">Date</span>();</span><br><span class="line"></span><br><span class="line">  <span class="title function_">beforeAll</span>(<span class="keyword">async</span> () =&gt; &#123;</span><br><span class="line">    jest.<span class="title function_">useFakeTimers</span>(&#123; now &#125;);</span><br><span class="line">    jest</span><br><span class="line">      .<span class="title function_">spyOn</span>(userModel, <span class="string">&quot;create&quot;</span>)</span><br><span class="line">      .<span class="title function_">mockImplementation</span>(jest.<span class="title function_">fn</span>().<span class="title function_">mockResolvedValue</span>(createdUser));</span><br><span class="line">    jest.<span class="title function_">spyOn</span>(userModel, <span class="string">&quot;scan&quot;</span>).<span class="title function_">mockImplementation</span>(</span><br><span class="line">      jest.<span class="title function_">fn</span>().<span class="title function_">mockReturnValue</span>(&#123;</span><br><span class="line">        <span class="attr">exec</span>: jest</span><br><span class="line">          .<span class="title function_">fn</span>()</span><br><span class="line">          .<span class="title function_">mockResolvedValue</span>([createdUser, &#123; ...createdUser, <span class="attr">id</span>: <span class="string">&quot;2&quot;</span> &#125;]),</span><br><span class="line">      &#125;)</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> app = <span class="keyword">await</span> <span class="title class_">Test</span>.<span class="title function_">createTestingModule</span>(&#123;</span><br><span class="line">      <span class="attr">providers</span>: [</span><br><span class="line">        <span class="title class_">AppService</span>,</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">provide</span>: <span class="string">&quot;UserModel&quot;</span>,</span><br><span class="line">          <span class="attr">useValue</span>: userModel,</span><br><span class="line">        &#125;,</span><br><span class="line">      ],</span><br><span class="line">    &#125;).<span class="title function_">compile</span>();</span><br><span class="line"></span><br><span class="line">    service = app.<span class="property">get</span>&lt;<span class="title class_">AppService</span>&gt;(<span class="title class_">AppService</span>);</span><br><span class="line">  &#125;);</span><br><span class="line">  <span class="title function_">afterAll</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">    jest.<span class="title function_">restoreAllMocks</span>();</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  <span class="title function_">it</span>(<span class="string">&quot;add&quot;</span>, <span class="keyword">async</span> () =&gt; &#123;</span><br><span class="line">    <span class="keyword">const</span> user = <span class="keyword">await</span> service.<span class="title function_">addData</span>();</span><br><span class="line">    <span class="comment">// 测试mock的返回值, 这里真实的走DB</span></span><br><span class="line">    <span class="title function_">expect</span>(user.<span class="property">userId</span>).<span class="title function_">toEqual</span>(createdUser.<span class="property">userId</span>);</span><br><span class="line">    <span class="comment">// 测试真实逻辑</span></span><br><span class="line">    <span class="title function_">expect</span>(userModel.<span class="property">create</span>).<span class="title function_">toBeCalledWith</span>(&#123;</span><br><span class="line">      <span class="attr">userId</span>: <span class="string">`uid-<span class="subst">$&#123;<span class="built_in">Date</span>.now()&#125;</span>`</span>,</span><br><span class="line">      <span class="attr">info</span>: &#123;</span><br><span class="line">        <span class="attr">name</span>: <span class="string">&quot;demoUser&quot;</span>,</span><br><span class="line">        <span class="attr">age</span>: <span class="number">100</span>,</span><br><span class="line">      &#125;,</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  <span class="title function_">it</span>(<span class="string">&quot;list&quot;</span>, <span class="keyword">async</span> () =&gt; &#123;</span><br><span class="line">    <span class="keyword">const</span> users = <span class="keyword">await</span> service.<span class="title function_">listData</span>();</span><br><span class="line">    <span class="title function_">expect</span>(users.<span class="property">length</span>).<span class="title function_">toEqual</span>(<span class="number">2</span>);</span><br><span class="line">    <span class="title function_">expect</span>(users[<span class="number">0</span>].<span class="property">userId</span>).<span class="title function_">toEqual</span>(createdUser.<span class="property">userId</span>);</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>代码解释:</p>
+<ul>
+<li>15 行, 使用<code>dynamoose.model</code>创建一个 mock 对象, 这个对象在单元测试中会被注入到 service 中</li>
+<li>19~25 行<ul>
+<li>使用 useFakeTimers 冻结时间, 因为业务代码有使用时间戳的逻辑, 冻结时间后比较好写断言</li>
+<li>使用 jest 分别 mock <code>userModel</code>的<code>create</code>和<code>scan</code>方法, 每个方法都 mock 返回值, 返回值是 18 行定义的测试数据</li>
+</ul>
+</li>
+<li>30~33 行, 因为 nest 使用依赖注入, 所以这里设置一个 provider 提前将依赖准备好, 这里需要注意一下问题<ul>
+<li><code>provide</code>这个属性的值属于 Nest 自身逻辑, Nest 所有的 model 都是以<code>Model</code>结尾的, 因为我们代码使用<code>@InjectModel(&#39;User&#39;)</code>, 所以这里是<code>User</code>+<code>Model</code>, 最终为: <code>UserModel</code></li>
+<li><code>useValue</code> 这里需要定义注入的依赖, 因为之前的步骤已经定义和 mock 了<code>userModel</code>这里直接使用这个对象</li>
+</ul>
+</li>
+<li>40 行, 清除 mock</li>
+<li>44, 46 行, 这里在执行的时候使用的是我们 mock 注入的对象, 所以不走真实数据库</li>
+<li>48 行, 这里断言我们定义的 server 中的方法被执行了, 是测试代码逻辑的核心, 这里需要注意的<code>userId</code>和<code>createdUser</code>中的值是不一样的,因为前者走的真实业务代码逻辑, 而后者只是我们 mock 了这个方法的返回值</li>
+</ul>
+<h2 id="2-3-总结"><a href="#2-3-总结" class="headerlink" title="2.3 总结"></a>2.3 总结</h2><p>要解决 Nest 单元测试的问题, 主要思路是解决依赖注入, 按照上面的例子可以使用自定<code>provider</code>的方式提供依赖, 但是需要注意依赖的名字(provide 的值); 而注入的依赖对象可以结合 jest, mock 其各个具体的方法和返回值</p>
+<h1 id="3-参考文档"><a href="#3-参考文档" class="headerlink" title="3. 参考文档"></a>3. 参考文档</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://jestjs.io/zh-Hans/docs/timer-mocks">计时器模拟</a></li>
+<li><a target="_blank" rel="noopener" href="https://jestjs.io/zh-Hans/docs/jest-object#jestspyonobject-methodname">mock 对象函数</a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.nestjs.com/providers#providers">nest provider</a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.nestjs.com/modules">nest modules:</a>: 该文档中还有一个官方例子, 代码位置在<a target="_blank" rel="noopener" href="https://github.com/nestjs/nest/blob/master/sample/25-dynamic-modules/src/config/config.module.ts">这里</a>, 例子中使用了动态<code>module</code>这是依赖注入方案的启示性的例子</li>
+</ul>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2023/04/14/research-sentry-knowlege/" class="article-next" title="Sentry快速上手"><i class="icon-arrow-right"></i></a>
+
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "57c1514b7f35f0a4473b6102658a7dfb",
+        distractionFreeMode: true,
+        title: "Dynamodb在Nest框架中如何写单元测试",
+        body: "https://nnsay.github.io/2023/04/18/nest-dynamodb-unit-test/",
+        labels: ["Tips","Code"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?1f97030bb3a44256d81e14447104bef8";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+    
+    
+      <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+      </script>
+        <!-- <script src='https://unpkg.com/mermaid@10/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script> -->
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

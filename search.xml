@@ -4,6 +4,27 @@
   
     
     <entry>
+      <title>Sentry最佳实践(不定期更新)</title>
+      <link href="/2023/04/23/sentry-best-practices/"/>
+      <url>/2023/04/23/sentry-best-practices/</url>
+      
+        <content type="html"><![CDATA[<h2 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h2><ul><li>2023-04-23: 增加性能和问题分配的实践</li></ul><h2 id="1-实践一-性能优化"><a href="#1-实践一-性能优化" class="headerlink" title="1. 实践一: 性能优化"></a>1. 实践一: 性能优化</h2><p>最近的实践发现服务加上 Sentry 会性能降低很多, 做了一些对比测试即有 Sentry 和无 Sentry 的相同 API 访问测试, 发现有 Sentry 很影响性能, 推断影响性能的原因:</p><ul><li>Sentry 默认会开启性能监控, 性能监控会进行采样, 采样会影响性能</li><li>服务本身除了集成 Sentry 还开启了 Source Map, 该特性也影响性能</li></ul><p>省略测试过程, 测试结果如下:</p><ul><li>Source Map 和 Sentry 都会影响性能</li><li>影响性能因素:<ul><li>Sentry Trace</li><li>Sentry Senssion</li><li>Source Map</li></ul></li><li>Sentry Trace 影响效果 &gt; Source Map</li><li>减少 Sentry Trance Sample Rate 可以提高性能</li></ul><p>根据以上测试和实验, 最佳实践是: <strong>保留 Source Map, 禁用性能监控</strong>. 具体做法如下:</p><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="title class_">Sentry</span>.<span class="property">AWSLambda</span>.<span class="title function_">init</span>(&#123;</span><br><span class="line">  <span class="attr">dsn</span>: process.<span class="property">env</span>.<span class="property">SENTRY_DSN</span>,</span><br><span class="line">  environment,</span><br><span class="line">  <span class="attr">enableTracing</span>: <span class="literal">false</span>,</span><br><span class="line">  <span class="attr">autoSessionTracking</span>: <span class="literal">false</span>,</span><br><span class="line">  <span class="attr">enabled</span>: environment !== <span class="string">&quot;local&quot;</span>,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure><h2 id="2-实践二-问题自动分配"><a href="#2-实践二-问题自动分配" class="headerlink" title="2. 实践二: 问题自动分配"></a>2. 实践二: 问题自动分配</h2><p>Sentry 的 Issue 默认不会分配到某个人, 但是通过配置归属规则可以指定哪些 Issue 分配到哪个人负责解决问题, 这个分配的行为和 Github Issue Assign 的行为一样. 具体设置分配规则可以参考文档: <a href="https://docs.sentry.io/product/issues/ownership-rules/">ownership-rules</a>, Sentry 的规则写法是: type:pattern owners</p><ul><li>type: 匹配类型, 可以选择: path, module, url, tag</li><li>pattern: 是默认匹配, 匹配规则: <a href="https://en.wikipedia.org/wiki/Glob_(programming)">https://en.wikipedia.org/wiki/Glob_(programming)</a></li><li>owners: 是分配的人或者团队, 分配到人可以写邮箱, 分配到团队可以写团队名称(带#)</li></ul><p>假设我们是用使用 Lambda, user-service 有问题分配给 a(<a href="mailto:&#97;&#x40;&#109;&#97;&#x69;&#x6c;&#46;&#99;&#111;&#x6d;">&#97;&#x40;&#109;&#97;&#x69;&#x6c;&#46;&#99;&#111;&#x6d;</a>), report-service 有问题分配给 b(<a href="mailto:&#98;&#64;&#109;&#x61;&#105;&#x6c;&#46;&#99;&#111;&#x6d;">&#98;&#64;&#109;&#x61;&#105;&#x6c;&#46;&#99;&#111;&#x6d;</a>)则规则如下:</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tags.transaction:user-service* a@mail.com</span><br><span class="line">tags.transaction:report-service* b@mail.com</span><br></pre></td></tr></table></figure><p>其中<code>tags.transaction</code>是 Sentry SDK 集成后默认会有的 Tag, 根据分析, 这个值是和 Lambda 的名字有关, 而<code>*</code>是为了默认匹配, 因为这个服务被部署到多个环境, 所以后缀是不一样的</p>]]></content>
+      
+      
+      
+        <tags>
+            
+            <tag> Tips </tag>
+            
+            <tag> DevOps </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>Dynamodb在Nest框架中如何写单元测试</title>
       <link href="/2023/04/18/nest-dynamodb-unit-test/"/>
       <url>/2023/04/18/nest-dynamodb-unit-test/</url>

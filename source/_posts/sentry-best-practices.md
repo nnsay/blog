@@ -56,3 +56,29 @@ tags.transaction:report-service* b@mail.com
 ```
 
 其中`tags.transaction`是 Sentry SDK 集成后默认会有的 Tag, 根据分析, 这个值是和 Lambda 的名字有关, 而`*`是为了默认匹配, 因为这个服务被部署到多个环境, 所以后缀是不一样的
+
+## 3. 实践三: 异常过滤
+
+为了避免非必要的异常淹没重要的异常, 也为了开发者可以更关注, 过滤异常可以有以下两个方法:
+
+### 3.1 捕获时过滤
+
+因为捕获是通过 SDK 的`captureException`方法实现的, 所以可以在执行`captureException`之前进行条件判断, 代码如下:
+
+```typescript
+// 自定义错误
+class ValidationError extends Error {}
+
+// 捕获前过滤
+if (exception.constructor.name !== "ValidationError") {
+  Sentry.captureException(exception);
+}
+```
+
+### 3.2 通知时过滤
+
+创建 Alert 时可以增加过滤, 这个方式与上面的方式不同之处是: 通知时过滤 Event 是已经被捕获和发送了, 只是在通知的时候不关注. 继续使用`3.1`中的案例, 通知时过滤的过滤条件可以如下设置:
+
+The event's `exception.type` value `does not equal` `ValidationError`
+
+当然通知过滤支持更丰富的过滤条件, 具体可以从[这里](https://docs.sentry.io/product/alerts/create-alerts/issue-alert-config/#if-conditions-filters)查看.

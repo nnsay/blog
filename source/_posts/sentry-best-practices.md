@@ -1,5 +1,5 @@
 ---
-title: Sentry最佳实践(不定期更新)
+title: Sentry最佳实践(2023-05-06更新)
 date: 2023-04-23 12:56:17
 tags:
   - Tips
@@ -11,6 +11,7 @@ excerpt: 了解Sentry真实项目中的最佳使用实践
 
 - 2023-04-23 13:00: 增加性能和问题分配的实践
 - 2023-04-23 16:41: 增加问题过滤实践
+- 2023-05-06 16:50: 增加自定义上下文和实践
 
 ## 1. 实践一: 性能优化
 
@@ -83,3 +84,73 @@ if (exception.constructor.name !== "ValidationError") {
 The event's `exception.type` value `does not equal` `ValidationError`
 
 当然通知过滤支持更丰富的过滤条件, 具体可以从[这里](https://docs.sentry.io/product/alerts/create-alerts/issue-alert-config/#if-conditions-filters)查看.
+
+## 4. 实践四: 自定义上下文
+
+### 4.1 自定义用户
+
+在捕获异常的中间中获取用户上下文, 组装成 Sentry 的用户对象:
+
+```typescript
+@Injectable()
+export class SentryInterceptor implements NestInterceptor {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    return next.handle().pipe(
+      tap(null, (exception) => {
+        const cxt = context.switchToHttp();
+        const req = cxt.getRequest<GuardedRequest>();
+        const captureContext: CaptureContext = {
+          extra: {
+            method: req.method,
+            url: req.url,
+            params: req.params,
+          },
+          tags: {
+            funcName: context.getHandler().name,
+            className: context.getClass().name,
+          },
+        };
+        if (req.userInfo) {
+          captureContext.user = {
+            id: req.userInfo.sub,
+            email: req.userInfo.email + "",
+            username: req.userInfo.name + "",
+          };
+        }
+        Sentry.captureException(exception, captureContext);
+      })
+    );
+  }
+}
+```
+
+> 注意:
+> 上面代码中的`userInfo`是 JWTToken 解析后放置到 req 对象上的, express/nest 等框架中间件均可以这样实现
+
+### 4.2 自定义上下文
+
+在使用 AWS Lambda 的 Sentry 监控中, 通常使用`Sentry.AWSLambda.wrapHandler`包装 handler 函数, 但是这个`wrapHandler`中的 CloudWatch 地址在国内是错误的, 这里定义一个帮助函数, 执行这个函数增加正确的 CloudWatch 上下文:
+
+```typescript
+import { Context } from "aws-lambda";
+
+const configCnCloudWatchContext = (context: Context) => {
+  const hub = Sentry.getCurrentHub();
+  const scope = hub.getScope();
+  scope.setContext("aws.cloudwatch.logs.cn", {
+    log_group: context.logGroupName,
+    log_stream: context.logStreamName,
+    url: `https://${
+      process.env.AWS_REGION.startsWith("cn-")
+        ? `${process.env.AWS_REGION}.console.amazonaws.cn`
+        : "console.aws.amazon.com"
+    }/cloudwatch/home?region=${
+      process.env.AWS_REGION
+    }#logsV2:log-groups/log-group/${encodeURIComponent(
+      context.logGroupName
+    )}/log-events/${encodeURIComponent(context.logStreamName)}?filterPattern="${
+      context.awsRequestId
+    }"`,
+  });
+};
+```

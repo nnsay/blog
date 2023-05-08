@@ -127,3 +127,21 @@ const getElevation = async (point: string) => {
 
 - **数据有效性上如果 Google Map 的结果四舍五入和 Bing Map 结果相差不大, 可以完全替换**
 - Bing Map API 国内使用更友好, 推荐在国内使用 Bing Map API 替换 Google Map API
+
+# 4. [许可证](https://www.microsoft.com/en-us/maps/licensing/licensing-options/)
+
+- [许可介绍](https://www.microsoft.com/en-us/maps/licensing/licensing-options/)
+
+  - 开发者许可证: 每年少于 125000 个计费请求事务, 免费
+  - 企业许可证: 超过则需要请求报价单, 使用企业许可证
+
+- [Bing Map API 请求事务](https://learn.microsoft.com/en-us/bingmaps/getting-started/bing-maps-dev-center-help/understanding-bing-maps-transactions#bing-maps-transactions-by-api): 在 REST Services 的统计表中, 除了以下几个之外, 其余的都是计费事务
+
+  - RESTImagery-BasicMetadata
+  - Route-IsochroneAsyncCallback
+  - Routes-OptimizeItineraryAsyncCallbac
+  - Route-SnapToRoadAsyncCallback
+  - Route-TruckAsyncCallback
+  - GeospatialEndpoint
+
+  所以本文使用的时区(RESTTimezone)和海拔(RESTElevations)都是计费事务

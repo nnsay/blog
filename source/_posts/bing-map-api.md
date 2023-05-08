@@ -2,8 +2,9 @@
 title: 必应地图API调研
 date: 2023-05-08 14:33:35
 tags:
+  - Code
+  - 研究
   - Tips
-  - DevOps
 excerpt: 使用必应地图API替换谷歌地图API
 ---
 

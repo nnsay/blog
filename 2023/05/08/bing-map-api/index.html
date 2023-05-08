@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>必应地图API调研 | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="1. 背景介绍Google Map 的 API 在国内不可用, 社区里面有一些通过反向代理的方式使用 Google Map API 的方式也不稳定, 经常遇到的问题就是ECONNREFUSED. 为了提供稳定的服务本文试图调研 Bing Map API 来替换 Google Map API 的可行性, 结合业务背景, 主要调研替换两个接口:海拔数据: Elevation API, 可返回地球上某个位置的海拔数据，或沿路径的抽样海拔数据时区: Time Zone API 服务可接受纬度&amp;#x2F;" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 5.4.2"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E8%83%8C%E6%99%AF%E4%BB%8B%E7%BB%8D"><span class="toc-text">1. 背景介绍</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-Bing-Map-%E5%BC%80%E5%8F%91%E8%80%85"><span class="toc-text">2. Bing Map 开发者</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E4%BD%BF%E7%94%A8%E5%92%8C%E5%AF%B9%E6%AF%94"><span class="toc-text">3. 使用和对比</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-%E4%BB%A3%E7%A0%81"><span class="toc-text">3.1 代码</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-%E6%B5%8B%E8%AF%95%E8%AF%B4%E6%98%8E"><span class="toc-text">3.2 测试说明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-3-%E6%B5%8B%E8%AF%95%E7%BB%93%E8%AE%BA"><span class="toc-text">3.3 测试结论</span></a></li></ol></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            必应地图API调研
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2023/05/08/bing-map-api/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2023-05-08T06:33:35.000Z" itemprop="datePublished">2023-05-08</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/DevOps/" rel="tag">DevOps</a>, <a class="article-tag-link" href="/tags/Tips/" rel="tag">Tips</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h1 id="1-背景介绍"><a href="#1-背景介绍" class="headerlink" title="1. 背景介绍"></a>1. 背景介绍</h1><p>Google Map 的 API 在国内不可用, 社区里面有一些通过反向代理的方式使用 Google Map API 的方式也不稳定, 经常遇到的问题就是<code>ECONNREFUSED</code>. 为了提供稳定的服务本文试图调研 Bing Map API 来替换 Google Map API 的可行性, 结合业务背景, 主要调研替换两个接口:</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://developers.google.com/maps/documentation/elevation/overview?hl=zh-cn">海拔数据</a>: Elevation API, 可返回地球上某个位置的海拔数据，或沿路径的抽样海拔数据</li>
+<li><a target="_blank" rel="noopener" href="https://maps.googleapis.com/maps/api/timezone/json">时区</a>: Time Zone API 服务可接受纬度&#x2F;经度坐标的 HTTP 请求以及所需的日期和时间。它返回该位置的时区数据，包括世界协调时间 (UTC) 的偏移量和夏令时</li>
+</ul>
+<h1 id="2-Bing-Map-开发者"><a href="#2-Bing-Map-开发者" class="headerlink" title="2. Bing Map 开发者"></a>2. Bing Map 开发者</h1><p>与其他服务一样, 使用 Bing Map 需要注册开发者账号并创建一个 Key, 使用 API 时需要提供 Key. 具体获取 Key 的步骤如下:</p>
+<ul>
+<li>在<a target="_blank" rel="noopener" href="https://www.bingmapsportal.com/">开发者中心</a>注册账号</li>
+<li>在<code>My Account</code>中选择<code>My keys</code>: 创建账号</li>
+</ul>
+<p>完整的帮助文档请查看:<a target="_blank" rel="noopener" href="https://learn.microsoft.com/en-us/bingmaps/getting-started/bing-maps-dev-center-help/getting-a-bing-maps-key">Getting a Bing Maps Key</a></p>
+<h1 id="3-使用和对比"><a href="#3-使用和对比" class="headerlink" title="3. 使用和对比"></a>3. 使用和对比</h1><h2 id="3-1-代码"><a href="#3-1-代码" class="headerlink" title="3.1 代码"></a>3.1 代码</h2><p>使用 nodejs 的 axios 客户端发送请求, 详细代码如下:</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> axios <span class="keyword">from</span> <span class="string">&quot;axios&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="title class_">BingMapsKey</span> = <span class="string">&quot;使用个人开发者中心生成的Key&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// https://learn.microsoft.com/en-us/bingmaps/rest-services/timezone/find-time-zone</span></span><br><span class="line"><span class="keyword">const</span> <span class="title function_">getTimezone</span> = <span class="keyword">async</span> (<span class="params">point: <span class="built_in">string</span>, datetime_utc: <span class="built_in">string</span></span>) =&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> url = <span class="string">`https://dev.virtualearth.net/REST/v1/TimeZone/<span class="subst">$&#123;point&#125;</span>?datetime=<span class="subst">$&#123;datetime_utc&#125;</span>&amp;key=<span class="subst">$&#123;BingMapsKey&#125;</span>`</span>;</span><br><span class="line">  <span class="keyword">const</span> res = <span class="keyword">await</span> axios.<span class="title function_">get</span>(url, &#123;</span><br><span class="line">    <span class="attr">headers</span>: &#123;</span><br><span class="line">      <span class="string">&quot;Content-Type&quot;</span>: <span class="string">&quot;application/json&quot;</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;);</span><br><span class="line">  <span class="keyword">const</span> &#123; resourceSets, statusCode, errorDetails &#125; = res.<span class="property">data</span>;</span><br><span class="line">  <span class="keyword">if</span> (errorDetails) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">error</span>(<span class="string">&quot;%j&quot;</span>, errorDetails);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (</span><br><span class="line">    statusCode === <span class="number">200</span> &amp;&amp;</span><br><span class="line">    resourceSets[<span class="number">0</span>]?.<span class="property">resources</span>[<span class="number">0</span>]?.<span class="property">timeZone</span>?.<span class="property">utcOffset</span></span><br><span class="line">  ) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(statusCode);</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;%j&quot;</span>, resourceSets);</span><br><span class="line">    <span class="keyword">const</span> utcOffsets =</span><br><span class="line">      resourceSets[<span class="number">0</span>].<span class="property">resources</span>[<span class="number">0</span>].<span class="property">timeZone</span>.<span class="property">utcOffset</span>.<span class="title function_">split</span>(<span class="string">&quot;:&quot;</span>);</span><br><span class="line">    <span class="keyword">const</span> hours =</span><br><span class="line">      +utcOffsets[<span class="number">0</span>] &gt; <span class="number">0</span></span><br><span class="line">        ? +utcOffsets[<span class="number">0</span>] + utcOffsets[<span class="number">1</span>] / <span class="number">60</span></span><br><span class="line">        : +utcOffsets[<span class="number">0</span>] + (-<span class="number">1</span> * utcOffsets[<span class="number">1</span>]) / <span class="number">60</span>;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(hours);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// 没有报错, 但是无数据, 提供坐标和UTC时间不匹配时会出现</span></span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">warn</span>(<span class="string">&quot;%j&quot;</span>, resourceSets);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// https://learn.microsoft.com/en-us/bingmaps/rest-services/elevations/get-elevations</span></span><br><span class="line"><span class="keyword">const</span> <span class="title function_">getElevation</span> = <span class="keyword">async</span> (<span class="params">point: <span class="built_in">string</span></span>) =&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> url = <span class="string">`http://dev.virtualearth.net/REST/v1/Elevation/List?points=<span class="subst">$&#123;point&#125;</span>&amp;key=<span class="subst">$&#123;BingMapsKey&#125;</span>`</span>;</span><br><span class="line">  <span class="keyword">const</span> res = <span class="keyword">await</span> axios.<span class="title function_">get</span>(url, &#123;</span><br><span class="line">    <span class="attr">headers</span>: &#123;</span><br><span class="line">      <span class="string">&quot;Content-Type&quot;</span>: <span class="string">&quot;application/json&quot;</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;);</span><br><span class="line">  <span class="keyword">const</span> &#123; resourceSets, statusCode, errorDetails &#125; = res.<span class="property">data</span>;</span><br><span class="line">  <span class="keyword">if</span> (errorDetails) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">error</span>(<span class="string">&quot;%j&quot;</span>, errorDetails);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (statusCode === <span class="number">200</span> &amp;&amp; resourceSets[<span class="number">0</span>]?.<span class="property">resources</span>[<span class="number">0</span>]?.<span class="property">elevations</span>?.<span class="property">length</span>) &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(statusCode);</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;%j&quot;</span>, resourceSets);</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(resourceSets[<span class="number">0</span>].<span class="property">resources</span>[<span class="number">0</span>].<span class="property">elevations</span>[<span class="number">0</span>]);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="comment">// 没有报错, 但是无数据</span></span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">warn</span>(<span class="string">&quot;%j&quot;</span>, resourceSets);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">(<span class="keyword">async</span> () =&gt; &#123;</span><br><span class="line">  <span class="comment">// 北京故宫: 8</span></span><br><span class="line">  <span class="comment">// await getTimezone(&#x27;39.918953,116.397357&#x27;, new Date().toUTCString())</span></span><br><span class="line">  <span class="comment">// 新疆乌鲁木齐: 8</span></span><br><span class="line">  <span class="comment">// await getTimezone(&#x27;43.844556,87.69757&#x27;, new Date().toUTCString())</span></span><br><span class="line">  <span class="comment">// Google: -28800(秒), Bing: -8(小时)</span></span><br><span class="line">  <span class="keyword">await</span> <span class="title function_">getTimezone</span>(</span><br><span class="line">    <span class="string">&quot;39.6034810,-119.6822510&quot;</span>,</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">Date</span>(<span class="number">1331766000000</span>).<span class="title function_">toUTCString</span>()</span><br><span class="line">  );</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 北京故宫: 52</span></span><br><span class="line">  <span class="comment">// await getElevation(&#x27;39.918953,116.397357&#x27;)</span></span><br><span class="line">  <span class="comment">// 新疆乌鲁木齐: 882</span></span><br><span class="line">  <span class="comment">// await getElevation(&#x27;43.844556,87.69757&#x27;)</span></span><br><span class="line">  <span class="comment">// Google: 1608.637939453125, Bing: 1609</span></span><br><span class="line">  <span class="keyword">await</span> <span class="title function_">getElevation</span>(<span class="string">&quot;39.7391536,-104.9847034&quot;</span>);</span><br><span class="line">&#125;)()</span><br><span class="line">  .<span class="title function_">then</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;all done&quot;</span>);</span><br><span class="line">  &#125;)</span><br><span class="line">  .<span class="title function_">catch</span>(<span class="function">(<span class="params">err</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">// console.error(err)</span></span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(err.<span class="property">response</span>.<span class="property">data</span>);</span><br><span class="line">  &#125;);</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-2-测试说明"><a href="#3-2-测试说明" class="headerlink" title="3.2 测试说明"></a>3.2 测试说明</h2><ul>
+<li>海拔数据 Google Map API 取其<a target="_blank" rel="noopener" href="https://developers.google.com/maps/documentation/elevation/start?hl=zh-cn#sample-request">返回值</a>中的<code>elevation</code>字段, 而 Bing Map API 取<code>elevations</code>数组中的值, 单位都是米</li>
+<li>时区数据 Google Map API 取其<a target="_blank" rel="noopener" href="https://developers.google.com/maps/documentation/timezone/requests-timezone?hl=zh-cn#TimeZoneResponse">返回值</a>中的<code>rawOffset</code>字端,单位是秒, 而 Bing Map API 取<code>utcOffset</code>, 是<code>(+/-)hh:mm</code>格式, 上面的代码中将其换算成小时进行比较</li>
+<li>代码中使用 Google Map API 中文档中的例子中的数据请求 Bing Map API 并将结果和 Google Map 文档中的案例值进行对比<ul>
+<li><a target="_blank" rel="noopener" href="https://developers.google.com/maps/documentation/timezone/requests-timezone?hl=zh-cn#TimeZoneResponse">Google Map API 时区案例</a></li>
+<li><a target="_blank" rel="noopener" href="https://developers.google.com/maps/documentation/elevation/start?hl=zh-cn#sample-request">Google Map API 海拔案例</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="3-3-测试结论"><a href="#3-3-测试结论" class="headerlink" title="3.3 测试结论"></a>3.3 测试结论</h2><p>​ <strong>数据有效性上如果 Google Map 的结果四舍五入和 Bing Map 结果相差不大, 可以完全替换.</strong></p>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2023/04/26/github-verify-commit/" class="article-next" title="Github提交验证"><i class="icon-arrow-right"></i></a>
+
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "e3c278b8daf70bc9fa3397d1a86329ac",
+        distractionFreeMode: true,
+        title: "必应地图API调研",
+        body: "https://nnsay.github.io/2023/05/08/bing-map-api/",
+        labels: ["Tips","DevOps"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?1f97030bb3a44256d81e14447104bef8";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+    
+    
+      <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+      </script>
+        <!-- <script src='https://unpkg.com/mermaid@10/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script> -->
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

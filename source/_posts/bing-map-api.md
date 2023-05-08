@@ -125,4 +125,5 @@ const getElevation = async (point: string) => {
 
 ## 3.3 测试结论
 
-​ **数据有效性上如果 Google Map 的结果四舍五入和 Bing Map 结果相差不大, 可以完全替换.**
+- **数据有效性上如果 Google Map 的结果四舍五入和 Bing Map 结果相差不大, 可以完全替换**
+- Bing Map API 国内使用更友好, 推荐在国内使用 Bing Map API 替换 Google Map API

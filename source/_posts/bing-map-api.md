@@ -128,6 +128,54 @@ const getElevation = async (point: string) => {
 - **数据有效性上如果 Google Map 的结果四舍五入和 Bing Map 结果相差不大, 可以完全替换**
 - Bing Map API 国内使用更友好, 推荐在国内使用 Bing Map API 替换 Google Map API
 
+## 3.4 压缩数据
+
+在使用海拔接口时如果点太多可以考虑压缩, 详细查看[Point Compression Algorithm,](https://learn.microsoft.com/en-us/bingmaps/rest-services/elevations/point-compression-algorithm) 压缩算法代码(Typescript)如下:
+
+```typescript
+const encodePoints = (points: number[][]) => {
+  let latitude = 0;
+  let longitude = 0;
+  const result: string[] = [];
+
+  for (const point in points) {
+    // step 2
+    const newLatitude = Math.round(points[point][0] * 100000);
+    const newLongitude = Math.round(points[point][1] * 100000);
+
+    // step 3
+    let dy = newLatitude - latitude;
+    let dx = newLongitude - longitude;
+    latitude = newLatitude;
+    longitude = newLongitude;
+
+    // step 4 and 5
+    dy = (dy << 1) ^ (dy >> 31);
+    dx = (dx << 1) ^ (dx >> 31);
+
+    // step 6
+    let index = ((dy + dx) * (dy + dx + 1)) / 2 + dy;
+
+    while (index > 0) {
+      // step 7
+      let rem = index & 31;
+      index = (index - rem) / 32;
+
+      // step 8
+      if (index > 0) rem += 32;
+
+      // step 9
+      result.push(
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-"[rem]
+      );
+    }
+  }
+
+  // step 10
+  return result.join("");
+};
+```
+
 # 4. [许可证](https://www.microsoft.com/en-us/maps/licensing/licensing-options/)
 
 - [许可介绍](https://www.microsoft.com/en-us/maps/licensing/licensing-options/)

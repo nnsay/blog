@@ -28,7 +28,7 @@ word-wrap: break-word;
 ### 脚本
 
 ```bash
-aws dynamodb scan --table-name albedo-steel-table-dev --scan-filter '{"userID":{"ComparisonOperator":"EQ","AttributeValueList":[{"S":"63047568ade7f31ad13c641a"}]}}' --profile dev --no-paginate | jq -c '.Items | _nwise(25) | {"albedo-steel-table-dev": map({"PutRequest": {"Item": . }})}' | while read -r line; do echo $line > chunk.json & aws dynamodb batch-write-item --request-items file://chunk.json --profile sandbox; done
+aws dynamodb scan --table-name steel-table-dev --scan-filter '{"userID":{"ComparisonOperator":"EQ","AttributeValueList":[{"S":"63047568ade7f31ad13c641a"}]}}' --profile dev --no-paginate | jq -c '.Items | _nwise(25) | {"steel-table-dev": map({"PutRequest": {"Item": . }})}' | while read -r line; do echo $line > chunk.json & aws dynamodb batch-write-item --request-items file://chunk.json --profile sandbox; done
 ```
 
 ### 脚本工作原理
@@ -36,7 +36,7 @@ aws dynamodb scan --table-name albedo-steel-table-dev --scan-filter '{"userID":{
 - 第一个管道拉取同步数据
 
   - 使用 dynamodb scan 命令查询数据
-  - 使用--table-name 指定源数据表名: albedo-steel-table-dev
+  - 使用--table-name 指定源数据表名: steel-table-dev
   - 使用--scan-filter 设置过滤条件: userID = 63047568ade7f31ad13c641a
 
   本步骤获取数据格式如下:
@@ -62,13 +62,13 @@ aws dynamodb scan --table-name albedo-steel-table-dev --scan-filter '{"userID":{
 
   - 使用`jq`解析数据
   - 使用`jq`的`_nwise`函数分片数据
-  - 使用`jq`的管道重新定义 JSON, 其中 Root Key 是目标数据表名: albedo-steel-table-dev
+  - 使用`jq`的管道重新定义 JSON, 其中 Root Key 是目标数据表名: steel-table-dev
 
   本步骤改造数据格式如下, 这种格式是 aws 要求的, 详情可以参考: [BatchWriteItem](https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_BatchWriteItem.html)
 
   ```json
   {
-    "albedo-steel-table-dev": [
+    "steel-table-dev": [
       {
         "PutRequest": {
           "Item": {

@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>DynamoDB表数据同步 | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="pre {overflow: auto;white-space: pre;white-space: pre-wrap;word-wrap: break-word;}用户故事同步 dev 环境官方钢材库数据到 sandbox 环境依赖安装 aws 和 jqaws 配置了sandbox和 dev 两个profile及 credentials脚本1aws dynamodb scan --table-name albedo-steel-table-dev --scan-filter &amp;#x27;&amp;#12" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 6.3.0"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%94%A8%E6%88%B7%E6%95%85%E4%BA%8B"><span class="toc-text">用户故事</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BE%9D%E8%B5%96"><span class="toc-text">依赖</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%84%9A%E6%9C%AC"><span class="toc-text">脚本</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%84%9A%E6%9C%AC%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86"><span class="toc-text">脚本工作原理</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            DynamoDB表数据同步
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2023/05/24/sync-dynamodb-table/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2023-05-24T08:49:11.000Z" itemprop="datePublished">2023-05-24</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/DevOps/" rel="tag">DevOps</a>, <a class="article-tag-link" href="/tags/Tips/" rel="tag">Tips</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <style>
+pre {
+overflow: auto;
+white-space: pre;
+white-space: pre-wrap;
+word-wrap: break-word;
+}
+</style>
+
+<h3 id="用户故事"><a href="#用户故事" class="headerlink" title="用户故事"></a>用户故事</h3><p>同步 dev 环境官方钢材库数据到 sandbox 环境</p>
+<h3 id="依赖"><a href="#依赖" class="headerlink" title="依赖"></a>依赖</h3><ul>
+<li>安装 <code>aws</code> 和 <code>jq</code></li>
+<li>aws 配置了<code>sandbox</code>和 dev 两个<code>profile</code>及 credentials</li>
+</ul>
+<h3 id="脚本"><a href="#脚本" class="headerlink" title="脚本"></a>脚本</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">aws dynamodb scan --table-name albedo-steel-table-dev --scan-filter <span class="string">&#x27;&#123;&quot;userID&quot;:&#123;&quot;ComparisonOperator&quot;:&quot;EQ&quot;,&quot;AttributeValueList&quot;:[&#123;&quot;S&quot;:&quot;63047568ade7f31ad13c641a&quot;&#125;]&#125;&#125;&#x27;</span> --profile dev --no-paginate | jq -c <span class="string">&#x27;.Items | _nwise(25) | &#123;&quot;albedo-steel-table-dev&quot;: map(&#123;&quot;PutRequest&quot;: &#123;&quot;Item&quot;: . &#125;&#125;)&#125;&#x27;</span> | <span class="keyword">while</span> <span class="built_in">read</span> -r line; <span class="keyword">do</span> <span class="built_in">echo</span> <span class="variable">$line</span> &gt; chunk.json &amp; aws dynamodb batch-write-item --request-items file://chunk.json --profile sandbox; <span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="脚本工作原理"><a href="#脚本工作原理" class="headerlink" title="脚本工作原理"></a>脚本工作原理</h3><ul>
+<li><p>第一个管道拉取同步数据</p>
+<ul>
+<li>使用 dynamodb scan 命令查询数据</li>
+<li>使用–table-name 指定源数据表名: albedo-steel-table-dev</li>
+<li>使用–scan-filter 设置过滤条件: userID &#x3D; 63047568ade7f31ad13c641a</li>
+</ul>
+<p>本步骤获取数据格式如下:</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;Items&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;col1&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;N&quot;</span><span class="punctuation">:</span> <span class="string">&quot;3.925&quot;</span></span><br><span class="line">      <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;col2&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;N&quot;</span><span class="punctuation">:</span> <span class="string">&quot;2.5&quot;</span></span><br><span class="line">      <span class="punctuation">&#125;</span></span><br><span class="line">      ...</span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">    ...</span><br><span class="line">  <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>第二个管道按照写入最大限制(25)分片数据</p>
+<ul>
+<li>使用<code>jq</code>解析数据</li>
+<li>使用<code>jq</code>的<code>_nwise</code>函数分片数据</li>
+<li>使用<code>jq</code>的管道重新定义 JSON, 其中 Root Key 是目标数据表名: albedo-steel-table-dev</li>
+</ul>
+<p>本步骤改造数据格式如下, 这种格式是 aws 要求的, 详情可以参考: <a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_BatchWriteItem.html">BatchWriteItem</a></p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;albedo-steel-table-dev&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;PutRequest&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="attr">&quot;Item&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">          <span class="attr">&quot;col1&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;N&quot;</span><span class="punctuation">:</span> <span class="string">&quot;3.925&quot;</span></span><br><span class="line">          <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">          <span class="attr">&quot;col2&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="attr">&quot;N&quot;</span><span class="punctuation">:</span> <span class="string">&quot;2.5&quot;</span></span><br><span class="line">          <span class="punctuation">&#125;</span></span><br><span class="line">          ...</span><br><span class="line">        <span class="punctuation">&#125;</span></span><br><span class="line">      <span class="punctuation">&#125;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">    ...</span><br><span class="line">  <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>第三个管道提交同步数据</p>
+<ul>
+<li>遍历每个<code>jq</code>产生的分片, 每个分配数据写入临时文件</li>
+<li>使用临时文件配合 aws cli 进行写入</li>
+</ul>
+</li>
+</ul>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2023/05/12/security-monorepo/" class="article-next" title="Monorepo敏感代码保护"><i class="icon-arrow-right"></i></a>
+
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "8d5b82b2035256f607e6ccd552c46fb2",
+        distractionFreeMode: true,
+        title: "DynamoDB表数据同步",
+        body: "https://nnsay.github.io/2023/05/24/sync-dynamodb-table/",
+        labels: ["Tips","DevOps"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?1f97030bb3a44256d81e14447104bef8";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+    
+    
+      <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+      </script>
+        <!-- <script src='https://unpkg.com/mermaid@10/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script> -->
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

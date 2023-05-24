@@ -1,10 +1,4 @@
 https://nnsay.github.io/tags/index.html
-https://nnsay.github.io/2023/02/17/helm-trraform/
-https://nnsay.github.io/2021/10/26/helm/
-https://nnsay.github.io/2022/03/16/java-learning/
-https://nnsay.github.io/2019/12/05/kiosk-research/
-https://nnsay.github.io/2022/02/13/knative-autoscaling/
-https://nnsay.github.io/2022/01/21/knative-service-on-aliyun/
 https://nnsay.github.io/2022/01/26/knative-serving-operation/
 https://nnsay.github.io/2020/09/16/log-server-custom-domain-does-not-work/
 https://nnsay.github.io/2019/12/04/make-effective-communication/
@@ -27,10 +21,11 @@ https://nnsay.github.io/2021/04/16/setup%20docker%20registry%20with%20custom%20a
 https://nnsay.github.io/2020/11/04/setup-develop-environment-under-the-ubuntu-os/
 https://nnsay.github.io/2019/10/24/shell-script-pass-parameter/
 https://nnsay.github.io/2019/10/20/shell-weather/
-https://nnsay.github.io/2019/11/18/soft-delete/
 https://nnsay.github.io/2020/11/13/simple-three-step-to-publish-local-server-or-website/
+https://nnsay.github.io/2019/11/18/soft-delete/
 https://nnsay.github.io/2022/08/03/springboot-zipkin-trace-on-aliyun/
 https://nnsay.github.io/2019/10/20/sprint-graph/
+https://nnsay.github.io/2023/05/24/sync-dynamodb-table/
 https://nnsay.github.io/2020/04/09/think-about-retry/
 https://nnsay.github.io/2019/12/10/ubuntu-network-manager/
 https://nnsay.github.io/2021/09/15/use-submodule-theme/
@@ -48,6 +43,12 @@ https://nnsay.github.io/2020/09/02/express-parameter-router-skill/
 https://nnsay.github.io/2023/03/24/github-action-cache/
 https://nnsay.github.io/2023/04/07/github-reuse-workflow/
 https://nnsay.github.io/2023/04/26/github-verify-commit/
+https://nnsay.github.io/2023/02/17/helm-trraform/
+https://nnsay.github.io/2021/10/26/helm/
+https://nnsay.github.io/2022/03/16/java-learning/
+https://nnsay.github.io/2019/12/05/kiosk-research/
+https://nnsay.github.io/2022/02/13/knative-autoscaling/
+https://nnsay.github.io/2022/01/21/knative-service-on-aliyun/
 https://nnsay.github.io/2022/09/06/acme-sh/
 https://nnsay.github.io/2021/08/17/aliyun-migration-case-study/
 https://nnsay.github.io/

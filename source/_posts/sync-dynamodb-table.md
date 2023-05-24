@@ -4,7 +4,7 @@ date: 2023-05-24 16:49:11
 tags:
   - Tips
   - DevOps
-excerpt: 一行代码同步DynamoDB表数据
+excerpt: 一行脚本同步DynamoDB表数据
 ---
 
 <style>

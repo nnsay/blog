@@ -6,7 +6,7 @@
   <link href="https://nnsay.github.io/atom.xml" rel="self"/>
   
   <link href="https://nnsay.github.io/"/>
-  <updated>2023-05-31T11:52:36.233Z</updated>
+  <updated>2023-05-31T11:53:45.501Z</updated>
   <id>https://nnsay.github.io/</id>
   
   <author>
@@ -21,7 +21,7 @@
     <link href="https://nnsay.github.io/2023/05/24/sync-dynamodb-table/"/>
     <id>https://nnsay.github.io/2023/05/24/sync-dynamodb-table/</id>
     <published>2023-05-24T08:49:11.000Z</published>
-    <updated>2023-05-31T11:52:36.233Z</updated>
+    <updated>2023-05-31T11:53:45.501Z</updated>
     
     
     <summary type="html">一行脚本同步DynamoDB表数据</summary>
@@ -40,7 +40,7 @@
     <link href="https://nnsay.github.io/2023/05/12/security-monorepo/"/>
     <id>https://nnsay.github.io/2023/05/12/security-monorepo/</id>
     <published>2023-05-12T03:30:38.000Z</published>
-    <updated>2023-05-31T11:52:36.233Z</updated>
+    <updated>2023-05-31T11:53:45.501Z</updated>
     
     
     <summary type="html">调研如何针对monorepo做敏感代码保护</summary>
@@ -59,7 +59,7 @@
     <link href="https://nnsay.github.io/2023/05/08/bing-map-api/"/>
     <id>https://nnsay.github.io/2023/05/08/bing-map-api/</id>
     <published>2023-05-08T06:33:35.000Z</published>
-    <updated>2023-05-31T11:52:36.229Z</updated>
+    <updated>2023-05-31T11:53:45.497Z</updated>
     
     
     <summary type="html">使用必应地图API替换谷歌地图API</summary>
@@ -80,7 +80,7 @@
     <link href="https://nnsay.github.io/2023/04/26/github-verify-commit/"/>
     <id>https://nnsay.github.io/2023/04/26/github-verify-commit/</id>
     <published>2023-04-26T09:37:39.000Z</published>
-    <updated>2023-05-31T11:52:36.233Z</updated>
+    <updated>2023-05-31T11:53:45.497Z</updated>
     
     
     <summary type="html">开启提交验证让你的代码更被信任</summary>
@@ -97,7 +97,7 @@
     <link href="https://nnsay.github.io/2023/04/23/sentry-best-practices/"/>
     <id>https://nnsay.github.io/2023/04/23/sentry-best-practices/</id>
     <published>2023-04-23T04:56:17.000Z</published>
-    <updated>2023-05-31T11:52:36.233Z</updated>
+    <updated>2023-05-31T11:53:45.501Z</updated>
     
     
     <summary type="html">了解Sentry真实项目中的最佳使用实践</summary>
@@ -116,7 +116,7 @@
     <link href="https://nnsay.github.io/2023/04/18/nest-dynamodb-unit-test/"/>
     <id>https://nnsay.github.io/2023/04/18/nest-dynamodb-unit-test/</id>
     <published>2023-04-18T11:24:24.000Z</published>
-    <updated>2023-05-31T11:52:36.233Z</updated>
+    <updated>2023-05-31T11:53:45.501Z</updated>
     
     
     <summary type="html">了解如何实现DynamoDB在Nest框架中如何进行依赖注入/mock数据</summary>
@@ -135,7 +135,7 @@
     <link href="https://nnsay.github.io/2023/04/14/research-sentry-knowlege/"/>
     <id>https://nnsay.github.io/2023/04/14/research-sentry-knowlege/</id>
     <published>2023-04-14T09:46:40.000Z</published>
-    <updated>2023-05-31T11:52:36.233Z</updated>
+    <updated>2023-05-31T11:53:45.501Z</updated>
     
     
     <summary type="html">快速了解并实现一套完整的应用程序异常/性能捕获和通知提醒的流程</summary>
@@ -152,7 +152,7 @@
     <link href="https://nnsay.github.io/2023/04/13/research-sentry/"/>
     <id>https://nnsay.github.io/2023/04/13/research-sentry/</id>
     <published>2023-04-13T09:56:48.000Z</published>
-    <updated>2023-05-31T11:52:36.233Z</updated>
+    <updated>2023-05-31T11:53:45.501Z</updated>
     
     
     <summary type="html">使用Sentry给Nestjs应用程序增加监控</summary>
@@ -169,7 +169,7 @@
     <link href="https://nnsay.github.io/2023/04/11/nx-local-plugin/"/>
     <id>https://nnsay.github.io/2023/04/11/nx-local-plugin/</id>
     <published>2023-04-11T04:15:40.000Z</published>
-    <updated>2023-05-31T11:52:36.233Z</updated>
+    <updated>2023-05-31T11:53:45.501Z</updated>
     
     
     <summary type="html">使用自定义Nx生成器/修改器满足特殊的工程代码需求</summary>
@@ -188,7 +188,7 @@
     <link href="https://nnsay.github.io/2023/04/07/github-reuse-workflow/"/>
     <id>https://nnsay.github.io/2023/04/07/github-reuse-workflow/</id>
     <published>2023-04-07T09:54:27.000Z</published>
-    <updated>2023-05-31T11:52:36.233Z</updated>
+    <updated>2023-05-31T11:53:45.497Z</updated>
     
     
     <summary type="html">使用Github Action复用工作流优化代码工程</summary>
@@ -207,7 +207,7 @@
     <link href="https://nnsay.github.io/2023/03/31/move-aws-lambda-into-vpc/"/>
     <id>https://nnsay.github.io/2023/03/31/move-aws-lambda-into-vpc/</id>
     <published>2023-03-31T11:18:49.000Z</published>
-    <updated>2023-05-31T11:52:36.233Z</updated>
+    <updated>2023-05-31T11:53:45.501Z</updated>
     
     
     <summary type="html">解决vpc lambda访问各种外部资源和服务问题</summary>
@@ -226,7 +226,7 @@
     <link href="https://nnsay.github.io/2023/03/24/github-action-cache/"/>
     <id>https://nnsay.github.io/2023/03/24/github-action-cache/</id>
     <published>2023-03-24T03:58:46.000Z</published>
-    <updated>2023-05-31T11:52:36.233Z</updated>
+    <updated>2023-05-31T11:53:45.497Z</updated>
     
     
     <summary type="html">使用github action cache加快流水线速度</summary>
@@ -243,7 +243,7 @@
     <link href="https://nnsay.github.io/2023/03/04/monorepo/"/>
     <id>https://nnsay.github.io/2023/03/04/monorepo/</id>
     <published>2023-03-04T04:59:59.000Z</published>
-    <updated>2023-05-31T11:52:36.233Z</updated>
+    <updated>2023-05-31T11:53:45.501Z</updated>
     
     
     <summary type="html">代码工程管理--monorepo实践</summary>
@@ -260,7 +260,7 @@
     <link href="https://nnsay.github.io/2023/02/17/helm-trraform/"/>
     <id>https://nnsay.github.io/2023/02/17/helm-trraform/</id>
     <published>2023-02-17T04:57:42.000Z</published>
-    <updated>2023-05-31T11:52:36.233Z</updated>
+    <updated>2023-05-31T11:53:45.497Z</updated>
     
     
     <summary type="html">helm+terraform实现资源编排</summary>
@@ -279,7 +279,7 @@
     <link href="https://nnsay.github.io/2023/02/03/async-call-compute-service/"/>
     <id>https://nnsay.github.io/2023/02/03/async-call-compute-service/</id>
     <published>2023-02-03T02:04:43.000Z</published>
-    <updated>2023-05-31T11:52:36.229Z</updated>
+    <updated>2023-05-31T11:53:45.497Z</updated>
     
     
     <summary type="html">AWS/Aliyun函数计算异步调用</summary>
@@ -300,7 +300,7 @@
     <link href="https://nnsay.github.io/2022/09/06/acme-sh/"/>
     <id>https://nnsay.github.io/2022/09/06/acme-sh/</id>
     <published>2022-09-06T04:04:12.000Z</published>
-    <updated>2023-05-31T11:52:36.225Z</updated>
+    <updated>2023-05-31T11:53:45.489Z</updated>
     
     
     <summary type="html">使用证书管理客户端(acme.sh)快速管理和维护证书</summary>
@@ -321,7 +321,7 @@
     <link href="https://nnsay.github.io/2022/08/03/springboot-zipkin-trace-on-aliyun/"/>
     <id>https://nnsay.github.io/2022/08/03/springboot-zipkin-trace-on-aliyun/</id>
     <published>2022-08-03T10:10:19.000Z</published>
-    <updated>2023-05-31T11:52:36.233Z</updated>
+    <updated>2023-05-31T11:53:45.501Z</updated>
     
     
     <summary type="html">如何在阿里云上搭建Springboot微服务链路追踪系统</summary>
@@ -344,7 +344,7 @@
     <link href="https://nnsay.github.io/2022/07/01/mount-aliyun-drive/"/>
     <id>https://nnsay.github.io/2022/07/01/mount-aliyun-drive/</id>
     <published>2022-07-01T08:24:56.000Z</published>
-    <updated>2023-05-31T11:52:36.233Z</updated>
+    <updated>2023-05-31T11:53:45.501Z</updated>
     
     
     <summary type="html">挂载阿里云盘到本地(MacOS)</summary>
@@ -363,7 +363,7 @@
     <link href="https://nnsay.github.io/2022/05/07/volta/"/>
     <id>https://nnsay.github.io/2022/05/07/volta/</id>
     <published>2022-05-07T02:52:18.000Z</published>
-    <updated>2023-05-31T11:52:36.233Z</updated>
+    <updated>2023-05-31T11:53:45.501Z</updated>
     
     
     <summary type="html">全局和项目级别的javascrpt工具版本控制工具</summary>
@@ -382,7 +382,7 @@
     <link href="https://nnsay.github.io/2022/04/07/picgo/"/>
     <id>https://nnsay.github.io/2022/04/07/picgo/</id>
     <published>2022-04-07T03:06:53.000Z</published>
-    <updated>2023-05-31T11:52:36.233Z</updated>
+    <updated>2023-05-31T11:53:45.501Z</updated>
     
     
     <summary type="html">使用PicGo提供图床服务使Typora协作更优雅</summary>

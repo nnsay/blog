@@ -36,11 +36,11 @@ jobs:
           github_token: ${{ secrets.GH_TOKEN }}
           publish_dir: ./public
 
-      - name: test
-        run: |
-          git submodule foreach "if [ $(git status --porcelain | wc -l) -gt 0 ]; then \
-            echo ok; \
-            git add . ; \
-            git commit -a -m 'chore: upgrade version'; \
-            git push origin; \
-          fi"
+      # - name: test
+      #   run: |
+      #     git submodule foreach "if [ $(git status --porcelain | wc -l) -gt 0 ]; then \
+      #       echo ok; \
+      #       git add . ; \
+      #       git commit -a -m 'chore: upgrade version'; \
+      #       git push origin; \
+      #     fi"

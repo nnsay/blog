@@ -212,31 +212,31 @@ export type CoverageSummary = {
       total: number;
       covered: number;
       skipped: number;
-      pct: number;
+      pct: number | "Unknown";
     };
     statements: {
       total: number;
       covered: number;
       skipped: number;
-      pct: number;
+      pct: number | "Unknown";
     };
     functions: {
       total: number;
       covered: number;
       skipped: number;
-      pct: number;
+      pct: number | "Unknown";
     };
     branches: {
       total: number;
       covered: number;
       skipped: number;
-      pct: number;
+      pct: number | "Unknown";
     };
     branchesTrue: {
       total: number;
       covered: number;
       skipped: number;
-      pct: number;
+      pct: number | "Unknown";
     };
   };
 };
@@ -244,7 +244,10 @@ export type CoverageSummary = {
 // red: < 65
 // yellow: >=65 && <80
 // green: > 80
-export const formatCoverageValue = (v: number) => {
+export const formatCoverageValue = (v: number | "Unknown") => {
+  if (v === "Unknown") {
+    return `🔴 Unknown`;
+  }
   if (v < 65) {
     return `🔴 ${v.toFixed(2)}%`;
   } else if (v > 80) {
@@ -264,47 +267,50 @@ export async function codeCoverageReportGenerator(
   tree: Tree,
   options: CodeCoverageReportGeneratorSchema
 ) {
-  const baseDir = path.resolve(process.cwd(), options.coverageDir);
-  const reportJsonPaths: string[] = [];
-  fs.readdirSync(baseDir).forEach((nxProject) => {
-    const report = `${baseDir}/${nxProject}/coverage-summary.json`;
-    if (fs.existsSync(report)) {
-      reportJsonPaths.push(report);
-    }
-  });
-  const exitFile = path.resolve(process.cwd(), `${options.reportPath}.exit`);
-  fs.rmSync(exitFile, { force: true });
-  if (reportJsonPaths.length) {
-    const reportMarkdown: string[] = [];
-    reportMarkdown.push("# Coverage report");
-    reportMarkdown.push("|App|Lines|Statements|Branches|Functions|");
-    reportMarkdown.push("|---|---|---|---|---|");
-    reportJsonPaths.forEach((reportJsonPath) => {
-      const coverages = readJsonFile(reportJsonPath) as CoverageSummary;
-      const {
-        total: { lines, statements, branches, functions },
-      } = coverages;
-      const app = reportJsonPath.split("/").at(-2);
-      reportMarkdown.push(
-        `|${app}|${formatCoverageValue(lines.pct)}|${formatCoverageValue(
-          statements.pct
-        )}|${formatCoverageValue(branches.pct)}|${formatCoverageValue(
-          functions.pct
-        )}|`
-      );
-      if (statements.pct < options.limitTarget) {
-        const msg = `${app} statements: ${formatCoverageValue(
-          statements.pct
-        )} < ${options.limitTarget}`;
-        const exitFile = path.resolve(
-          process.cwd(),
-          `${options.reportPath}.exit`
-        );
-        fs.writeFileSync(exitFile, `${msg}\n`, { flag: "a" });
+  const reportMarkdown: string[] = [];
+  reportMarkdown.push("# Coverage report");
+  reportMarkdown.push("|Project|Lines|Statements|Branches|Functions|");
+  reportMarkdown.push("|---|---|---|---|---|");
+
+  for (const coverageDir of options.coverageDir) {
+    const baseDir = path.resolve(process.cwd(), coverageDir);
+    const reportJsonPaths: string[] = [];
+    fs.readdirSync(baseDir).forEach((nxProject) => {
+      const report = `${baseDir}/${nxProject}/coverage-summary.json`;
+      if (fs.existsSync(report)) {
+        reportJsonPaths.push(report);
       }
     });
-    const reportFile = path.resolve(process.cwd(), options.reportPath);
-    fs.writeFileSync(reportFile, reportMarkdown.join("\n"));
+    const exitFile = path.resolve(process.cwd(), `${options.reportPath}.exit`);
+    fs.rmSync(exitFile, { force: true });
+    if (reportJsonPaths.length) {
+      reportJsonPaths.forEach((reportJsonPath) => {
+        const coverages = readJsonFile(reportJsonPath) as CoverageSummary;
+        const {
+          total: { lines, statements, branches, functions },
+        } = coverages;
+        const app = reportJsonPath.split("/").at(-2);
+        reportMarkdown.push(
+          `|${app}|${formatCoverageValue(lines.pct)}|${formatCoverageValue(
+            statements.pct
+          )}|${formatCoverageValue(branches.pct)}|${formatCoverageValue(
+            functions.pct
+          )}|`
+        );
+        if (+statements.pct < +options.limitTarget) {
+          const msg = `${app} statements: ${formatCoverageValue(
+            statements.pct
+          )} < ${options.limitTarget}`;
+          const exitFile = path.resolve(
+            process.cwd(),
+            `${options.reportPath}.exit`
+          );
+          fs.writeFileSync(exitFile, `${msg}\n`, { flag: "a" });
+        }
+      });
+      const reportFile = path.resolve(process.cwd(), options.reportPath);
+      fs.writeFileSync(reportFile, reportMarkdown.join("\n"));
+    }
   }
 }
 

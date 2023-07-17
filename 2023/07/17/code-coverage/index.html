@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>基于 Monorepo 的自定义代码覆盖率报告 | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="1. 业务背景如果组织代码使用 Monorepo 的架构则代码仓库中有很多项目, 以 Nx 框架为例, 有些项目是应用类, 有些工具类或者库, 每个项目都有单元测试, 进而有不同的代码覆盖率, 如何将多个项目的覆盖率报告按照项目分组并结合 Github PR 使用是本文的实践, 主要包含以下内容:介绍两个脚本, 分别针对Istanbul的json和json-summary报告格式进行二次统计, 进而生成自己的覆盖率报告, 达到按照项目分组和更高度自定义的需求介绍两个 Gihub Workflow" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 6.3.0"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E4%B8%9A%E5%8A%A1%E8%83%8C%E6%99%AF"><span class="toc-text">1. 业务背景</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E8%84%9A%E6%9C%AC"><span class="toc-text">2. 脚本</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-json"><span class="toc-text">2.1 json</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-json-summary"><span class="toc-text">2.2 json-summary</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E9%85%8D%E5%90%88-Github-Workflow-%E4%BD%BF%E7%94%A8"><span class="toc-text">3. 配合 Github Workflow 使用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-%E4%BD%BF%E7%94%A8-GH-%E7%BB%99-PR-%E5%86%99-Comment"><span class="toc-text">3.1 使用 GH 给 PR 写 Comment</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-%E8%A6%86%E7%9B%96%E7%8E%87%E9%98%88%E5%80%BC%E6%A3%80%E6%A3%80%E6%9F%A5"><span class="toc-text">3.2 覆盖率阈值检检查</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E6%80%BB%E7%BB%93"><span class="toc-text">4. 总结</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            基于 Monorepo 的自定义代码覆盖率报告
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2023/07/17/code-coverage/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2023-07-17T00:47:58.000Z" itemprop="datePublished">2023-07-17</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/DevOps/" rel="tag">DevOps</a>, <a class="article-tag-link" href="/tags/Tips/" rel="tag">Tips</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h2 id="1-业务背景"><a href="#1-业务背景" class="headerlink" title="1. 业务背景"></a>1. 业务背景</h2><p>如果组织代码使用 Monorepo 的架构则代码仓库中有很多项目, 以 Nx 框架为例, 有些项目是应用类, 有些工具类或者库, 每个项目都有单元测试, 进而有不同的代码覆盖率, 如何将多个项目的覆盖率报告按照项目分组并结合 Github PR 使用是本文的实践, 主要包含以下内容:</p>
+<ul>
+<li>介绍两个脚本, 分别针对<code>Istanbul</code>的<code>json</code>和<code>json-summary</code>报告格式进行二次统计, 进而生成自己的覆盖率报告, 达到按照项目分组和更高度自定义的需求</li>
+<li>介绍两个 Gihub Workflow 的步骤<ul>
+<li>如何在 PR 中提交 Comment, 实现自定义覆盖率的报告在 PR 上显示</li>
+<li>如何在流水线中检查阈值, 覆盖率低于阈值流水线失败, 这对 PR 质量要求严格的团队是必须要的特性</li>
+</ul>
+</li>
+</ul>
+<h2 id="2-脚本"><a href="#2-脚本" class="headerlink" title="2. 脚本"></a>2. 脚本</h2><p>覆盖率报告有很多格式, 常见的有 json&#x2F;json-summary&#x2F;clover&#x2F;lcov&#x2F;text 等, 具体可以查<a target="_blank" rel="noopener" href="https://istanbul.js.org/docs/advanced/alternative-reporters/">这里</a>查看详情. 对于 nodejs 编程比较友好是 json 格式, 以下是具体两种 json 格式的自定义统计报告, 报告<strong>以 Monorepo 中的应用程序分类统计</strong>, 而不是整体统计.</p>
+<h3 id="2-1-json"><a href="#2-1-json" class="headerlink" title="2.1 json"></a>2.1 json</h3><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Copyright © https://github.com/pveyes/byzantine</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> fs <span class="keyword">from</span> <span class="string">&#x27;fs&#x27;</span></span><br><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> path <span class="keyword">from</span> <span class="string">&#x27;path&#x27;</span></span><br><span class="line"></span><br><span class="line">interface <span class="title class_">ReportType</span> &#123;</span><br><span class="line">  <span class="attr">coverageMap</span>: &#123;</span><br><span class="line">    [<span class="attr">path</span>: string]: &#123;</span><br><span class="line">      <span class="attr">path</span>: string</span><br><span class="line">      <span class="attr">s</span>: &#123; [<span class="attr">k</span>: string]: number &#125;</span><br><span class="line">      <span class="attr">f</span>: &#123; [<span class="attr">k</span>: string]: number &#125;</span><br><span class="line">      <span class="attr">b</span>: &#123; [<span class="attr">k</span>: string]: number[] &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type <span class="title class_">AggregateReportItemType</span> = &#123;</span><br><span class="line">  <span class="attr">covered</span>: number</span><br><span class="line">  <span class="attr">all</span>: number</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type <span class="title class_">AggregateResult</span> = &#123;</span><br><span class="line">  <span class="attr">branches</span>: number</span><br><span class="line">  <span class="attr">statements</span>: number</span><br><span class="line">  <span class="attr">functions</span>: number</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">type <span class="title class_">CoverageResult</span> = &#123;</span><br><span class="line">  <span class="attr">path</span>: string</span><br><span class="line">  <span class="attr">branches</span>: <span class="title class_">AggregateReportItemType</span></span><br><span class="line">  <span class="attr">statements</span>: <span class="title class_">AggregateReportItemType</span></span><br><span class="line">  <span class="attr">functions</span>: <span class="title class_">AggregateReportItemType</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">generateEmptyReport</span>(<span class="params"></span>): <span class="title class_">AggregateReportItemType</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> &#123;</span><br><span class="line">    <span class="attr">covered</span>: <span class="number">0</span>,</span><br><span class="line">    <span class="attr">all</span>: <span class="number">0</span>,</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">aggregateCoverage</span>(<span class="params">coverages: CoverageResult[]</span>): <span class="title class_">AggregateResult</span> &#123;</span><br><span class="line">  <span class="keyword">let</span> statements = <span class="number">0</span></span><br><span class="line">  <span class="keyword">let</span> statementCount = <span class="number">0</span></span><br><span class="line">  <span class="keyword">let</span> branches = <span class="number">0</span></span><br><span class="line">  <span class="keyword">let</span> branchCount = <span class="number">0</span></span><br><span class="line">  <span class="keyword">let</span> functions = <span class="number">0</span></span><br><span class="line">  <span class="keyword">let</span> functionCount = <span class="number">0</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (coverages.<span class="property">length</span> === <span class="number">0</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">      <span class="attr">statements</span>: <span class="number">0</span>,</span><br><span class="line">      <span class="attr">branches</span>: <span class="number">0</span>,</span><br><span class="line">      <span class="attr">functions</span>: <span class="number">0</span>,</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  coverages.<span class="title function_">forEach</span>(<span class="function"><span class="params">coverage</span> =&gt;</span> &#123;</span><br><span class="line">    statements += coverage.<span class="property">statements</span>.<span class="property">covered</span></span><br><span class="line">    statementCount += coverage.<span class="property">statements</span>.<span class="property">all</span></span><br><span class="line"></span><br><span class="line">    branches += coverage.<span class="property">branches</span>.<span class="property">covered</span></span><br><span class="line">    branchCount += coverage.<span class="property">branches</span>.<span class="property">all</span></span><br><span class="line"></span><br><span class="line">    functions += coverage.<span class="property">functions</span>.<span class="property">covered</span></span><br><span class="line">    functionCount += coverage.<span class="property">functions</span>.<span class="property">all</span></span><br><span class="line">  &#125;)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (statementCount === <span class="number">0</span>) &#123;</span><br><span class="line">    statements = <span class="number">100</span></span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    statements = (statements / statementCount) * <span class="number">100</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (branchCount === <span class="number">0</span>) &#123;</span><br><span class="line">    branches = <span class="number">100</span></span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    branches = (branches / branchCount) * <span class="number">100</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (functionCount === <span class="number">0</span>) &#123;</span><br><span class="line">    functions = <span class="number">100</span></span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    functions = (functions / functionCount) * <span class="number">100</span></span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> &#123;</span><br><span class="line">    statements,</span><br><span class="line">    branches,</span><br><span class="line">    functions,</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">parseCoverage</span>(<span class="params">json: ReportType</span>): <span class="title class_">CoverageResult</span>[] &#123;</span><br><span class="line">  <span class="keyword">const</span> paths = <span class="title class_">Object</span>.<span class="title function_">keys</span>(json.<span class="property">coverageMap</span>)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> paths.<span class="title function_">map</span>(<span class="function"><span class="params">path</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> coverage = json.<span class="property">coverageMap</span>[path]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> branches = <span class="title function_">generateEmptyReport</span>()</span><br><span class="line">    <span class="keyword">const</span> statements = <span class="title function_">generateEmptyReport</span>()</span><br><span class="line">    <span class="keyword">const</span> functions = <span class="title function_">generateEmptyReport</span>()</span><br><span class="line"></span><br><span class="line">    <span class="title class_">Object</span>.<span class="title function_">keys</span>(coverage.<span class="property">b</span>).<span class="title function_">forEach</span>(<span class="function"><span class="params">id</span> =&gt;</span> &#123;</span><br><span class="line">      <span class="keyword">const</span> result = coverage.<span class="property">b</span>[id]</span><br><span class="line">      result.<span class="title function_">forEach</span>(<span class="function"><span class="params">r</span> =&gt;</span> &#123;</span><br><span class="line">        branches.<span class="property">covered</span> += r &gt; <span class="number">0</span> ? <span class="number">1</span> : <span class="number">0</span></span><br><span class="line">        branches.<span class="property">all</span> += <span class="number">1</span></span><br><span class="line">      &#125;)</span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">    <span class="title class_">Object</span>.<span class="title function_">keys</span>(coverage.<span class="property">s</span>).<span class="title function_">forEach</span>(<span class="function"><span class="params">id</span> =&gt;</span> &#123;</span><br><span class="line">      statements.<span class="property">covered</span> += coverage.<span class="property">s</span>[id] &gt; <span class="number">0</span> ? <span class="number">1</span> : <span class="number">0</span></span><br><span class="line">      statements.<span class="property">all</span> += <span class="number">1</span></span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">    <span class="title class_">Object</span>.<span class="title function_">keys</span>(coverage.<span class="property">f</span>).<span class="title function_">forEach</span>(<span class="function"><span class="params">id</span> =&gt;</span> &#123;</span><br><span class="line">      functions.<span class="property">covered</span> += coverage.<span class="property">f</span>[id] &gt; <span class="number">0</span> ? <span class="number">1</span> : <span class="number">0</span></span><br><span class="line">      functions.<span class="property">all</span> += <span class="number">1</span></span><br><span class="line">    &#125;)</span><br><span class="line"></span><br><span class="line">    <span class="comment">// We don&#x27;t return line coverage because it&#x27;s no longer relevant</span></span><br><span class="line">    <span class="comment">// https://github.com/gotwarlost/istanbul/issues/639</span></span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">      path,</span><br><span class="line">      branches,</span><br><span class="line">      statements,</span><br><span class="line">      functions,</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> baseDir = path.<span class="title function_">resolve</span>(__dirname, <span class="string">&#x27;../coverage/packages&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="attr">paths</span>: string[] = []</span><br><span class="line">fs.<span class="title function_">readdirSync</span>(baseDir).<span class="title function_">forEach</span>(<span class="function"><span class="params">app</span> =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">const</span> report = <span class="string">`<span class="subst">$&#123;baseDir&#125;</span>/<span class="subst">$&#123;app&#125;</span>/report.json`</span></span><br><span class="line">  <span class="keyword">if</span> (fs.<span class="title function_">existsSync</span>(report)) &#123;</span><br><span class="line">    paths.<span class="title function_">push</span>(report)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (paths.<span class="property">length</span>) &#123;</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;# Coverage report&#x27;</span>)</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;|App|Statements|Branches|Functions|&#x27;</span>)</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;|---|---|---|---|&#x27;</span>)</span><br><span class="line">  paths.<span class="title function_">forEach</span>(<span class="function"><span class="params">path</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> coverages = <span class="title function_">parseCoverage</span>(<span class="built_in">require</span>(path))</span><br><span class="line">    <span class="keyword">const</span> &#123; statements, branches, functions &#125; = <span class="title function_">aggregateCoverage</span>(coverages)</span><br><span class="line">    <span class="keyword">const</span> app = path.<span class="title function_">split</span>(<span class="string">&#x27;/&#x27;</span>).<span class="title function_">at</span>(-<span class="number">2</span>)</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(</span><br><span class="line">      <span class="string">`|<span class="subst">$&#123;app&#125;</span>|<span class="subst">$&#123;statements.toFixed(<span class="number">2</span>)&#125;</span>%|<span class="subst">$&#123;branches.toFixed(<span class="number">2</span>)&#125;</span>%|<span class="subst">$&#123;functions.toFixed(<span class="number">2</span>)&#125;</span>%|`</span></span><br><span class="line">    )</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>测试结果:</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="section"># Coverage report</span></span><br><span class="line"></span><br><span class="line">| App  | Statements | Branches | Functions |</span><br><span class="line">| ---- | ---------- | -------- | --------- |</span><br><span class="line">| app1 | 100.00%    | 100.00%  | 100.00%   |</span><br><span class="line">| app2 | 89.90%     | 66.06%   | 90.61%    |</span><br><span class="line">| app3 | 100.00%    | 100.00%  | 100.00%   |</span><br><span class="line">| lib1 | 87.83%     | 66.67%   | 93.33%    |</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-2-json-summary"><a href="#2-2-json-summary" class="headerlink" title="2.2 json-summary"></a>2.2 json-summary</h3><p>该方式是本人团队最后使用的方式, 具体脚本封装在 nx 自定义插件:</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; <span class="title class_">Tree</span>, readJsonFile &#125; <span class="keyword">from</span> <span class="string">&quot;@nx/devkit&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> fs <span class="keyword">from</span> <span class="string">&quot;fs&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> path <span class="keyword">from</span> <span class="string">&quot;path&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; <span class="title class_">CodeCoverageReportGeneratorSchema</span> &#125; <span class="keyword">from</span> <span class="string">&quot;./schema&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">type</span> <span class="title class_">CoverageSummary</span> = &#123;</span><br><span class="line">  <span class="attr">total</span>: &#123;</span><br><span class="line">    <span class="attr">lines</span>: &#123;</span><br><span class="line">      <span class="attr">total</span>: <span class="built_in">number</span>;</span><br><span class="line">      <span class="attr">covered</span>: <span class="built_in">number</span>;</span><br><span class="line">      <span class="attr">skipped</span>: <span class="built_in">number</span>;</span><br><span class="line">      <span class="attr">pct</span>: <span class="built_in">number</span>;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="attr">statements</span>: &#123;</span><br><span class="line">      <span class="attr">total</span>: <span class="built_in">number</span>;</span><br><span class="line">      <span class="attr">covered</span>: <span class="built_in">number</span>;</span><br><span class="line">      <span class="attr">skipped</span>: <span class="built_in">number</span>;</span><br><span class="line">      <span class="attr">pct</span>: <span class="built_in">number</span>;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="attr">functions</span>: &#123;</span><br><span class="line">      <span class="attr">total</span>: <span class="built_in">number</span>;</span><br><span class="line">      <span class="attr">covered</span>: <span class="built_in">number</span>;</span><br><span class="line">      <span class="attr">skipped</span>: <span class="built_in">number</span>;</span><br><span class="line">      <span class="attr">pct</span>: <span class="built_in">number</span>;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="attr">branches</span>: &#123;</span><br><span class="line">      <span class="attr">total</span>: <span class="built_in">number</span>;</span><br><span class="line">      <span class="attr">covered</span>: <span class="built_in">number</span>;</span><br><span class="line">      <span class="attr">skipped</span>: <span class="built_in">number</span>;</span><br><span class="line">      <span class="attr">pct</span>: <span class="built_in">number</span>;</span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="attr">branchesTrue</span>: &#123;</span><br><span class="line">      <span class="attr">total</span>: <span class="built_in">number</span>;</span><br><span class="line">      <span class="attr">covered</span>: <span class="built_in">number</span>;</span><br><span class="line">      <span class="attr">skipped</span>: <span class="built_in">number</span>;</span><br><span class="line">      <span class="attr">pct</span>: <span class="built_in">number</span>;</span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// red: &lt; 65</span></span><br><span class="line"><span class="comment">// yellow: &gt;=65 &amp;&amp; &lt;80</span></span><br><span class="line"><span class="comment">// green: &gt; 80</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> <span class="title function_">formatCoverageValue</span> = (<span class="params">v: <span class="built_in">number</span></span>) =&gt; &#123;</span><br><span class="line">  <span class="keyword">if</span> (v &lt; <span class="number">65</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">`🔴 <span class="subst">$&#123;v.toFixed(<span class="number">2</span>)&#125;</span>%`</span>;</span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span> (v &gt; <span class="number">80</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">`🟢 <span class="subst">$&#123;v.toFixed(<span class="number">2</span>)&#125;</span>%`</span>;</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="string">`🟡 <span class="subst">$&#123;v.toFixed(<span class="number">2</span>)&#125;</span>%`</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">interface</span> <span class="title class_">CodeCoverageReportGeneratorSchema</span> &#123;</span><br><span class="line">  <span class="attr">coverageDir</span>: <span class="built_in">string</span>;</span><br><span class="line">  <span class="attr">reportPath</span>: <span class="built_in">string</span>;</span><br><span class="line">  <span class="attr">limitTarget</span>: <span class="built_in">number</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">async</span> <span class="keyword">function</span> <span class="title function_">codeCoverageReportGenerator</span>(<span class="params"></span></span><br><span class="line"><span class="params">  tree: Tree,</span></span><br><span class="line"><span class="params">  options: CodeCoverageReportGeneratorSchema</span></span><br><span class="line"><span class="params"></span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> baseDir = path.<span class="title function_">resolve</span>(process.<span class="title function_">cwd</span>(), options.<span class="property">coverageDir</span>);</span><br><span class="line">  <span class="keyword">const</span> <span class="attr">reportJsonPaths</span>: <span class="built_in">string</span>[] = [];</span><br><span class="line">  fs.<span class="title function_">readdirSync</span>(baseDir).<span class="title function_">forEach</span>(<span class="function">(<span class="params">nxProject</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> report = <span class="string">`<span class="subst">$&#123;baseDir&#125;</span>/<span class="subst">$&#123;nxProject&#125;</span>/coverage-summary.json`</span>;</span><br><span class="line">    <span class="keyword">if</span> (fs.<span class="title function_">existsSync</span>(report)) &#123;</span><br><span class="line">      reportJsonPaths.<span class="title function_">push</span>(report);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;);</span><br><span class="line">  <span class="keyword">const</span> exitFile = path.<span class="title function_">resolve</span>(process.<span class="title function_">cwd</span>(), <span class="string">`<span class="subst">$&#123;options.reportPath&#125;</span>.exit`</span>);</span><br><span class="line">  fs.<span class="title function_">rmSync</span>(exitFile, &#123; <span class="attr">force</span>: <span class="literal">true</span> &#125;);</span><br><span class="line">  <span class="keyword">if</span> (reportJsonPaths.<span class="property">length</span>) &#123;</span><br><span class="line">    <span class="keyword">const</span> <span class="attr">reportMarkdown</span>: <span class="built_in">string</span>[] = [];</span><br><span class="line">    reportMarkdown.<span class="title function_">push</span>(<span class="string">&quot;# Coverage report&quot;</span>);</span><br><span class="line">    reportMarkdown.<span class="title function_">push</span>(<span class="string">&quot;|App|Lines|Statements|Branches|Functions|&quot;</span>);</span><br><span class="line">    reportMarkdown.<span class="title function_">push</span>(<span class="string">&quot;|---|---|---|---|---|&quot;</span>);</span><br><span class="line">    reportJsonPaths.<span class="title function_">forEach</span>(<span class="function">(<span class="params">reportJsonPath</span>) =&gt;</span> &#123;</span><br><span class="line">      <span class="keyword">const</span> coverages = <span class="title function_">readJsonFile</span>(reportJsonPath) <span class="keyword">as</span> <span class="title class_">CoverageSummary</span>;</span><br><span class="line">      <span class="keyword">const</span> &#123;</span><br><span class="line">        <span class="attr">total</span>: &#123; lines, statements, branches, functions &#125;,</span><br><span class="line">      &#125; = coverages;</span><br><span class="line">      <span class="keyword">const</span> app = reportJsonPath.<span class="title function_">split</span>(<span class="string">&quot;/&quot;</span>).<span class="title function_">at</span>(-<span class="number">2</span>);</span><br><span class="line">      reportMarkdown.<span class="title function_">push</span>(</span><br><span class="line">        <span class="string">`|<span class="subst">$&#123;app&#125;</span>|<span class="subst">$&#123;formatCoverageValue(lines.pct)&#125;</span>|<span class="subst">$&#123;formatCoverageValue(</span></span></span><br><span class="line"><span class="subst"><span class="string">          statements.pct</span></span></span><br><span class="line"><span class="subst"><span class="string">        )&#125;</span>|<span class="subst">$&#123;formatCoverageValue(branches.pct)&#125;</span>|<span class="subst">$&#123;formatCoverageValue(</span></span></span><br><span class="line"><span class="subst"><span class="string">          functions.pct</span></span></span><br><span class="line"><span class="subst"><span class="string">        )&#125;</span>|`</span></span><br><span class="line">      );</span><br><span class="line">      <span class="keyword">if</span> (statements.<span class="property">pct</span> &lt; options.<span class="property">limitTarget</span>) &#123;</span><br><span class="line">        <span class="keyword">const</span> msg = <span class="string">`<span class="subst">$&#123;app&#125;</span> statements: <span class="subst">$&#123;formatCoverageValue(</span></span></span><br><span class="line"><span class="subst"><span class="string">          statements.pct</span></span></span><br><span class="line"><span class="subst"><span class="string">        )&#125;</span> &lt; <span class="subst">$&#123;options.limitTarget&#125;</span>`</span>;</span><br><span class="line">        <span class="keyword">const</span> exitFile = path.<span class="title function_">resolve</span>(</span><br><span class="line">          process.<span class="title function_">cwd</span>(),</span><br><span class="line">          <span class="string">`<span class="subst">$&#123;options.reportPath&#125;</span>.exit`</span></span><br><span class="line">        );</span><br><span class="line">        fs.<span class="title function_">writeFileSync</span>(exitFile, <span class="string">`<span class="subst">$&#123;msg&#125;</span>\n`</span>, &#123; <span class="attr">flag</span>: <span class="string">&quot;a&quot;</span> &#125;);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="keyword">const</span> reportFile = path.<span class="title function_">resolve</span>(process.<span class="title function_">cwd</span>(), options.<span class="property">reportPath</span>);</span><br><span class="line">    fs.<span class="title function_">writeFileSync</span>(reportFile, reportMarkdown.<span class="title function_">join</span>(<span class="string">&quot;\n&quot;</span>));</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> codeCoverageReportGenerator;</span><br></pre></td></tr></table></figure>
+
+<p>测试结果如下, 比<code>json</code>报告多了一个行覆盖:</p>
+<figure class="highlight markdown"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="section"># Coverage report</span></span><br><span class="line"></span><br><span class="line">| App  | Lines      | Statements | Branches   | Functions  |</span><br><span class="line">| ---- | ---------- | ---------- | ---------- | ---------- |</span><br><span class="line">| app1 | 🟢 100.00% | 🟢 100.00% | 🟢 100.00% | 🟢 100.00% |</span><br><span class="line">| app2 | 🟢 90.13%  | 🟢 89.90%  | 🟡 66.06%  | 🟢 90.61%  |</span><br><span class="line">| app3 | 🟢 100.00% | 🟢 100.00% | 🟢 100.00% | 🟢 100.00% |</span><br><span class="line">| lib1 | 🟢 89.22%  | 🟢 87.82%  | 🟡 66.66%  | 🟢 93.33%  |</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-配合-Github-Workflow-使用"><a href="#3-配合-Github-Workflow-使用" class="headerlink" title="3. 配合 Github Workflow 使用"></a>3. 配合 Github Workflow 使用</h2><h3 id="3-1-使用-GH-给-PR-写-Comment"><a href="#3-1-使用-GH-给-PR-写-Comment" class="headerlink" title="3.1 使用 GH 给 PR 写 Comment"></a>3.1 <a target="_blank" rel="noopener" href="https://cli.github.com/manual/gh_pr_comment">使用 GH 给 PR 写 Comment</a></h3><p>这个功能主要是在 PR 运行完单元测试后例如上面的提到的脚本实现对覆盖率报告的收集, 并生成 markdown 文件, 这个 markdown 文件可以作为评论(Comment)写在 PR 上,方便查看覆盖率报告. 结合 2.2 中的使用 nx 生成器方式生产报告的方式如下:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">- name: Generate custom code coverage report</span><br><span class="line">  run: |</span><br><span class="line">    <span class="built_in">mkdir</span> -p coverage/packages</span><br><span class="line">    <span class="built_in">mkdir</span> -p tmp/</span><br><span class="line">    yarn nx g nx-plugin:code-coverage-report --coverageDir coverage/packages --reportPath tmp/report.md</span><br><span class="line"></span><br><span class="line">- name: Submit custom code coverage report</span><br><span class="line">  run: |</span><br><span class="line">    <span class="keyword">if</span> [ -f tmp/report.md ]; <span class="keyword">then</span></span><br><span class="line">      commentId=$(gh api \</span><br><span class="line">        -H <span class="string">&quot;Accept: application/vnd.github+json&quot;</span> \</span><br><span class="line">        -H <span class="string">&quot;X-GitHub-Api-Version: 2022-11-28&quot;</span> \</span><br><span class="line">        <span class="string">&quot;/repos/nnsay/core/issues/<span class="variable">$&#123;&#123; github.event.number &#125;</span>&#125;/comments&quot;</span> | jq -r <span class="string">&#x27;.[]|select(.body|test(&quot;Coverage report&quot;))|.id&#x27;</span>)</span><br><span class="line">      <span class="keyword">if</span> [ -n <span class="string">&quot;<span class="variable">$commentId</span>&quot;</span> ]; <span class="keyword">then</span></span><br><span class="line">        <span class="built_in">echo</span> <span class="string">&quot;existed comment id: <span class="variable">$commentId</span>&quot;</span></span><br><span class="line">        gh api \</span><br><span class="line">          --method DELETE \</span><br><span class="line">          -H <span class="string">&quot;Accept: application/vnd.github+json&quot;</span> \</span><br><span class="line">          -H <span class="string">&quot;X-GitHub-Api-Version: 2022-11-28&quot;</span> \</span><br><span class="line">          <span class="string">&quot;/repos/nnsay/core/issues/comments/<span class="variable">$commentId</span>&quot;</span></span><br><span class="line">      <span class="keyword">fi</span></span><br><span class="line">      <span class="built_in">cat</span> tmp/report.md</span><br><span class="line">      gh <span class="built_in">pr</span> comment <span class="variable">$&#123;&#123; github.event.number &#125;</span>&#125; --body-file tmp/report.md</span><br><span class="line">    <span class="keyword">fi</span></span><br><span class="line">  <span class="built_in">env</span>:</span><br><span class="line">    GITHUB_TOKEN: <span class="variable">$&#123;&#123; secrets.GITHUB_TOKEN &#125;</span>&#125;</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h3 id="3-2-覆盖率阈值检检查"><a href="#3-2-覆盖率阈值检检查" class="headerlink" title="3.2 覆盖率阈值检检查"></a>3.2 覆盖率阈值检检查</h3><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="bullet">-</span> <span class="attr">name:</span> <span class="string">Check</span> <span class="string">the</span> <span class="string">coverage</span> <span class="string">limit</span> <span class="string">target</span></span><br><span class="line">  <span class="attr">run:</span> <span class="string">|</span></span><br><span class="line"><span class="string">    if [ -f tmp/report.md.exit ]; then</span></span><br><span class="line"><span class="string">      cat tmp/report.md.exit</span></span><br><span class="line"><span class="string">      exit 1</span></span><br><span class="line"><span class="string">    fi</span></span><br></pre></td></tr></table></figure>
+
+<p>‼️ 该步骤需要在生产自定义报告之后做, 步骤中的<code>report.md.exit</code>就是自定义 nx 生成器中生成的文件, 开发者可以参考这个思路实现更复杂和符合业务需求的逻辑.</p>
+<h2 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h2><ul>
+<li>可以按照项目分类统计覆盖率,而不是仓库整体统计,更加准确反映每个项目的测试质量。</li>
+<li>可以自定义报告格式,生成 markdown 等格式,便于在 CI&#x2F;CD 流程中使用。</li>
+<li>可以在 PR 评论中实时展示覆盖率报告,帮助 review。</li>
+<li>可以设置覆盖率阈值,不达标时流水线失败,保证代码质量。</li>
+<li>借助代码生成器,可以使报告更易定制,也方便与 CI&#x2F;CD 系统集成。</li>
+<li>总体来说,自定义报告让开发团队更加关注测试质量,也为持续改进测试奠定基础。</li>
+</ul>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2023/06/07/serverless-nest-log/" class="article-next" title="AWS Lambda 日志优化"><i class="icon-arrow-right"></i></a>
+
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "9f761e45724ce6d42229b5a06db6fc8f",
+        distractionFreeMode: true,
+        title: "基于 Monorepo 的自定义代码覆盖率报告",
+        body: "https://nnsay.github.io/2023/07/17/code-coverage/",
+        labels: ["Tips","DevOps"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?1f97030bb3a44256d81e14447104bef8";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+    
+    
+      <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+      </script>
+        <!-- <script src='https://unpkg.com/mermaid@10/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script> -->
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

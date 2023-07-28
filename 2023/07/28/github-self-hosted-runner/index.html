@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>Github自托管Runner实践 | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="1. 运行自托管 Runner本文档调研基于 Mac OS 系统 M 系列芯片的硬件测试, 测试过硬件有:MacBook Pro, macOS 13.4.1 (c) (22F770820d) Apple M2 ProMac mini, macOS 13.4.1 (c) (22F770820d), Apple M21.1 下载脚本12345678910# Create a foldermkdir actions-runner &amp;amp;&amp;amp; cd actions-runner# Downlo" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 6.3.0"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E8%BF%90%E8%A1%8C%E8%87%AA%E6%89%98%E7%AE%A1-Runner"><span class="toc-text">1. 运行自托管 Runner</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-%E4%B8%8B%E8%BD%BD%E8%84%9A%E6%9C%AC"><span class="toc-text">1.1 下载脚本</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-%E9%85%8D%E7%BD%AE%E5%92%8C%E8%BF%90%E8%A1%8C"><span class="toc-text">1.2 配置和运行</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E6%80%A7%E8%83%BD%E5%AF%B9%E6%AF%94"><span class="toc-text">2. 性能对比</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-Pull-Request-%E5%B7%A5%E4%BD%9C%E6%B5%81"><span class="toc-text">2.2 Pull Request 工作流</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-Build-%E5%B7%A5%E4%BD%9C%E6%B5%81"><span class="toc-text">1.2 Build 工作流</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3-%E6%80%BB%E7%BB%93"><span class="toc-text">1.3 总结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E5%8D%95%E6%9C%BA%E5%B9%B6%E8%A1%8C%E6%96%B9%E6%A1%88"><span class="toc-text">3. 单机并行方案</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-%E5%8D%95%E8%BF%9B%E7%A8%8B-vs-%E5%A4%9A%E4%BB%BB%E5%8A%A1"><span class="toc-text">3.1 单进程 vs 多任务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-%E5%A4%9A%E8%BF%9B%E7%A8%8B-vs-%E5%A4%9A%E4%BB%BB%E5%8A%A1"><span class="toc-text">3.2 多进程 vs 多任务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-3-%E5%A4%9A%E5%AE%B9%E5%99%A8-vs-%E5%A4%9A%E4%BB%BB%E5%8A%A1"><span class="toc-text">3.3 多容器 vs 多任务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-4-%E6%80%BB%E7%BB%93"><span class="toc-text">3.4 总结</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E6%B7%B1%E5%85%A5%E8%B0%83%E7%A0%94"><span class="toc-text">4. 深入调研</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#4-1-%E8%87%AA%E5%AE%9A%E4%B9%89-Runner-%E9%95%9C%E5%83%8F"><span class="toc-text">4.1 自定义 Runner 镜像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-2-%E5%B0%86%E8%87%AA%E6%89%98%E7%AE%A1%E7%9A%84%E8%BF%90%E8%A1%8C%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F%E9%85%8D%E7%BD%AE%E4%B8%BA%E6%9C%8D%E5%8A%A1"><span class="toc-text">4.2 将自托管的运行应用程序配置为服务</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#5-Troubleshooting"><span class="toc-text">5. Troubleshooting</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#5-1-%E5%85%8B%E9%9A%86%E4%BB%A3%E7%90%86"><span class="toc-text">5.1. 克隆代理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-2-%E6%89%BE%E4%B8%8D%E5%88%B0Yarn%E5%91%BD%E4%BB%A4"><span class="toc-text">5.2 找不到Yarn命令</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-3-AWS-CLI-SSL-%E8%AF%81%E4%B9%A6%E9%AA%8C%E8%AF%81%E5%A4%B1%E8%B4%A5"><span class="toc-text">5.3 AWS-CLI SSL 证书验证失败</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-4-Docker-login-%E5%A4%B1%E8%B4%A5"><span class="toc-text">5.4. Docker login 失败</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-5-%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F%E8%AE%BE%E7%BD%AE"><span class="toc-text">5.5 环境变量设置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-6-Mac-mini-%E4%BF%9D%E6%8C%81%E6%B4%BB%E5%8A%A8%E7%8A%B6%E6%80%81"><span class="toc-text">5.6 Mac mini 保持活动状态</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#6-%E8%BF%9C%E7%A8%8B%E8%BF%9E%E6%8E%A5"><span class="toc-text">6. 远程连接</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#6-1-%E8%BF%9C%E7%A8%8B%E6%A1%8C%E9%9D%A2%E6%96%B9%E5%BC%8F"><span class="toc-text">6.1 远程桌面方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-2-SSH"><span class="toc-text">6.2 SSH</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#6-%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="toc-text">6. 参考文档</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            Github自托管Runner实践
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2023/07/28/github-self-hosted-runner/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2023-07-28T03:58:19.000Z" itemprop="datePublished">2023-07-28</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/DevOps/" rel="tag">DevOps</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h1 id="1-运行自托管-Runner"><a href="#1-运行自托管-Runner" class="headerlink" title="1. 运行自托管 Runner"></a>1. 运行自托管 Runner</h1><p>本文档调研基于 Mac OS 系统 M 系列芯片的硬件测试, 测试过硬件有:</p>
+<ul>
+<li>MacBook Pro, macOS 13.4.1 (c) (22F770820d) Apple M2 Pro</li>
+<li>Mac mini, macOS 13.4.1 (c) (22F770820d), Apple M2</li>
+</ul>
+<h2 id="1-1-下载脚本"><a href="#1-1-下载脚本" class="headerlink" title="1.1 下载脚本"></a>1.1 下载脚本</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Create a folder</span></span><br><span class="line"><span class="built_in">mkdir</span> actions-runner &amp;&amp; <span class="built_in">cd</span> actions-runner</span><br><span class="line"></span><br><span class="line"><span class="comment"># Download the latest runner package</span></span><br><span class="line">curl -o actions-runner-linux-arm64-2.306.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.306.0/actions-runner-linux-arm64-2.306.0.tar.gz</span><br><span class="line"></span><br><span class="line"><span class="comment"># Extract the installer</span></span><br><span class="line"><span class="built_in">mkdir</span> runner1</span><br><span class="line">tar xzf ./actions-runner-linux-arm64-2.306.0.tar.gz -C runner1/</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="1-2-配置和运行"><a href="#1-2-配置和运行" class="headerlink" title="1.2 配置和运行"></a>1.2 配置和运行</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">./config.sh --name demo-runner --url https://github.com/Albedo-Inc --token xxxxx --labels demo</span><br><span class="line"></span><br><span class="line">./run.sh</span><br></pre></td></tr></table></figure>
+
+<p>如果运行交互性的操作一律使用回车默认即可</p>
+<h1 id="2-性能对比"><a href="#2-性能对比" class="headerlink" title="2. 性能对比"></a>2. 性能对比</h1><h2 id="2-2-Pull-Request-工作流"><a href="#2-2-Pull-Request-工作流" class="headerlink" title="2.2 Pull Request 工作流"></a>2.2 Pull Request 工作流</h2><p>主要任务是运行单元测试和集成测试, 性能对比如下:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Self hosted</th>
+<th></th>
+<th>Github hosted</th>
+<th></th>
+</tr>
+</thead>
+<tbody><tr>
+<td></td>
+<td>首次</td>
+<td>第 N 次</td>
+<td>首次</td>
+<td>第 N 次</td>
+</tr>
+<tr>
+<td>Set up job</td>
+<td>21</td>
+<td>21</td>
+<td>2</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Restore nx cache</td>
+<td>72</td>
+<td>68</td>
+<td>67</td>
+<td>90</td>
+</tr>
+<tr>
+<td>Check out git repository</td>
+<td>15</td>
+<td>16</td>
+<td>6</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Apply the node_modules cache</td>
+<td>2</td>
+<td>55</td>
+<td>13</td>
+<td>13</td>
+</tr>
+<tr>
+<td>Install dependencies</td>
+<td>539</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Run Jest tests</td>
+<td>8</td>
+<td>0</td>
+<td>52</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Run Cypress tests</td>
+<td>124</td>
+<td>0</td>
+<td>322</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Post Apply the node_modules cache</td>
+<td>98</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Total duration</td>
+<td>907</td>
+<td>187</td>
+<td>404</td>
+<td>166</td>
+</tr>
+</tbody></table>
+<p>首次含义:<br>本地无 nx 缓存(1.1GiB)<br>本地无 yarn 缓存(360 MB)<br>远程无 node_module 缓存</p>
+<h2 id="1-2-Build-工作流"><a href="#1-2-Build-工作流" class="headerlink" title="1.2 Build 工作流"></a>1.2 Build 工作流</h2><p>主要任务是编译, 将 Typescript 打包为 JavaScript, 性能对比如下:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Self hosted</th>
+<th>Github hosted</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Set up job</td>
+<td>23</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Restore nx cache</td>
+<td>193</td>
+<td>118</td>
+</tr>
+<tr>
+<td>Check out git repository</td>
+<td>16</td>
+<td>7</td>
+</tr>
+<tr>
+<td>Apply the node_modules cache</td>
+<td>31</td>
+<td>16</td>
+</tr>
+<tr>
+<td>Install dependencies</td>
+<td>3</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Build affected projects</td>
+<td>26</td>
+<td>568</td>
+</tr>
+<tr>
+<td>Total duration</td>
+<td>172</td>
+<td>720</td>
+</tr>
+</tbody></table>
+<h2 id="1-3-总结"><a href="#1-3-总结" class="headerlink" title="1.3 总结"></a>1.3 总结</h2><ul>
+<li>启动调度速度: Self hosted 逊于 Github hosted</li>
+<li>下载速度: Self hosted 稍逊 Github hosted</li>
+<li>编译&#x2F;测试任务处理: Self hosted 优于 Github hosted</li>
+</ul>
+<p><strong>如何一个工作流的耗时大头是任务处理类的, 可以考虑使用 Self hosted, 否则效率上无优势</strong></p>
+<h1 id="3-单机并行方案"><a href="#3-单机并行方案" class="headerlink" title="3. 单机并行方案"></a>3. 单机并行方案</h1><p>根据日常 CICD 的观察, 很多场景下对 CPU 的要求不好, 主要是内存的限制, 特别是 TypeScript 构建过程, 所以如果单机性能较好只作为一个 Runner 运行太浪费, 所以单机开启多个 Runner 是理想的选择, 具体探索和尝试的思路如下:</p>
+<h2 id="3-1-单进程-vs-多任务"><a href="#3-1-单进程-vs-多任务" class="headerlink" title="3.1 单进程 vs 多任务"></a>3.1 单进程 vs 多任务</h2><p>本地仅开启一个 Runner 进程, 但是并行有多个流水线任务都使用自托管 Runner. 测试结果:</p>
+<p><strong>本来的并行多任务无法并行, 因为争抢 Runner 变成串行</strong></p>
+<h2 id="3-2-多进程-vs-多任务"><a href="#3-2-多进程-vs-多任务" class="headerlink" title="3.2 多进程 vs 多任务"></a>3.2 多进程 vs 多任务</h2><p>本地运行多个 Runner 进程, 模拟注册多个 Runner. 测试结果:</p>
+<ul>
+<li><p>在同目录下</p>
+<p>不能再次运行 config.sh 重新配置, 除非删除之前的配置</p>
+</li>
+<li><p>在不同目录下</p>
+<p>可以注册另一个 Runner, 需要注意的是:</p>
+<ul>
+<li>提供不一样的机器名称</li>
+<li>提供相同的标签</li>
+</ul>
+</li>
+</ul>
+<h2 id="3-3-多容器-vs-多任务"><a href="#3-3-多容器-vs-多任务" class="headerlink" title="3.3 多容器 vs 多任务"></a>3.3 多容器 vs 多任务</h2><p>根据<a target="_blank" rel="noopener" href="https://github.com/myoung34/docker-github-actions-runner">Github awesome runner</a>的文章, 选择<code>myoung34/github-runner</code>作为 Runner 镜像, 启动多个容器实例来模拟多 Runner. Compose 配置如下:</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">version:</span> <span class="string">&#x27;2.3&#x27;</span></span><br><span class="line"><span class="attr">services:</span></span><br><span class="line">  <span class="attr">worker1:</span></span><br><span class="line">    <span class="attr">image:</span> <span class="string">myoung34/github-runner:latest</span></span><br><span class="line">    <span class="attr">container_name:</span> <span class="string">worker1</span></span><br><span class="line">    <span class="attr">environment:</span></span><br><span class="line">      <span class="attr">REPO_URL:</span> <span class="string">https://github.com/nnsay/github-action-tutorial</span></span><br><span class="line">      <span class="attr">RUNNER_NAME:</span> <span class="string">worker1</span></span><br><span class="line">      <span class="attr">RUNNER_TOKEN:</span> <span class="string">ADNLAD2P5KRJJCBQJFWGVF3EW5PRU</span></span><br><span class="line">      <span class="comment"># RUNNER_GROUP: my-group</span></span><br><span class="line">      <span class="attr">LABELS:</span> <span class="string">demo,docker-runner</span></span><br><span class="line">    <span class="attr">security_opt:</span></span><br><span class="line">      <span class="comment"># needed on SELinux systems to allow docker container to manage other docker containers</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">label:disable</span></span><br><span class="line">    <span class="attr">volumes:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">&#x27;/var/run/docker.sock:/var/run/docker.sock&#x27;</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">&#x27;/tmp/nx:/tmp/nx&#x27;</span></span><br><span class="line">  <span class="attr">worker2:</span></span><br><span class="line">  	<span class="string">...</span> <span class="string">...</span></span><br></pre></td></tr></table></figure>
+
+<p>验证结果:</p>
+<ul>
+<li><p>docker compose up 自动注册 Runner</p>
+</li>
+<li><p>docker compose down 自动删除 Runner</p>
+</li>
+<li><p>多任务执行异常</p>
+<ul>
+<li><p><code>Build工作流</code>稳定失败且无错误日志, 推测是内存原因上调 Docker 资源亦无法解决</p>
+</li>
+<li><p>Cypress e2e 测试失败</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">Your system is missing the dependency: Xvfb</span><br><span class="line"></span><br><span class="line">Install Xvfb and run Cypress again.</span><br><span class="line"></span><br><span class="line">Read our documentation on dependencies for more information:</span><br><span class="line"></span><br><span class="line">https://on.cypress.io/required-dependencies</span><br><span class="line"></span><br><span class="line">If you are using Docker, we provide containers with all required dependencies installed.</span><br><span class="line"></span><br><span class="line">----------</span><br><span class="line"></span><br><span class="line">Error: spawn Xvfb ENOENT</span><br><span class="line"></span><br><span class="line">----------</span><br><span class="line"></span><br><span class="line">Platform: linux-arm64 (Ubuntu - 20.04)</span><br><span class="line">Cypress Version: 12.14.0</span><br></pre></td></tr></table></figure></li>
+</ul>
+</li>
+<li><p>缺陷</p>
+<ul>
+<li>案例中的镜像内虽然包含 docker, 但是 github action 自己不支持在 self hosted 使用 docker, 详情查看<a target="_blank" rel="noopener" href="https://github.com/myoung34/docker-github-actions-runner/tree/master#docker-support">这里</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="3-4-总结"><a href="#3-4-总结" class="headerlink" title="3.4 总结"></a>3.4 总结</h2><p>个人推荐<strong>多进程</strong>的方式, 根据实际测试和使用<strong>多容器</strong>有诸多问题例如: 镜像的个性化维护, 不支持 Job Service, 莫名其妙的退出等; 其次容器或者虚拟机本身是要占用资源了, <strong>多进程</strong>方式资源利用率更高.</p>
+<h1 id="4-深入调研"><a href="#4-深入调研" class="headerlink" title="4. 深入调研"></a>4. 深入调研</h1><h2 id="4-1-自定义-Runner-镜像"><a href="#4-1-自定义-Runner-镜像" class="headerlink" title="4.1 自定义 Runner 镜像"></a>4.1 自定义 Runner 镜像</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 下载代码</span></span><br><span class="line">git <span class="built_in">clone</span> https://github.com/myoung34/docker-github-actions-runner.git</span><br><span class="line"><span class="comment"># 镜像自定义, 例如安装一些没有的命令: yarn</span></span><br><span class="line">...</span><br><span class="line"><span class="comment"># 构建base镜像</span></span><br><span class="line">docker build -f Dockerfile.base -t myoung34/github-runner-base:latest .</span><br><span class="line"><span class="comment"># 构建runner镜像</span></span><br><span class="line">docker build -t <span class="built_in">local</span>/github-runner:latest .</span><br></pre></td></tr></table></figure>
+
+<h2 id="4-2-将自托管的运行应用程序配置为服务"><a href="#4-2-将自托管的运行应用程序配置为服务" class="headerlink" title="4.2 将自托管的运行应用程序配置为服务"></a>4.2 <a target="_blank" rel="noopener" href="https://docs.github.com/zh/actions/hosting-your-own-runners/managing-self-hosted-runners/configuring-the-self-hosted-runner-application-as-a-service">将自托管的运行应用程序配置为服务</a></h2><p>github runner 脚本已经包含了将应用程序服务化的帮助脚本, 直接使用即可</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">./svc.sh install</span><br><span class="line">./svc.sh start</span><br></pre></td></tr></table></figure>
+
+<h1 id="5-Troubleshooting"><a href="#5-Troubleshooting" class="headerlink" title="5. Troubleshooting"></a>5. Troubleshooting</h1><h2 id="5-1-克隆代理"><a href="#5-1-克隆代理" class="headerlink" title="5.1. 克隆代理"></a>5.1. 克隆代理</h2><p>~&#x2F;.gitconfig:</p>
+<figure class="highlight toml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[http]</span></span><br><span class="line">	<span class="attr">postBuffer</span> = <span class="number">524288000</span></span><br><span class="line">	<span class="attr">version</span> = HTTP/<span class="number">1.1</span></span><br><span class="line">	<span class="attr">proxy</span> = <span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">7890</span></span><br><span class="line"><span class="section">[https]</span></span><br><span class="line">	<span class="attr">proxy</span> = <span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">7890</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="5-2-找不到Yarn命令"><a href="#5-2-找不到Yarn命令" class="headerlink" title="5.2 找不到Yarn命令"></a>5.2 找不到<code>Yarn</code>命令</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo npm install yarn@1 -g</span><br></pre></td></tr></table></figure>
+
+<h2 id="5-3-AWS-CLI-SSL-证书验证失败"><a href="#5-3-AWS-CLI-SSL-证书验证失败" class="headerlink" title="5.3 AWS-CLI SSL 证书验证失败"></a>5.3 AWS-CLI SSL 证书验证失败</h2><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">rules:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">&quot;DOMAIN-SUFFIX,amazonaws.cn,DIRECT&quot;</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">&quot;DOMAIN-SUFFIX,amazonaws.com.cn,DIRECT&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="5-4-Docker-login-失败"><a href="#5-4-Docker-login-失败" class="headerlink" title="5.4. Docker login 失败"></a>5.4. Docker login 失败</h2><p>错误: Error saving credentials: error storing credentials - err: exit status 1, out: <code>User interaction is not allowed.</code></p>
+<p>解决方案: 编辑 runsvc.sh, 增加 session 级别的 unlock</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">security unlock-keychain -p xxxx ~/Library/Keychains/login.keychain-db</span><br></pre></td></tr></table></figure>
+
+<h2 id="5-5-环境变量设置"><a href="#5-5-环境变量设置" class="headerlink" title="5.5 环境变量设置"></a>5.5 环境变量设置</h2><p>查看本地安装目录<code>env.sh</code>文件, 可以在本地生产.env 然后写入环境变量, 例如:</p>
+<figure class="highlight toml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">https_proxy</span>=http://<span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">7890</span></span><br><span class="line"><span class="attr">http_proxy</span>=http://<span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">7890</span></span><br></pre></td></tr></table></figure>
+
+<p>可以通过执行 env.sh 查看最后生成的.env 中的环境变量是否 OK</p>
+<h2 id="5-6-Mac-mini-保持活动状态"><a href="#5-6-Mac-mini-保持活动状态" class="headerlink" title="5.6 Mac mini 保持活动状态"></a>5.6 Mac mini 保持活动状态</h2><p>问题: 即使配置从不睡眠和锁屏, 退出远程桌面后发现 Runner 还是会掉线, 即使在终端放置一些诸如 htop 的命令运行, 发现其实也不是真正的运行, 似乎被挂起了, 这个挂起可以使用 nodejs 的 setInterval 输出时间的方法证明.</p>
+<p>解决方案: 使用第三方软件保持活动: <a target="_blank" rel="noopener" href="https://apps.apple.com/cn/app/amphetamine/id937984704">Amphetamine</a></p>
+<h1 id="6-远程连接"><a href="#6-远程连接" class="headerlink" title="6. 远程连接"></a>6. 远程连接</h1><h2 id="6-1-远程桌面方式"><a href="#6-1-远程桌面方式" class="headerlink" title="6.1 远程桌面方式"></a>6.1 远程桌面方式</h2><ul>
+<li><p>Runner 端设置</p>
+<p>系统设置-&gt;通用-&gt;共享, 打开 屏幕共享</p>
+</li>
+<li><p>发起连接</p>
+<p>Finder-&gt;前往-&gt;连接服务器, 输入: vnc:&#x2F;&#x2F;officerunner1, 连接成功后还需要输入用户名&#x2F;密码即可远程桌面操作 Runner</p>
+<p>ℹ️officerunner1 是 Runner 主机名, 这个名字也可以在: 系统设置-&gt;通用-&gt;共享-&gt;本地主机名 中设置</p>
+</li>
+</ul>
+<h2 id="6-2-SSH"><a href="#6-2-SSH" class="headerlink" title="6.2 SSH"></a>6.2 SSH</h2><ul>
+<li><p>Runner 端设置</p>
+<p>系统设置-&gt;通用-&gt;共享, 打开 远程登录</p>
+</li>
+<li><p>发起连接</p>
+<p>Finder-&gt;前往-&gt;连接服务器, 输入: ssh [username]@[ip&#x2F;machineName], 连接成功后还需要输入密码随后即可操作</p>
+</li>
+</ul>
+<h1 id="6-参考文档"><a href="#6-参考文档" class="headerlink" title="6. 参考文档"></a>6. 参考文档</h1><ul>
+<li><p><a target="_blank" rel="noopener" href="https://jonico.github.io/awesome-runners/">Github awesome runner</a></p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://developer.apple.com/forums/thread/690665">Unlock keychain on headless system does not work on BigSur</a></p>
+</li>
+</ul>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2023/07/20/nx-invalid-cache/" class="article-next" title="Nx缓存失效探究"><i class="icon-arrow-right"></i></a>
+
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "c5486ce694c91269247bc8130e496ef8",
+        distractionFreeMode: true,
+        title: "Github自托管Runner实践",
+        body: "https://nnsay.github.io/2023/07/28/github-self-hosted-runner/",
+        labels: ["DevOps"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?1f97030bb3a44256d81e14447104bef8";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+    
+    
+      <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+      </script>
+        <!-- <script src='https://unpkg.com/mermaid@10/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script> -->
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

@@ -11,159 +11,6 @@
   </url>
   
   <url>
-    <loc>https://nnsay.github.io/2019/10/24/shell-script-pass-parameter/</loc>
-    
-    <lastmod>2023-07-28</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2019/10/20/shell-weather/</loc>
-    
-    <lastmod>2023-07-28</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2020/11/13/simple-three-step-to-publish-local-server-or-website/</loc>
-    
-    <lastmod>2023-07-28</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2019/11/18/soft-delete/</loc>
-    
-    <lastmod>2023-07-28</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2022/08/03/springboot-zipkin-trace-on-aliyun/</loc>
-    
-    <lastmod>2023-07-28</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2019/10/20/sprint-graph/</loc>
-    
-    <lastmod>2023-07-28</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2023/05/24/sync-dynamodb-table/</loc>
-    
-    <lastmod>2023-07-28</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2020/04/09/think-about-retry/</loc>
-    
-    <lastmod>2023-07-28</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2019/12/10/ubuntu-network-manager/</loc>
-    
-    <lastmod>2023-07-28</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2021/09/15/use-submodule-theme/</loc>
-    
-    <lastmod>2023-07-28</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2022/05/07/volta/</loc>
-    
-    <lastmod>2023-07-28</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2022/02/21/yueqian/</loc>
-    
-    <lastmod>2023-07-28</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/about/index.html</loc>
-    
-    <lastmod>2023-07-28</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2019/10/20/code-art/</loc>
-    
-    <lastmod>2023-07-28</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2023/07/17/code-coverage/</loc>
-    
-    <lastmod>2023-07-28</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2019/10/20/es6/</loc>
-    
-    <lastmod>2023-07-28</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://nnsay.github.io/2020/09/02/express-parameter-router-skill/</loc>
-    
-    <lastmod>2023-07-28</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://nnsay.github.io/2023/03/24/github-action-cache/</loc>
     
     <lastmod>2023-07-28</lastmod>
@@ -416,6 +263,24 @@
   </url>
   
   <url>
+    <loc>https://nnsay.github.io/2020/11/04/setup-develop-environment-under-the-ubuntu-os/</loc>
+    
+    <lastmod>2023-07-28</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2019/10/24/shell-script-pass-parameter/</loc>
+    
+    <lastmod>2023-07-28</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://nnsay.github.io/2023/04/23/sentry-best-practices/</loc>
     
     <lastmod>2023-07-28</lastmod>
@@ -434,6 +299,15 @@
   </url>
   
   <url>
+    <loc>https://nnsay.github.io/2019/10/20/shell-weather/</loc>
+    
+    <lastmod>2023-07-28</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://nnsay.github.io/2021/04/16/setup%20docker%20registry%20with%20custom%20auth/</loc>
     
     <lastmod>2023-07-28</lastmod>
@@ -443,7 +317,97 @@
   </url>
   
   <url>
-    <loc>https://nnsay.github.io/2020/11/04/setup-develop-environment-under-the-ubuntu-os/</loc>
+    <loc>https://nnsay.github.io/2020/11/13/simple-three-step-to-publish-local-server-or-website/</loc>
+    
+    <lastmod>2023-07-28</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2019/11/18/soft-delete/</loc>
+    
+    <lastmod>2023-07-28</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2022/08/03/springboot-zipkin-trace-on-aliyun/</loc>
+    
+    <lastmod>2023-07-28</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2019/10/20/sprint-graph/</loc>
+    
+    <lastmod>2023-07-28</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2023/05/24/sync-dynamodb-table/</loc>
+    
+    <lastmod>2023-07-28</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2020/04/09/think-about-retry/</loc>
+    
+    <lastmod>2023-07-28</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2019/12/10/ubuntu-network-manager/</loc>
+    
+    <lastmod>2023-07-28</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2021/09/15/use-submodule-theme/</loc>
+    
+    <lastmod>2023-07-28</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2022/05/07/volta/</loc>
+    
+    <lastmod>2023-07-28</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2022/02/21/yueqian/</loc>
+    
+    <lastmod>2023-07-28</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/about/index.html</loc>
     
     <lastmod>2023-07-28</lastmod>
     
@@ -489,6 +453,42 @@
   
   <url>
     <loc>https://nnsay.github.io/2023/05/08/bing-map-api/</loc>
+    
+    <lastmod>2023-07-28</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2019/10/20/code-art/</loc>
+    
+    <lastmod>2023-07-28</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2023/07/17/code-coverage/</loc>
+    
+    <lastmod>2023-07-28</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2019/10/20/es6/</loc>
+    
+    <lastmod>2023-07-28</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://nnsay.github.io/2020/09/02/express-parameter-router-skill/</loc>
     
     <lastmod>2023-07-28</lastmod>
     

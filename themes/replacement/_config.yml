@@ -7,7 +7,7 @@ menu:
   About: /about
 
 # Content
-excerpt_link: Read more 
+excerpt_link: Read more
 content_max_width: 800px
 
 # Sidebar
@@ -21,8 +21,10 @@ author:
 links:
   - svg: ./source/svg/_github.svg
     url: https://github.com/nnsay
+  - svg: ./source/svg/_mail.svg
+    url: mailto:jimmy.w@aliyun.com
 
-# github comment 
+# github comment
 git_commit:
   enable: true
   client_id: f9b3c7ac0c057c6a0fa2
@@ -32,7 +34,7 @@ git_commit:
   admin:
     - nnsay
   per_page: 10
-  
+
 # https://github.com/wzpan/hexo-generator-search
 search:
   path: search.xml
@@ -41,9 +43,9 @@ search:
 
 # https://github.com/hexojs/hexo-generator-sitemap
 sitemap:
-    path: sitemap.xml
-    template: ./sitemap_template.xml
-    rel: false
+  path: sitemap.xml
+  template: ./sitemap_template.xml
+  rel: false
 
 # 百度统计
 baidu:

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>DynamoDB和S3数据同步 | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="1. 业务场景最近因为微服务迁移的需要需要将现有微服务中的 DynamoDB Table 和 S3 Bucket 做一个迁移, 新老资源结构不变只需要从一个位置迁移到另外一个位置. 因为是在线系统所以在设计方案时需要考虑以下两点:实时数据迁移历史数据迁移实时数据迁移优先上线, 历史数据迁移可以慢慢同步, 等到历史数据同步结束, 新的微服务就可以使用新资源, 在同步时需要注意数据准确性和完整性.2. 方案设计2.1 历史数据同步历史数据同步相对比较简单, 最笨的办法可以通过写程序来实现, 通过调研" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 6.3.0"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E4%B8%9A%E5%8A%A1%E5%9C%BA%E6%99%AF"><span class="toc-text">1. 业务场景</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E6%96%B9%E6%A1%88%E8%AE%BE%E8%AE%A1"><span class="toc-text">2. 方案设计</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-%E5%8E%86%E5%8F%B2%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5"><span class="toc-text">2.1 历史数据同步</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-1-DynamoDB-Table-%E5%8E%86%E5%8F%B2%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5-%E7%BC%96%E7%A8%8B"><span class="toc-text">2.1.1 DynamoDB Table 历史数据同步: 编程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-2-S3-Bucket-%E5%8E%86%E5%8F%B2%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5-CLI"><span class="toc-text">2.1.2 S3 Bucket 历史数据同步: CLI</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-%E5%AE%9E%E6%97%B6%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5"><span class="toc-text">2.2 实时数据同步</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-1-DynamoDB-Table-%E5%AE%9E%E6%97%B6%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5-DynamoDB-Stream"><span class="toc-text">2.2.1 DynamoDB Table 实时数据同步: DynamoDB Stream</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-2-S3-Bucket-%E5%AE%9E%E6%97%B6%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5-Bucket-Event"><span class="toc-text">2.2.2 S3 Bucket 实时数据同步: Bucket Event</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E6%80%BB%E7%BB%93"><span class="toc-text">3. 总结</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-FQA"><span class="toc-text">4. FQA</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            DynamoDB和S3数据同步
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2023/10/26/sync-dynamodb-and-s3/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2023-10-26T07:56:42.000Z" itemprop="datePublished">2023-10-26</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/Code/" rel="tag">Code</a>, <a class="article-tag-link" href="/tags/DevOps/" rel="tag">DevOps</a>, <a class="article-tag-link" href="/tags/%E7%A0%94%E7%A9%B6/" rel="tag">研究</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h1 id="1-业务场景"><a href="#1-业务场景" class="headerlink" title="1. 业务场景"></a>1. 业务场景</h1><p>最近因为微服务迁移的需要需要将现有微服务中的 DynamoDB Table 和 S3 Bucket 做一个迁移, 新老资源结构不变只需要从一个位置迁移到另外一个位置. 因为是在线系统所以在设计方案时需要考虑以下两点:</p>
+<ul>
+<li>实时数据迁移</li>
+<li>历史数据迁移</li>
+</ul>
+<p>实时数据迁移优先上线, 历史数据迁移可以慢慢同步, 等到历史数据同步结束, 新的微服务就可以使用新资源, 在同步时需要注意数据准确性和完整性.</p>
+<h1 id="2-方案设计"><a href="#2-方案设计" class="headerlink" title="2. 方案设计"></a>2. 方案设计</h1><h2 id="2-1-历史数据同步"><a href="#2-1-历史数据同步" class="headerlink" title="2.1 历史数据同步"></a>2.1 历史数据同步</h2><p>历史数据同步相对比较简单, 最笨的办法可以通过写程序来实现, 通过调研相关的技术文档详细的设计方法如下:</p>
+<h3 id="2-1-1-DynamoDB-Table-历史数据同步-编程"><a href="#2-1-1-DynamoDB-Table-历史数据同步-编程" class="headerlink" title="2.1.1 DynamoDB Table 历史数据同步: 编程"></a>2.1.1 DynamoDB Table 历史数据同步: 编程</h3><p>DynamoDB 在国内市场似乎用的比较少, 资料和工具都比较少, 经过调研决定使用编程方式解决, 单表同步逻辑如下:</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123;</span><br><span class="line">  <span class="title class_">DynamoDBClient</span>,</span><br><span class="line">  <span class="title class_">ScanCommand</span>,</span><br><span class="line">  <span class="title class_">AttributeValue</span>,</span><br><span class="line">  <span class="title class_">PutItemCommand</span>,</span><br><span class="line">  <span class="title class_">ScanCommandOutput</span>,</span><br><span class="line">&#125; <span class="keyword">from</span> <span class="string">&quot;@aws-sdk/client-dynamodb&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; fromIni &#125; <span class="keyword">from</span> <span class="string">&quot;@aws-sdk/credential-provider-ini&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> <span class="title function_">syncTable</span> = <span class="keyword">async</span> (<span class="params"></span></span><br><span class="line"><span class="params">  sourceTableName: <span class="built_in">string</span>,</span></span><br><span class="line"><span class="params">  targetTableName: <span class="built_in">string</span>,</span></span><br><span class="line"><span class="params">  envName: <span class="built_in">string</span></span></span><br><span class="line"><span class="params"></span>) =&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> devCredential = <span class="title function_">fromIni</span>(&#123; <span class="attr">profile</span>: envName &#125;);</span><br><span class="line">  <span class="keyword">const</span> devClient = <span class="keyword">new</span> <span class="title class_">DynamoDBClient</span>(&#123; <span class="attr">credentials</span>: devCredential &#125;);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">let</span> <span class="attr">lastEvaluatedKey</span>: <span class="title class_">Record</span>&lt;<span class="built_in">string</span>, <span class="title class_">AttributeValue</span>&gt; | <span class="literal">undefined</span> = &#123;</span><br><span class="line">    <span class="attr">__default</span>: &#123; <span class="attr">N</span>: <span class="string">&quot;default&quot;</span> &#125;,</span><br><span class="line">  &#125;;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 循环获取所有数据</span></span><br><span class="line">  <span class="keyword">do</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> <span class="attr">data</span>: <span class="title class_">ScanCommandOutput</span> = <span class="keyword">await</span> devClient.<span class="title function_">send</span>(</span><br><span class="line">      <span class="keyword">new</span> <span class="title class_">ScanCommand</span>(&#123;</span><br><span class="line">        <span class="title class_">TableName</span>: sourceTableName,</span><br><span class="line">        <span class="title class_">ExclusiveStartKey</span>: lastEvaluatedKey?.<span class="property">__default</span></span><br><span class="line">          ? <span class="literal">undefined</span></span><br><span class="line">          : lastEvaluatedKey,</span><br><span class="line">      &#125;)</span><br><span class="line">    );</span><br><span class="line">    lastEvaluatedKey = data.<span class="property">LastEvaluatedKey</span>;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(</span><br><span class="line">      <span class="string">`<span class="subst">$&#123;sourceTableName&#125;</span>--&gt; <span class="subst">$&#123;targetTableName&#125;</span> lastEvaluatedKey: %j currentCount: %d`</span>,</span><br><span class="line">      lastEvaluatedKey,</span><br><span class="line">      data.<span class="property">Count</span></span><br><span class="line">    );</span><br><span class="line">    <span class="comment">// 同步</span></span><br><span class="line">    <span class="keyword">const</span> tasks =</span><br><span class="line">      data.<span class="property">Items</span>?.<span class="title function_">map</span>(<span class="function">(<span class="params">item</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> devClient.<span class="title function_">send</span>(</span><br><span class="line">          <span class="keyword">new</span> <span class="title class_">PutItemCommand</span>(&#123;</span><br><span class="line">            <span class="title class_">TableName</span>: targetTableName,</span><br><span class="line">            <span class="title class_">Item</span>: item,</span><br><span class="line">          &#125;)</span><br><span class="line">        );</span><br><span class="line">      &#125;) || [];</span><br><span class="line">    <span class="keyword">await</span> <span class="title class_">Promise</span>.<span class="title function_">all</span>(tasks);</span><br><span class="line">  &#125; <span class="keyword">while</span> (lastEvaluatedKey?.<span class="property">__default</span> || lastEvaluatedKey);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>上面的代码使用 Typescript 编写, 使用 DynamoDB 的 SDK, 使用 Scan 方法循环查询表直到所有的数据查找完; 另外在权限部分使用<code>fromIni</code>获取本地配置的 AWS Profile 权限.</p>
+<h3 id="2-1-2-S3-Bucket-历史数据同步-CLI"><a href="#2-1-2-S3-Bucket-历史数据同步-CLI" class="headerlink" title="2.1.2 S3 Bucket 历史数据同步: CLI"></a>2.1.2 S3 Bucket 历史数据同步: CLI</h3><p>AWS CLI 提供的 <code>sync</code> 非常适合做文件迁移, 并且支持增量, 所以 S3 Bucket 的历史数据同步直接使用 Shell 脚本 + AWS CLI 即可, 代码片段如下:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#! /bin/bash</span></span><br><span class="line"><span class="built_in">set</span> -e</span><br><span class="line">sourcebucket=<span class="string">&quot;xxx&quot;</span></span><br><span class="line">targetbucket=<span class="string">&quot;yyy&quot;</span></span><br><span class="line">profile=dev</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;<span class="subst">$(date +&#x27;%Y-%m-%d %H:%M:%S&#x27;)</span> 开始同步: <span class="variable">$sourcebucket</span>-&gt;<span class="variable">$targetbucket</span>&quot;</span></span><br><span class="line">aws s3 <span class="built_in">sync</span> --only-show-errors s3://source-dev-dev s3://target-dev --profile=<span class="variable">$profile</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;<span class="subst">$(date +&#x27;%Y-%m-%d %H:%M:%S&#x27;)</span> 结束同步: <span class="variable">$sourcebucket</span>-&gt;<span class="variable">$targetbucket</span>&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="2-2-实时数据同步"><a href="#2-2-实时数据同步" class="headerlink" title="2.2 实时数据同步"></a>2.2 实时数据同步</h2><p>实时数据同步是数据迁移方案不停服务无缝迁移的核心, 经过查看 AWS 的相关服务决定使用 DynamoDB Stream 和 S3 Event 来实现.</p>
+<h3 id="2-2-1-DynamoDB-Table-实时数据同步-DynamoDB-Stream"><a href="#2-2-1-DynamoDB-Table-实时数据同步-DynamoDB-Stream" class="headerlink" title="2.2.1 DynamoDB Table 实时数据同步: DynamoDB Stream"></a>2.2.1 DynamoDB Table 实时数据同步: DynamoDB Stream</h3><p>要实现 DynamoDB Table 实时数据同步, 首先要开启 Table Stream, 然后监听 Table 事件, 通过 Lambda 来实现具体的同步逻辑, 这里以 Serverless 框架为例来做代码演示.</p>
+<p>首先开启 Table 的 Stream 功能, 并配置事件处理函数, 可以在<code>serverless.ts</code>中设置:</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; <span class="variable constant_">AWS</span> &#125; <span class="keyword">from</span> <span class="string">&#x27;@serverless/typescript&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="attr">config</span>: <span class="variable constant_">AWS</span> = &#123;</span><br><span class="line">  <span class="attr">service</span>: <span class="string">&#x27;serverless-tutorial-service&#x27;</span>,</span><br><span class="line">  <span class="attr">frameworkVersion</span>: <span class="string">&#x27;3&#x27;</span>,</span><br><span class="line">  <span class="attr">provider</span>: &#123;</span><br><span class="line">    <span class="attr">name</span>: <span class="string">&#x27;aws&#x27;</span>,</span><br><span class="line">    <span class="attr">region</span>: <span class="string">&#x27;cn-northwest-1&#x27;</span>,</span><br><span class="line">    <span class="attr">stage</span>: <span class="string">&quot;$&#123;opt:stage, &#x27;local&#x27;&#125;&quot;</span>,</span><br><span class="line">    <span class="attr">stackName</span>: <span class="string">&#x27;$&#123;self:service&#125;-$&#123;self:provider.stage&#125;&#x27;</span>,</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="attr">functions</span>: &#123;</span><br><span class="line">    <span class="attr">tableStream</span>: &#123;</span><br><span class="line">      <span class="attr">name</span>: <span class="string">&#x27;$&#123;self:provider.stackName&#125;-tablestream&#x27;</span>,</span><br><span class="line">      <span class="attr">handler</span>: <span class="string">&#x27;dist/lambda.dataSync&#x27;</span>,</span><br><span class="line">      <span class="attr">events</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">stream</span>: &#123;</span><br><span class="line">            <span class="attr">type</span>: <span class="string">&#x27;dynamodb&#x27;</span>,</span><br><span class="line">            <span class="attr">arn</span>: &#123; <span class="string">&#x27;Fn::GetAtt&#x27;</span>: [<span class="string">&#x27;ExampleTable&#x27;</span>, <span class="string">&#x27;StreamArn&#x27;</span>] &#125;,</span><br><span class="line">          &#125;,</span><br><span class="line">        &#125;,</span><br><span class="line">      ],</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">s3Sync</span>: &#123;</span><br><span class="line">      <span class="attr">name</span>: <span class="string">&#x27;$&#123;self:provider.stackName&#125;-s3sync&#x27;</span>,</span><br><span class="line">      <span class="attr">handler</span>: <span class="string">&#x27;dist/lambda.s3Sync&#x27;</span>,</span><br><span class="line">      <span class="attr">events</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">s3</span>: &#123;</span><br><span class="line">            <span class="attr">bucket</span>: <span class="string">&#x27;$&#123;env:EXAMPLE_S3&#125;&#x27;</span>,</span><br><span class="line">            <span class="attr">event</span>: <span class="string">&#x27;s3:ObjectCreated:*&#x27;</span>,</span><br><span class="line">            <span class="attr">existing</span>: <span class="literal">true</span>,</span><br><span class="line">          &#125;,</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">s3</span>: &#123;</span><br><span class="line">            <span class="attr">bucket</span>: <span class="string">&#x27;$&#123;env:EXAMPLE_S3&#125;&#x27;</span>,</span><br><span class="line">            <span class="attr">event</span>: <span class="string">&#x27;s3:ObjectRemoved:*&#x27;</span>,</span><br><span class="line">            <span class="attr">existing</span>: <span class="literal">true</span>,</span><br><span class="line">          &#125;,</span><br><span class="line">        &#125;,</span><br><span class="line">      ],</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="attr">resources</span>: &#123;</span><br><span class="line">    <span class="title class_">Description</span>: <span class="string">&#x27;$&#123;self:provider.stackName&#125; resource&#x27;</span>,</span><br><span class="line">    <span class="title class_">Resources</span>: &#123;</span><br><span class="line">      <span class="title class_">ExampleTable</span>: &#123;</span><br><span class="line">        <span class="title class_">Type</span>: <span class="string">&#x27;AWS::DynamoDB::Table&#x27;</span>,</span><br><span class="line">        <span class="title class_">Properties</span>: &#123;</span><br><span class="line">          <span class="title class_">TableName</span>: <span class="string">&#x27;$&#123;env:EXAMPLE_TBL&#125;-$&#123;self:provider.stage&#125;&#x27;</span>,</span><br><span class="line">          <span class="title class_">AttributeDefinitions</span>: [</span><br><span class="line">            &#123;</span><br><span class="line">              <span class="title class_">AttributeName</span>: <span class="string">&#x27;userID&#x27;</span>,</span><br><span class="line">              <span class="title class_">AttributeType</span>: <span class="string">&#x27;S&#x27;</span>,</span><br><span class="line">            &#125;,</span><br><span class="line">            &#123;</span><br><span class="line">              <span class="title class_">AttributeName</span>: <span class="string">&#x27;pvID&#x27;</span>,</span><br><span class="line">              <span class="title class_">AttributeType</span>: <span class="string">&#x27;S&#x27;</span>,</span><br><span class="line">            &#125;,</span><br><span class="line">          ],</span><br><span class="line">          <span class="title class_">KeySchema</span>: [</span><br><span class="line">            &#123;</span><br><span class="line">              <span class="title class_">AttributeName</span>: <span class="string">&#x27;userID&#x27;</span>,</span><br><span class="line">              <span class="title class_">KeyType</span>: <span class="string">&#x27;HASH&#x27;</span>,</span><br><span class="line">            &#125;,</span><br><span class="line">            &#123;</span><br><span class="line">              <span class="title class_">AttributeName</span>: <span class="string">&#x27;pvID&#x27;</span>,</span><br><span class="line">              <span class="title class_">KeyType</span>: <span class="string">&#x27;RANGE&#x27;</span>,</span><br><span class="line">            &#125;,</span><br><span class="line">          ],</span><br><span class="line">          <span class="title class_">ProvisionedThroughput</span>: &#123;</span><br><span class="line">            <span class="title class_">ReadCapacityUnits</span>: <span class="number">5</span>,</span><br><span class="line">            <span class="title class_">WriteCapacityUnits</span>: <span class="number">5</span>,</span><br><span class="line">          &#125;,</span><br><span class="line">          <span class="title class_">PointInTimeRecoverySpecification</span>: &#123;</span><br><span class="line">            <span class="title class_">PointInTimeRecoveryEnabled</span>: <span class="string">&#x27;$&#123;self:custom.enabledPITR.$&#123;self:provider.stage&#125;&#125;&#x27;</span>,</span><br><span class="line">          &#125;,</span><br><span class="line">          <span class="title class_">StreamSpecification</span>: &#123;</span><br><span class="line">            <span class="title class_">StreamViewType</span>: <span class="string">&#x27;NEW_AND_OLD_IMAGES&#x27;</span>,</span><br><span class="line">          &#125;,</span><br><span class="line">        &#125;,</span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="title class_">ExampleTableTarget</span>: &#123;</span><br><span class="line">        <span class="title class_">Type</span>: <span class="string">&#x27;AWS::DynamoDB::Table&#x27;</span>,</span><br><span class="line">        <span class="title class_">Properties</span>: &#123;</span><br><span class="line">          <span class="title class_">TableName</span>: <span class="string">&#x27;$&#123;env:EXAMPLE_TBL&#125;-$&#123;self:provider.stage&#125;-target&#x27;</span>,</span><br><span class="line">          <span class="title class_">AttributeDefinitions</span>: [</span><br><span class="line">            &#123;</span><br><span class="line">              <span class="title class_">AttributeName</span>: <span class="string">&#x27;userID&#x27;</span>,</span><br><span class="line">              <span class="title class_">AttributeType</span>: <span class="string">&#x27;S&#x27;</span>,</span><br><span class="line">            &#125;,</span><br><span class="line">            &#123;</span><br><span class="line">              <span class="title class_">AttributeName</span>: <span class="string">&#x27;pvID&#x27;</span>,</span><br><span class="line">              <span class="title class_">AttributeType</span>: <span class="string">&#x27;S&#x27;</span>,</span><br><span class="line">            &#125;,</span><br><span class="line">          ],</span><br><span class="line">          <span class="title class_">KeySchema</span>: [</span><br><span class="line">            &#123;</span><br><span class="line">              <span class="title class_">AttributeName</span>: <span class="string">&#x27;userID&#x27;</span>,</span><br><span class="line">              <span class="title class_">KeyType</span>: <span class="string">&#x27;HASH&#x27;</span>,</span><br><span class="line">            &#125;,</span><br><span class="line">            &#123;</span><br><span class="line">              <span class="title class_">AttributeName</span>: <span class="string">&#x27;pvID&#x27;</span>,</span><br><span class="line">              <span class="title class_">KeyType</span>: <span class="string">&#x27;RANGE&#x27;</span>,</span><br><span class="line">            &#125;,</span><br><span class="line">          ],</span><br><span class="line">          <span class="title class_">BillingMode</span>: <span class="string">&#x27;PAY_PER_REQUEST&#x27;</span>,</span><br><span class="line">        &#125;,</span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="title class_">ExampleS3</span>: &#123;</span><br><span class="line">        <span class="title class_">Type</span>: <span class="string">&#x27;AWS::S3::Bucket&#x27;</span>,</span><br><span class="line">        <span class="title class_">Properties</span>: &#123;</span><br><span class="line">          <span class="title class_">BucketName</span>: <span class="string">&#x27;$&#123;env:EXAMPLE_S3&#125;&#x27;</span>,</span><br><span class="line">          <span class="title class_">LifecycleConfiguration</span>: &#123;</span><br><span class="line">            <span class="title class_">Rules</span>: [&#123; <span class="title class_">Id</span>: <span class="string">&#x27;DeleteAfter1Day&#x27;</span>, <span class="title class_">Status</span>: <span class="string">&#x27;Enabled&#x27;</span>, <span class="title class_">ExpirationInDays</span>: <span class="number">1</span> &#125;],</span><br><span class="line">          &#125;,</span><br><span class="line">          <span class="title class_">CorsConfiguration</span>: &#123;</span><br><span class="line">            <span class="title class_">CorsRules</span>: [</span><br><span class="line">              &#123;</span><br><span class="line">                <span class="title class_">AllowedOrigins</span>: [<span class="string">&#x27;*&#x27;</span>],</span><br><span class="line">                <span class="title class_">AllowedHeaders</span>: [<span class="string">&#x27;*&#x27;</span>],</span><br><span class="line">                <span class="title class_">AllowedMethods</span>: [<span class="string">&#x27;GET&#x27;</span>, <span class="string">&#x27;PUT&#x27;</span>, <span class="string">&#x27;POST&#x27;</span>, <span class="string">&#x27;DELETE&#x27;</span>, <span class="string">&#x27;HEAD&#x27;</span>],</span><br><span class="line">                <span class="title class_">MaxAge</span>: <span class="number">3000</span>,</span><br><span class="line">              &#125;,</span><br><span class="line">            ],</span><br><span class="line">          &#125;,</span><br><span class="line">        &#125;,</span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="title class_">ExampleS3Target</span>: &#123;</span><br><span class="line">        <span class="title class_">Type</span>: <span class="string">&#x27;AWS::S3::Bucket&#x27;</span>,</span><br><span class="line">        <span class="title class_">Properties</span>: &#123;</span><br><span class="line">          <span class="title class_">BucketName</span>: <span class="string">&#x27;$&#123;env:EXAMPLE_S3&#125;-target&#x27;</span>,</span><br><span class="line">          <span class="title class_">LifecycleConfiguration</span>: &#123;</span><br><span class="line">            <span class="title class_">Rules</span>: [&#123; <span class="title class_">Id</span>: <span class="string">&#x27;DeleteAfter1Day&#x27;</span>, <span class="title class_">Status</span>: <span class="string">&#x27;Enabled&#x27;</span>, <span class="title class_">ExpirationInDays</span>: <span class="number">1</span> &#125;],</span><br><span class="line">          &#125;,</span><br><span class="line">          <span class="title class_">CorsConfiguration</span>: &#123;</span><br><span class="line">            <span class="title class_">CorsRules</span>: [</span><br><span class="line">              &#123;</span><br><span class="line">                <span class="title class_">AllowedOrigins</span>: [<span class="string">&#x27;*&#x27;</span>],</span><br><span class="line">                <span class="title class_">AllowedHeaders</span>: [<span class="string">&#x27;*&#x27;</span>],</span><br><span class="line">                <span class="title class_">AllowedMethods</span>: [<span class="string">&#x27;GET&#x27;</span>, <span class="string">&#x27;PUT&#x27;</span>, <span class="string">&#x27;POST&#x27;</span>, <span class="string">&#x27;DELETE&#x27;</span>, <span class="string">&#x27;HEAD&#x27;</span>],</span><br><span class="line">                <span class="title class_">MaxAge</span>: <span class="number">3000</span>,</span><br><span class="line">              &#125;,</span><br><span class="line">            ],</span><br><span class="line">          &#125;,</span><br><span class="line">        &#125;,</span><br><span class="line">      &#125;,</span><br><span class="line">    &#125;,</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;</span><br><span class="line"><span class="variable language_">module</span>.<span class="property">exports</span> = config</span><br></pre></td></tr></table></figure>
+
+<p>该<code>serverless.ts</code> 不完整, 但是核心的资源创建和函数配置是完整的, 实际情况按照自己业务进行调整, 需要关注的有以下几点:</p>
+<ul>
+<li>Dynamodb Table <code>ExampleTable</code> 是数据源, 同步到 <code>ExampleTableTarget</code>, 其中<code>ExampleTable</code>设置了<code>StreamSpecification</code>配置</li>
+<li><code>StreamSpecification</code> 的 <code>StreamViewType</code> 配置的是<code>NEW_AND_OLD_IMAGES</code>, 表示新老数据修改删除都会通知</li>
+<li>Stream 事件的监听处理函数是: <code>functions.tableStream</code> 中定义的<code>dist/lambda.dataSync</code> 函数</li>
+</ul>
+<p>Stream 事件的处理函数如下:</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; S3Event &#125; <span class="keyword">from</span> <span class="string">&#x27;aws-lambda&#x27;</span></span><br><span class="line"><span class="keyword">import</span> <span class="variable constant_">AWS</span> <span class="keyword">from</span> <span class="string">&#x27;aws-sdk&#x27;</span></span><br><span class="line"><span class="keyword">import</span> &#123; <span class="title class_">DynamoDBStreamEvent</span> &#125; <span class="keyword">from</span> <span class="string">&#x27;aws-lambda&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 新老表映射关系自行提供</span></span><br><span class="line"><span class="keyword">const</span> tableNameMap = &#123;</span><br><span class="line">  <span class="attr">aaa</span>: <span class="string">&#x27;bbb&#x27;</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> docClient = <span class="keyword">new</span> <span class="variable constant_">AWS</span>.<span class="property">DynamoDB</span>.<span class="title class_">DocumentClient</span>()</span><br><span class="line"><span class="keyword">const</span> <span class="title function_">syncTable</span> = <span class="keyword">async</span> (<span class="params">event: DynamoDBStreamEvent</span>) =&gt; &#123;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">const</span> record <span class="keyword">of</span> event.<span class="property">Records</span>) &#123;</span><br><span class="line">    <span class="keyword">const</span> sourceTableName = record.<span class="property">eventSourceARN</span>.<span class="title function_">split</span>(<span class="string">&#x27;/&#x27;</span>)[<span class="number">1</span>]</span><br><span class="line">    <span class="keyword">const</span> targetTableName = tableNameMap[sourceTableName]</span><br><span class="line">    <span class="keyword">if</span> (!sourceTableName || !targetTableName) &#123;</span><br><span class="line">      <span class="keyword">const</span> errorMessage = <span class="string">`找不到同步表关系: <span class="subst">$&#123;sourceTableName&#125;</span>-&gt;<span class="subst">$&#123;targetTableName&#125;</span>`</span></span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">error</span>(errorMessage)</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">Error</span>(errorMessage)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (record.<span class="property">eventName</span> === <span class="string">&#x27;INSERT&#x27;</span> || record.<span class="property">eventName</span> === <span class="string">&#x27;MODIFY&#x27;</span>) &#123;</span><br><span class="line">      <span class="keyword">const</span> newItem = <span class="variable constant_">AWS</span>.<span class="property">DynamoDB</span>.<span class="property">Converter</span>.<span class="title function_">unmarshall</span>(record.<span class="property">dynamodb</span>.<span class="property">NewImage</span>)</span><br><span class="line">      <span class="comment">// 将 newItem 写入到另一个表</span></span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;new item: %j&#x27;</span>, newItem)</span><br><span class="line">      <span class="keyword">const</span> params = &#123;</span><br><span class="line">        <span class="title class_">TableName</span>: targetTableName, <span class="comment">// 更改为目标表的表名</span></span><br><span class="line">        <span class="title class_">Item</span>: newItem,</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">await</span> docClient.<span class="title function_">put</span>(params).<span class="title function_">promise</span>()</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (record.<span class="property">eventName</span> === <span class="string">&#x27;REMOVE&#x27;</span>) &#123;</span><br><span class="line">      <span class="comment">// 处理删除操作</span></span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;oldItem key: %j&#x27;</span>, <span class="variable constant_">AWS</span>.<span class="property">DynamoDB</span>.<span class="property">Converter</span>.<span class="title function_">unmarshall</span>(record.<span class="property">dynamodb</span>.<span class="property">Keys</span>))</span><br><span class="line">      <span class="keyword">const</span> params = &#123;</span><br><span class="line">        <span class="title class_">TableName</span>: targetTableName, <span class="comment">// 更改为目标表的表名</span></span><br><span class="line">        <span class="title class_">Key</span>: <span class="variable constant_">AWS</span>.<span class="property">DynamoDB</span>.<span class="property">Converter</span>.<span class="title function_">unmarshall</span>(record.<span class="property">dynamodb</span>.<span class="property">Keys</span>), <span class="comment">// 根据键值删除</span></span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">await</span> docClient.<span class="title function_">delete</span>(params).<span class="title function_">promise</span>()</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> <span class="attr">dataSync</span>: <span class="title class_">Handler</span> = <span class="keyword">async</span> (<span class="attr">event</span>: <span class="title class_">DynamoDBStreamEvent</span>, context) =&gt; &#123;</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;dataSync event: &#x27;</span>)</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="title class_">JSON</span>.<span class="title function_">stringify</span>(event))</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;dataSync context: &#x27;</span>)</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="title class_">JSON</span>.<span class="title function_">stringify</span>(context))</span><br><span class="line"></span><br><span class="line">  <span class="keyword">await</span> <span class="title function_">syncTable</span>(event)</span><br><span class="line">&#125;),</span><br></pre></td></tr></table></figure>
+
+<p>开启 DynamoDB Table 的 Stream 事件后通过 Lambda 函数处理实现表的实时数据同步, 这个同步方法与表无关, 任何表都可以通过该处理函数.</p>
+<h3 id="2-2-2-S3-Bucket-实时数据同步-Bucket-Event"><a href="#2-2-2-S3-Bucket-实时数据同步-Bucket-Event" class="headerlink" title="2.2.2 S3 Bucket 实时数据同步: Bucket Event"></a>2.2.2 S3 Bucket 实时数据同步: Bucket Event</h3><p>同 DynamoDB 类似, S3 也有 Bucket 的事件, 这个事件不需要特别开启, 我们直接创建处理函数即可, 至于资源的创建可以查看 <strong>2.2.1</strong> 中 serverless.ts 中的配置:</p>
+<ul>
+<li>ExampleS3 是数据源, ExampleS3Target 是同步的目标</li>
+<li>处理函数是: <code>functions.s3Sync</code> 中定义的 <code>dist/lambda.s3Sync</code></li>
+</ul>
+<p>Bucket 事件处理函数和新代码如下:</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="variable constant_">AWS</span> <span class="keyword">from</span> <span class="string">&quot;aws-sdk&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; S3Event &#125; <span class="keyword">from</span> <span class="string">&quot;aws-lambda&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> bucketNameMap = &#123;</span><br><span class="line">  <span class="attr">exmpales3</span>: <span class="string">&quot;exmaples3target&quot;</span>,</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">const</span> s3 = <span class="keyword">new</span> <span class="variable constant_">AWS</span>.<span class="title function_">S3</span>();</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> <span class="title function_">syncBucket</span> = <span class="keyword">async</span> (<span class="params">event: S3Event</span>) =&gt; &#123;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">const</span> record <span class="keyword">of</span> event.<span class="property">Records</span>) &#123;</span><br><span class="line">    <span class="keyword">const</span> sourceBucketName = record.<span class="property">s3</span>.<span class="property">bucket</span>.<span class="property">name</span>;</span><br><span class="line">    <span class="keyword">const</span> targetBucketName = bucketNameMap[sourceBucketName];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (!sourceBucketName || !targetBucketName) &#123;</span><br><span class="line">      <span class="keyword">const</span> errorMessage = <span class="string">`找不到同步桶关系: <span class="subst">$&#123;sourceBucketName&#125;</span>-&gt;<span class="subst">$&#123;targetBucketName&#125;</span>`</span>;</span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">error</span>(errorMessage);</span><br><span class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">Error</span>(errorMessage);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (record.<span class="property">eventName</span>.<span class="title function_">startsWith</span>(<span class="string">&quot;ObjectCreated&quot;</span>)) &#123;</span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">`copyObject <span class="subst">$&#123;record.s3.<span class="built_in">object</span>.key&#125;</span>`</span>);</span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">log</span>(&#123;</span><br><span class="line">        <span class="title class_">Bucket</span>: targetBucketName,</span><br><span class="line">        <span class="title class_">Key</span>: record.<span class="property">s3</span>.<span class="property">object</span>.<span class="property">key</span>,</span><br><span class="line">        <span class="title class_">CopySource</span>: <span class="string">`<span class="subst">$&#123;sourceBucketName&#125;</span>/<span class="subst">$&#123;record.s3.<span class="built_in">object</span>.key&#125;</span>`</span>,</span><br><span class="line">      &#125;);</span><br><span class="line">      <span class="keyword">await</span> s3</span><br><span class="line">        .<span class="title function_">upload</span>(&#123;</span><br><span class="line">          <span class="title class_">Bucket</span>: targetBucketName,</span><br><span class="line">          <span class="title class_">Key</span>: record.<span class="property">s3</span>.<span class="property">object</span>.<span class="property">key</span>,</span><br><span class="line">          <span class="title class_">Body</span>: s3</span><br><span class="line">            .<span class="title function_">getObject</span>(&#123;</span><br><span class="line">              <span class="title class_">Bucket</span>: sourceBucketName,</span><br><span class="line">              <span class="title class_">Key</span>: record.<span class="property">s3</span>.<span class="property">object</span>.<span class="property">key</span>,</span><br><span class="line">            &#125;)</span><br><span class="line">            .<span class="title function_">createReadStream</span>(),</span><br><span class="line">        &#125;)</span><br><span class="line">        .<span class="title function_">promise</span>();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (record.<span class="property">eventName</span>.<span class="title function_">startsWith</span>(<span class="string">&quot;ObjectRemoved&quot;</span>)) &#123;</span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">`deleteObject:`</span>);</span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">log</span>(&#123;</span><br><span class="line">        <span class="title class_">Bucket</span>: targetBucketName,</span><br><span class="line">        <span class="title class_">Key</span>: record.<span class="property">s3</span>.<span class="property">object</span>.<span class="property">key</span>,</span><br><span class="line">      &#125;);</span><br><span class="line">      <span class="keyword">await</span> s3</span><br><span class="line">        .<span class="title function_">deleteObject</span>(&#123;</span><br><span class="line">          <span class="title class_">Bucket</span>: targetBucketName,</span><br><span class="line">          <span class="title class_">Key</span>: record.<span class="property">s3</span>.<span class="property">object</span>.<span class="property">key</span>,</span><br><span class="line">        &#125;)</span><br><span class="line">        .<span class="title function_">promise</span>();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> <span class="attr">s3Sync</span>: <span class="title class_">Handler</span> = <span class="keyword">async</span> (<span class="attr">event</span>: S3Event, context) =&gt; &#123;</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;s3Sync event: &quot;</span>);</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="title class_">JSON</span>.<span class="title function_">stringify</span>(event));</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;s3Sync context: &quot;</span>);</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="title class_">JSON</span>.<span class="title function_">stringify</span>(context));</span><br><span class="line"></span><br><span class="line">  <span class="keyword">await</span> <span class="title function_">syncBucket</span>(event);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>这个处理函数需要关注一下<code>ObjectCreated</code>的逻辑处理, 代码中没有事用<code>copyObject</code>而是使用 <code>getObject</code>和<code>upload</code>这是为了保证准确性, 因为<code>copyObject</code> 不支持对现有的文件进行修改, 所以这里实际是先把原数据下载然后再覆盖目标文件.</p>
+<h1 id="3-总结"><a href="#3-总结" class="headerlink" title="3. 总结"></a>3. 总结</h1><p>本文通过 DynamoDB Table 的 Stream &#x2F; S3 Bucket Event &#x2F; Lambda, 实现针对热(实时)数据的同步, 通过 AWS SDK 和 CLI 实现了冷(历史)数据的同步. 其中热数据同步的方法比较有价值, 可以稍微做一些扩展及可以实现很多高级功能, 比如将老表数据拆分到多个新的子表.</p>
+<p>在实现过程中需要注意的是: Stream 事件处理函数可以设置多个表的事件监听, 而 Bucket 事件处理有限制, 同一个 Bucket 同一个事件只能被分配给一个处理函数, 所以如果现有代码中已经针对 Bucket Event 有业务处理时需要格外注意.</p>
+<h1 id="4-FQA"><a href="#4-FQA" class="headerlink" title="4. FQA"></a>4. FQA</h1><ul>
+<li><p>同一个 Bucket 事件不能分享给不同目标</p>
+<p>原始报错: Configurations on the same bucket cannot share a common event type.</p>
+<p>要解决这个问题需要检查现有 Bucket 的属性, 检查 <strong>Event notifications</strong> 看是否已经有相同的事件被分配了其他函数, AWS 不支持相同的 Bucket 事件分配给不同的函数, 所以:</p>
+<ul>
+<li>不同的函数使用尽量具体的事件</li>
+<li>合并事件处理逻辑到同一个函数</li>
+</ul>
+</li>
+</ul>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2023/09/09/go-wasm/" class="article-next" title="go wasm"><i class="icon-arrow-right"></i></a>
+
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "afe19c044710495d142033feb82d1c59",
+        distractionFreeMode: true,
+        title: "DynamoDB和S3数据同步",
+        body: "https://nnsay.github.io/2023/10/26/sync-dynamodb-and-s3/",
+        labels: ["研究","DevOps","Code"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?1f97030bb3a44256d81e14447104bef8";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+    
+    
+      <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+      </script>
+        <!-- <script src='https://unpkg.com/mermaid@10/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script> -->
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

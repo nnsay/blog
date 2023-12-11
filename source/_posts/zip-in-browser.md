@@ -1,5 +1,5 @@
 ---
-title: 浏览器处理zip
+title: 浏览器中zip的处理
 date: 2023-12-11 16:42:39
 tags:
   - Code
@@ -42,7 +42,7 @@ excerpt: 使用js解压/抽取/创建zip
 
 代码示例使用: vue + ts
 
-```vue
+```html
 <template>
   <h1>读取zip</h1>
   <input type="file" name="zipFile" />
@@ -54,77 +54,83 @@ excerpt: 使用js解压/抽取/创建zip
 </template>
 
 <script setup lang="ts">
-import { BlobReader, BlobWriter, ZipReader, ZipWriter } from "@zip.js/zip.js";
+  import { BlobReader, BlobWriter, ZipReader, ZipWriter } from "@zip.js/zip.js";
 
-const listZipFile = async () => {
-  const zipFileEle = document.querySelector<HTMLInputElement>(
-    'input[name="zipFile"]'
-  );
-  if (!zipFileEle || !zipFileEle.files || zipFileEle.files!.length === 0) {
-    console.error("no found zip");
-    return;
-  }
-  const zipFile = zipFileEle.files[0];
-  const zipFileReader = new BlobReader(zipFile);
-  const zipReader = new ZipReader(zipFileReader, {
-    filenameEncoding: "utf8",
-    commentEncoding: "utf8",
-  });
-  const entries = await zipReader.getEntries();
-  for (const entry of entries) {
-    if (entry.directory) {
-      continue;
+  const listZipFile = async () => {
+    const zipFileEle = document.querySelector<HTMLInputElement>(
+      'input[name="zipFile"]'
+    );
+    if (!zipFileEle || !zipFileEle.files || zipFileEle.files!.length === 0) {
+      console.error("no found zip");
+      return;
     }
-    if (entry.filename.startsWith("__")) {
-      continue;
+    const zipFile = zipFileEle.files[0];
+    const zipFileReader = new BlobReader(zipFile);
+    const zipReader = new ZipReader(zipFileReader, {
+      filenameEncoding: "utf8",
+      commentEncoding: "utf8",
+    });
+    const entries = await zipReader.getEntries();
+    for (const entry of entries) {
+      if (entry.directory) {
+        continue;
+      }
+      if (entry.filename.startsWith("__")) {
+        continue;
+      }
+      if (entry.filename.startsWith(".")) {
+        continue;
+      }
+      if (entry.filename.endsWith(".DS_Store")) {
+        continue;
+      }
+      // 处理业务: 读取obj文件
+      if (entry.filename.endsWith(".obj")) {
+        const dataStream = new BlobWriter();
+        await entry.getData!(dataStream);
+        const dateaBlob = await dataStream.getData();
+        const text = await dateaBlob.text();
+        console.log(`${entry.filename}的文件内容如下:`);
+        console.log(text);
+      }
     }
-    if (entry.filename.startsWith(".")) {
-      continue;
-    }
-    if (entry.filename.endsWith(".DS_Store")) {
-      continue;
-    }
-    // 处理业务: 读取obj文件
-    if (entry.filename.endsWith(".obj")) {
-      const dataStream = new BlobWriter();
-      await entry.getData!(dataStream);
-      const dateaBlob = await dataStream.getData();
-      const text = await dateaBlob.text();
-      console.log(`${entry.filename}的文件内容如下:`);
-      console.log(text);
-    }
-  }
-  await zipReader.close();
-};
+    await zipReader.close();
+  };
 
-const createZip = async () => {
-  const sourceFileEle = document.querySelector<HTMLInputElement>(
-    'input[name="sourceFile"]'
-  );
-  if (!sourceFileEle || !sourceFileEle.files) {
-    console.error("no found source files");
-    return;
-  }
+  const createZip = async () => {
+    const sourceFileEle = document.querySelector<HTMLInputElement>(
+      'input[name="sourceFile"]'
+    );
+    if (!sourceFileEle || !sourceFileEle.files) {
+      console.error("no found source files");
+      return;
+    }
 
-  const dataWriter = new BlobWriter();
-  const zipWriter = new ZipWriter(dataWriter, { level: 5 });
-  for (const file of sourceFileEle.files) {
-    await zipWriter.add(file.name, file.stream());
-  }
-  await zipWriter.close();
-  const dataBlock = await dataWriter.getData();
+    const dataWriter = new BlobWriter();
+    const zipWriter = new ZipWriter(dataWriter, { level: 5 });
+    for (const file of sourceFileEle.files) {
+      await zipWriter.add(file.name, file.stream());
+    }
+    await zipWriter.close();
+    const dataBlock = await dataWriter.getData();
 
-  // 下载
-  const downloadEle = document.createElement("a");
-  downloadEle.download = "objfile.zip";
-  downloadEle.href = URL.createObjectURL(dataBlock);
-  downloadEle.textContent = "点击下载压缩文件";
-  // 下载方式二选一
-  // 下载方式一: 添加页面元素, 用户点击下载
-  sourceFileEle.parentNode?.insertBefore(downloadEle, downloadEle.nextSibling);
-  // 下载方式二: 自动下载
-  downloadEle.click();
-};
+    // 下载
+    const downloadEle =
+      document.querySelector<HTMLAnchorElement>("#zipDownload") ||
+      document.createElement("a");
+    downloadEle.id = "zipDownload";
+    downloadEle.download = "objfile.zip";
+    downloadEle.href = URL.createObjectURL(dataBlock);
+    downloadEle.textContent = "点击下载压缩文件";
+    // 下载方式二选一
+    // 下载方式一: 添加页面元素, 用户点击下载
+    sourceFileEle.parentNode?.insertBefore(
+      downloadEle,
+      downloadEle.nextSibling
+    );
+    // 下载方式二: 自动下载
+    downloadEle.click();
+  };
 </script>
 ```
 

@@ -108,8 +108,15 @@ excerpt: 使用js解压/抽取/创建zip
 
     const dataWriter = new BlobWriter();
     const zipWriter = new ZipWriter(dataWriter, { level: 5 });
+    const createdFolders = new Map<string, boolean>();
     for (const file of sourceFileEle.files) {
-      await zipWriter.add(file.name, file.stream());
+      if (file.name.endsWith(".obj") && !createdFolders.has("obj")) {
+        await zipWriter.add("obj", undefined, { directory: true });
+        createdFolders.set("obj", true);
+        await zipWriter.add(`obj/${file.name}`, file.stream());
+      } else {
+        await zipWriter.add(file.name, file.stream());
+      }
     }
     await zipWriter.close();
     const dataBlock = await dataWriter.getData();

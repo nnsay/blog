@@ -263,7 +263,7 @@ exec()
 
 手动上传文件/删除文件查看 webhook 容器日志检查事件是否 OK
 
-## 3.2 aws-cli 操作
+## 3.3 aws-cli 操作
 
 添加 aws profile:
 
@@ -299,7 +299,7 @@ Total Objects: 2
    Total Size: 50
 ```
 
-## 3.3 生命周期
+## 3.4 生命周期
 
 通过控制台配置生命周期:
 

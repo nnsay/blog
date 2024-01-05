@@ -10,7 +10,7 @@
     <title>使用minio替换s3 | Jimmy&#39;s Blog</title>
     <meta name="author" content="Jimmy Wang" />
     <meta name="keywords" content="" />
-    <meta name="description" content="1. 背景调研使用minio替换s3的可行性分析. 根据现有业务特点测试内容如下:对象操作: 可以使用现有的 s3 sdk 操作 minio 文件对象putObjectdeleteObjectcopyObjectgetObjectheadObjectpresignedUrl对象事件: minio 的 bucket 可以添加事件监控对象操作上传删除awscli: 可以使用现有 s3 工具(awscli)操作 minio以上操作如可以通过 aws s3 sdk 和其他工具顺利操作 minio, 则证" />
+    <meta name="description" content="1. 探求 minio 和 s3 兼容性调研使用minio替换s3的可行性分析. 根据现有业务特点测试内容如下:对象操作: 可以使用现有的 s3 sdk 操作 minio 文件对象putObjectdeleteObjectcopyObjectgetObjectheadObjectpresignedUrl对象事件: minio 的 bucket 可以添加事件监控对象操作上传删除awscli: 可以使用现有 s3 工具(awscli)操作 minio生命周期: 可以设置生命周期, 例如自动过期删除以" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
 
@@ -86,7 +86,7 @@
         
 
         
-        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E8%83%8C%E6%99%AF"><span class="toc-text">1. 背景</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E6%90%AD%E5%BB%BA%E7%8E%AF%E5%A2%83"><span class="toc-text">2. 搭建环境</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-webhook-%E6%9C%8D%E5%8A%A1"><span class="toc-text">2.1 webhook 服务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-%E5%90%AF%E5%8A%A8%E6%9C%8D%E5%8A%A1"><span class="toc-text">2.2 启动服务</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E6%B5%8B%E8%AF%95"><span class="toc-text">3. 测试</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-%E6%B5%8B%E8%AF%95%E5%AF%B9%E8%B1%A1%E6%93%8D%E4%BD%9C"><span class="toc-text">3.1 测试对象操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-%E6%B5%8B%E8%AF%95%E5%AF%B9%E8%B1%A1%E4%BA%8B%E4%BB%B6"><span class="toc-text">3.2 测试对象事件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-aws-cli-%E6%93%8D%E4%BD%9C"><span class="toc-text">3.2 aws-cli 操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-3-%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="toc-text">3.3 生命周期</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E6%80%BB%E7%BB%93"><span class="toc-text">4. 总结</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E6%8E%A2%E6%B1%82-minio-%E5%92%8C-s3-%E5%85%BC%E5%AE%B9%E6%80%A7"><span class="toc-text">1. 探求 minio 和 s3 兼容性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E6%90%AD%E5%BB%BA%E7%8E%AF%E5%A2%83"><span class="toc-text">2. 搭建环境</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-webhook-%E6%9C%8D%E5%8A%A1"><span class="toc-text">2.1 webhook 服务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-%E5%90%AF%E5%8A%A8%E6%9C%8D%E5%8A%A1"><span class="toc-text">2.2 启动服务</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E6%B5%8B%E8%AF%95"><span class="toc-text">3. 测试</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-%E6%B5%8B%E8%AF%95%E5%AF%B9%E8%B1%A1%E6%93%8D%E4%BD%9C"><span class="toc-text">3.1 测试对象操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-%E6%B5%8B%E8%AF%95%E5%AF%B9%E8%B1%A1%E4%BA%8B%E4%BB%B6"><span class="toc-text">3.2 测试对象事件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-aws-cli-%E6%93%8D%E4%BD%9C"><span class="toc-text">3.2 aws-cli 操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-3-%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="toc-text">3.3 生命周期</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E6%80%BB%E7%BB%93"><span class="toc-text">4. 总结</span></a></li></ol>
         
     </div>
 </aside>
@@ -123,7 +123,7 @@
     
     <section class="article-body markdown-body">
         
-        <h1 id="1-背景"><a href="#1-背景" class="headerlink" title="1. 背景"></a>1. 背景</h1><p>调研使用<code>minio</code>替换<code>s3</code>的可行性分析. 根据现有业务特点测试内容如下:</p>
+        <h1 id="1-探求-minio-和-s3-兼容性"><a href="#1-探求-minio-和-s3-兼容性" class="headerlink" title="1. 探求 minio 和 s3 兼容性"></a>1. 探求 minio 和 s3 兼容性</h1><p>调研使用<code>minio</code>替换<code>s3</code>的可行性分析. 根据现有业务特点测试内容如下:</p>
 <ul>
 <li>对象操作: 可以使用现有的 s3 sdk 操作 minio 文件对象<ul>
 <li>putObject</li>
@@ -140,6 +140,7 @@
 </ul>
 </li>
 <li>awscli: 可以使用现有 s3 工具(awscli)操作 minio</li>
+<li>生命周期: 可以设置生命周期, 例如自动过期删除</li>
 </ul>
 <p>以上操作如可以通过 aws s3 sdk 和其他工具顺利操作 minio, 则证明可行.</p>
 <h1 id="2-搭建环境"><a href="#2-搭建环境" class="headerlink" title="2. 搭建环境"></a>2. 搭建环境</h1><p>使用 docker-compose 启动搭建环境, 有两个主要的服务:</p>

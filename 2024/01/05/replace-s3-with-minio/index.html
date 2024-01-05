@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>使用minio替换s3 | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="1. 背景调研使用minio替换s3的可行性分析. 根据现有业务特点测试内容如下:对象操作: 可以使用现有的 s3 sdk 操作 minio 文件对象putObjectdeleteObjectcopyObjectgetObjectheadObjectpresignedUrl对象事件: minio 的 bucket 可以添加事件监控对象操作上传删除awscli: 可以使用现有 s3 工具(awscli)操作 minio以上操作如可以通过 aws s3 sdk 和其他工具顺利操作 minio, 则证" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 6.3.0"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E8%83%8C%E6%99%AF"><span class="toc-text">1. 背景</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E6%90%AD%E5%BB%BA%E7%8E%AF%E5%A2%83"><span class="toc-text">2. 搭建环境</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-webhook-%E6%9C%8D%E5%8A%A1"><span class="toc-text">2.1 webhook 服务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-%E5%90%AF%E5%8A%A8%E6%9C%8D%E5%8A%A1"><span class="toc-text">2.2 启动服务</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E6%B5%8B%E8%AF%95"><span class="toc-text">3. 测试</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-%E6%B5%8B%E8%AF%95%E5%AF%B9%E8%B1%A1%E6%93%8D%E4%BD%9C"><span class="toc-text">3.1 测试对象操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-%E6%B5%8B%E8%AF%95%E5%AF%B9%E8%B1%A1%E4%BA%8B%E4%BB%B6"><span class="toc-text">3.2 测试对象事件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-aws-cli-%E6%93%8D%E4%BD%9C"><span class="toc-text">3.2 aws-cli 操作</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-3-%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F"><span class="toc-text">3.3 生命周期</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E6%80%BB%E7%BB%93"><span class="toc-text">4. 总结</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            使用minio替换s3
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2024/01/05/replace-s3-with-minio/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2024-01-05T11:58:25.000Z" itemprop="datePublished">2024-01-05</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/%E7%A0%94%E7%A9%B6/" rel="tag">研究</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h1 id="1-背景"><a href="#1-背景" class="headerlink" title="1. 背景"></a>1. 背景</h1><p>调研使用<code>minio</code>替换<code>s3</code>的可行性分析. 根据现有业务特点测试内容如下:</p>
+<ul>
+<li>对象操作: 可以使用现有的 s3 sdk 操作 minio 文件对象<ul>
+<li>putObject</li>
+<li>deleteObject</li>
+<li>copyObject</li>
+<li>getObject</li>
+<li>headObject</li>
+<li>presignedUrl</li>
+</ul>
+</li>
+<li>对象事件: minio 的 bucket 可以添加事件监控对象操作<ul>
+<li>上传</li>
+<li>删除</li>
+</ul>
+</li>
+<li>awscli: 可以使用现有 s3 工具(awscli)操作 minio</li>
+</ul>
+<p>以上操作如可以通过 aws s3 sdk 和其他工具顺利操作 minio, 则证明可行.</p>
+<h1 id="2-搭建环境"><a href="#2-搭建环境" class="headerlink" title="2. 搭建环境"></a>2. 搭建环境</h1><p>使用 docker-compose 启动搭建环境, 有两个主要的服务:</p>
+<ul>
+<li>minio 服务</li>
+<li>webhook 服务: 通过调研 minio 支持 Bucket 通知事件, 通知对象有很多种: AMQP&#x2F;MQTT&#x2F;NATS&#x2F;Kafka&#x2F;Mysql&#x2F;PostgreSQL&#x2F;Redis&#x2F;Webhook 等, 这里选择 webhook</li>
+</ul>
+<p>docker-compose.yaml 如下:</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">version:</span> <span class="string">&quot;3.8&quot;</span></span><br><span class="line"><span class="attr">services:</span></span><br><span class="line">  <span class="comment">### minio (https://hub.docker.com/r/minio/minio)</span></span><br><span class="line">  <span class="attr">minio:</span></span><br><span class="line">    <span class="attr">container_name:</span> <span class="string">minio</span></span><br><span class="line">    <span class="attr">image:</span> <span class="string">minio/minio</span></span><br><span class="line">    <span class="attr">command:</span> <span class="string">server</span> <span class="string">/miniodata</span> <span class="string">--console-address</span> <span class="string">&quot;:9001&quot;</span></span><br><span class="line">    <span class="attr">ports:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">&quot;9000:9000&quot;</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">&quot;9001:9001&quot;</span></span><br><span class="line">    <span class="attr">restart:</span> <span class="string">always</span></span><br><span class="line">    <span class="attr">volumes:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="string">data:/miniodata</span></span><br><span class="line">  <span class="attr">miniowebhook:</span></span><br><span class="line">    <span class="attr">container_name:</span> <span class="string">miniowebhook</span></span><br><span class="line">    <span class="attr">build:</span> <span class="string">/tmp/minio</span> <span class="comment"># 这里需要指定合适的webhook服务的源码地址</span></span><br><span class="line">    <span class="attr">image:</span> <span class="string">local/miniowebhook</span></span><br><span class="line">    <span class="attr">command:</span> <span class="string">node</span> <span class="string">webhook.js</span></span><br><span class="line"><span class="attr">volumes:</span></span><br><span class="line">  <span class="attr">data:</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="2-1-webhook-服务"><a href="#2-1-webhook-服务" class="headerlink" title="2.1 webhook 服务"></a>2.1 webhook 服务</h2><p>因为 minio 部署在 docker 中, 为了 webhook 可以访问方便, 所以这里也把 webhook 服务部署到 docker, 让 wehhook 容器和 minio 容器在同一个网络下. webhook 相关代码如下:</p>
+<ul>
+<li><p>webhook.js</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> express = <span class="built_in">require</span>(<span class="string">&quot;express&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> jwt = <span class="built_in">require</span>(<span class="string">&quot;jsonwebtoken&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> app = <span class="title function_">express</span>();</span><br><span class="line">app.<span class="title function_">use</span>(express.<span class="title function_">json</span>()); <span class="comment">// for parsing application/json</span></span><br><span class="line">app.<span class="title function_">use</span>(express.<span class="title function_">urlencoded</span>(&#123; <span class="attr">extended</span>: <span class="literal">true</span> &#125;));</span><br><span class="line"><span class="keyword">const</span> port = <span class="number">6000</span>;</span><br><span class="line"><span class="keyword">const</span> secret = <span class="string">&quot;minio webhook secret&quot;</span>;</span><br><span class="line"></span><br><span class="line">app.<span class="title function_">post</span>(<span class="string">&quot;/webhook&quot;</span>, <span class="function">(<span class="params">req, res</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">if</span> (req.<span class="property">headers</span>.<span class="property">authorization</span>?.<span class="title function_">startsWith</span>(<span class="string">&quot;Bearer&quot;</span>)) &#123;</span><br><span class="line">    <span class="keyword">const</span> token = req.<span class="property">headers</span>.<span class="property">authorization</span>.<span class="title function_">split</span>(<span class="string">&quot; &quot;</span>)[<span class="number">1</span>];</span><br><span class="line">    <span class="comment">// 验证token</span></span><br><span class="line">    <span class="keyword">const</span> data = jwt.<span class="title function_">verify</span>(token, secret);</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;verify data: &quot;</span>, data);</span><br><span class="line">    <span class="comment">// 获取参数, 例如删除对象事件如下:</span></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 上传事件:</span></span><br><span class="line"><span class="comment">     * &#123;&quot;EventName&quot;:&quot;s3:ObjectCreated:Put&quot;,&quot;Key&quot;:&quot;vd-main/Tile_+002_+002.mtl&quot;,&quot;Records&quot;:[&#123;&quot;eventVersion&quot;:&quot;2.0&quot;,&quot;eventSource&quot;:&quot;minio:s3&quot;,&quot;awsRegion&quot;:&quot;&quot;,&quot;eventTime&quot;:&quot;2024-01-05T11:26:33.408Z&quot;,&quot;eventName&quot;:&quot;s3:ObjectCreated:Put&quot;,&quot;userIdentity&quot;:&#123;&quot;principalId&quot;:&quot;minioadmin&quot;&#125;,&quot;requestParameters&quot;:&#123;&quot;principalId&quot;:&quot;minioadmin&quot;,&quot;region&quot;:&quot;&quot;,&quot;sourceIPAddress&quot;:&quot;192.168.65.1&quot;&#125;,&quot;responseElements&quot;:&#123;&quot;x-amz-id-2&quot;:&quot;dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8&quot;,&quot;x-amz-request-id&quot;:&quot;17A76FE05CEBA939&quot;,&quot;x-minio-deployment-id&quot;:&quot;c56dc51b-4b0a-41c0-ab16-7b990c2d51ad&quot;,&quot;x-minio-origin-endpoint&quot;:&quot;http://172.19.0.2:9000&quot;&#125;,&quot;s3&quot;:&#123;&quot;s3SchemaVersion&quot;:&quot;1.0&quot;,&quot;configurationId&quot;:&quot;Config&quot;,&quot;bucket&quot;:&#123;&quot;name&quot;:&quot;vd-main&quot;,&quot;ownerIdentity&quot;:&#123;&quot;principalId&quot;:&quot;minioadmin&quot;&#125;,&quot;arn&quot;:&quot;arn:aws:s3:::vd-main&quot;&#125;,&quot;object&quot;:&#123;&quot;key&quot;:&quot;Tile_%2B002_%2B002.mtl&quot;,&quot;size&quot;:210,&quot;eTag&quot;:&quot;775ff5def9531772a2bb12853cd46fce&quot;,&quot;contentType&quot;:&quot;application/octet-stream&quot;,&quot;userMetadata&quot;:&#123;&quot;content-type&quot;:&quot;application/octet-stream&quot;&#125;,&quot;sequencer&quot;:&quot;17A76FE05CF3469B&quot;&#125;&#125;,&quot;source&quot;:&#123;&quot;host&quot;:&quot;192.168.65.1&quot;,&quot;port&quot;:&quot;&quot;,&quot;userAgent&quot;:&quot;MinIO (linux; arm64) minio-go/v7.0.66 MinIO Console/(dev)&quot;&#125;&#125;]&#125;</span></span><br><span class="line"><span class="comment">     * 删除事件:</span></span><br><span class="line"><span class="comment">     * &#123;&quot;EventName&quot;:&quot;s3:ObjectRemoved:Delete&quot;,&quot;Key&quot;:&quot;vd-main/Tile_+002_+002.mtl&quot;,&quot;Records&quot;:[&#123;&quot;eventVersion&quot;:&quot;2.0&quot;,&quot;eventSource&quot;:&quot;minio:s3&quot;,&quot;awsRegion&quot;:&quot;&quot;,&quot;eventTime&quot;:&quot;2024-01-05T11:27:59.964Z&quot;,&quot;eventName&quot;:&quot;s3:ObjectRemoved:Delete&quot;,&quot;userIdentity&quot;:&#123;&quot;principalId&quot;:&quot;minioadmin&quot;&#125;,&quot;requestParameters&quot;:&#123;&quot;principalId&quot;:&quot;minioadmin&quot;,&quot;region&quot;:&quot;&quot;,&quot;sourceIPAddress&quot;:&quot;127.0.0.1&quot;&#125;,&quot;responseElements&quot;:&#123;&quot;content-length&quot;:&quot;164&quot;,&quot;x-amz-id-2&quot;:&quot;dd9025bab4ad464b049177c95eb6ebf374d3b3fd1af9251148b658df7ac2e3e8&quot;,&quot;x-amz-request-id&quot;:&quot;17A76FF48418FD2E&quot;,&quot;x-minio-deployment-id&quot;:&quot;c56dc51b-4b0a-41c0-ab16-7b990c2d51ad&quot;,&quot;x-minio-origin-endpoint&quot;:&quot;http://172.19.0.2:9000&quot;&#125;,&quot;s3&quot;:&#123;&quot;s3SchemaVersion&quot;:&quot;1.0&quot;,&quot;configurationId&quot;:&quot;Config&quot;,&quot;bucket&quot;:&#123;&quot;name&quot;:&quot;vd-main&quot;,&quot;ownerIdentity&quot;:&#123;&quot;principalId&quot;:&quot;minioadmin&quot;&#125;,&quot;arn&quot;:&quot;arn:aws:s3:::vd-main&quot;&#125;,&quot;object&quot;:&#123;&quot;key&quot;:&quot;Tile_%2B002_%2B002.mtl&quot;,&quot;sequencer&quot;:&quot;17A76FF4843A978E&quot;&#125;&#125;,&quot;source&quot;:&#123;&quot;host&quot;:&quot;127.0.0.1&quot;,&quot;port&quot;:&quot;&quot;,&quot;userAgent&quot;:&quot;MinIO (linux; arm64) minio-go/v7.0.66 MinIO Console/(dev)&quot;&#125;&#125;]&#125;</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="title class_">JSON</span>.<span class="title function_">stringify</span>(req.<span class="property">body</span>));</span><br><span class="line">    <span class="comment">// <span class="doctag">TODO:</span> 添加自定义业务</span></span><br><span class="line">  &#125;</span><br><span class="line">  res.<span class="title function_">end</span>();</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line">app.<span class="title function_">listen</span>(port, <span class="function">() =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">const</span> token = jwt.<span class="title function_">sign</span>(</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">user</span>: <span class="number">1</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">    secret</span><br><span class="line">  );</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">`token: <span class="subst">$&#123;token&#125;</span>`</span>);</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">`webhook start at <span class="subst">$&#123;port&#125;</span>`</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Dockerfile</p>
+<figure class="highlight dockerfile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> node</span><br><span class="line"></span><br><span class="line"><span class="keyword">WORKDIR</span><span class="language-bash"> /app</span></span><br><span class="line"><span class="keyword">COPY</span><span class="language-bash"> ./webhook.js ./webhook.js</span></span><br><span class="line"><span class="keyword">RUN</span><span class="language-bash"> npm install express jsonwebtoken</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">CMD</span><span class="language-bash"> node webhook.js</span></span><br><span class="line"></span><br></pre></td></tr></table></figure></li>
+</ul>
+<blockquote>
+<p>⚠️ 注意: 这两个文件的位置要和 docker-compose.yaml 中的 miniowebhook build 地址一样</p>
+</blockquote>
+<h2 id="2-2-启动服务"><a href="#2-2-启动服务" class="headerlink" title="2.2 启动服务"></a>2.2 启动服务</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker compose up -d</span><br></pre></td></tr></table></figure>
+
+<h1 id="3-测试"><a href="#3-测试" class="headerlink" title="3. 测试"></a>3. 测试</h1><h2 id="3-1-测试对象操作"><a href="#3-1-测试对象操作" class="headerlink" title="3.1 测试对象操作"></a>3.1 测试对象操作</h2><p>使用 typescript 脚本测试对象的各种操作:</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; <span class="title class_">PutObjectCommand</span>, <span class="title class_">GetObjectCommand</span>, <span class="variable constant_">S3</span> &#125; <span class="keyword">from</span> <span class="string">&quot;@aws-sdk/client-s3&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; getSignedUrl &#125; <span class="keyword">from</span> <span class="string">&quot;@aws-sdk/s3-request-presigner&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> axios <span class="keyword">from</span> <span class="string">&quot;axios&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> bucket = <span class="string">&quot;vd-main&quot;</span>;</span><br><span class="line"><span class="comment">// HINT: 该配置来自.mc/config.json中的一个minio配置, 其中AK/SK可以配置为用户名和密码</span></span><br><span class="line"><span class="comment">// HINT: AK/SK也可以从 http://localhost:9001/access-keys 中生成一份</span></span><br><span class="line"><span class="keyword">const</span> minioConfig = &#123;</span><br><span class="line">  <span class="attr">url</span>: <span class="string">&quot;http://localhost:9000&quot;</span>,</span><br><span class="line">  <span class="attr">accessKey</span>: <span class="string">&quot;x01paW1tNk9pbim9VH2D&quot;</span>,</span><br><span class="line">  <span class="attr">secretKey</span>: <span class="string">&quot;D76Xc3aJ1yVrTcYPVkm6pOnAclBcCXo7YgRIcFlK&quot;</span>,</span><br><span class="line">  <span class="attr">api</span>: <span class="string">&quot;S3v4&quot;</span>,</span><br><span class="line">  <span class="attr">path</span>: <span class="string">&quot;auto&quot;</span>,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="title function_">exec</span> = <span class="keyword">async</span> (<span class="params"></span>) =&gt; &#123;</span><br><span class="line">  <span class="keyword">const</span> s3 = <span class="keyword">new</span> <span class="title function_">S3</span>(&#123;</span><br><span class="line">    <span class="attr">credentials</span>: &#123;</span><br><span class="line">      <span class="attr">accessKeyId</span>: minioConfig.<span class="property">accessKey</span>,</span><br><span class="line">      <span class="attr">secretAccessKey</span>: minioConfig.<span class="property">secretKey</span>,</span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="attr">endpoint</span>: minioConfig.<span class="property">url</span>,</span><br><span class="line">    <span class="attr">forcePathStyle</span>: <span class="literal">true</span>,</span><br><span class="line">  &#125;);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 创建/修改</span></span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt; putObject &lt;&lt;&lt;&lt;&lt;&lt;&lt;&quot;</span>);</span><br><span class="line">  <span class="keyword">const</span> putResult = <span class="keyword">await</span> s3.<span class="title function_">putObject</span>(&#123;</span><br><span class="line">    <span class="title class_">Bucket</span>: bucket,</span><br><span class="line">    <span class="title class_">Key</span>: <span class="string">&quot;putobject.json&quot;</span>,</span><br><span class="line">    <span class="title class_">Body</span>: <span class="title class_">JSON</span>.<span class="title function_">stringify</span>(&#123; <span class="attr">hello</span>: <span class="string">&quot;中国&quot;</span> &#125;),</span><br><span class="line">  &#125;);</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;put object result: &quot;</span>, putResult.<span class="property">ETag</span>);</span><br><span class="line">  <span class="comment">// 复制</span></span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt; copyObject &lt;&lt;&lt;&lt;&lt;&lt;&lt;&quot;</span>);</span><br><span class="line">  <span class="keyword">const</span> copyResult = <span class="keyword">await</span> s3.<span class="title function_">copyObject</span>(&#123;</span><br><span class="line">    <span class="title class_">Bucket</span>: bucket,</span><br><span class="line">    <span class="title class_">Key</span>: <span class="string">&quot;putobject-copy.json&quot;</span>,</span><br><span class="line">    <span class="title class_">CopySource</span>: <span class="string">`<span class="subst">$&#123;bucket&#125;</span>/putobject.json`</span>,</span><br><span class="line">  &#125;);</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;copy object result: &quot;</span>, copyResult.<span class="property">CopyObjectResult</span>?.<span class="property">ETag</span>);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// put signed url</span></span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt; put signed url &lt;&lt;&lt;&lt;&lt;&lt;&lt;&quot;</span>);</span><br><span class="line">  <span class="keyword">const</span> putSignedURL = <span class="keyword">await</span> <span class="title function_">getSignedUrl</span>(</span><br><span class="line">    s3,</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">PutObjectCommand</span>(&#123;</span><br><span class="line">      <span class="title class_">Bucket</span>: bucket,</span><br><span class="line">      <span class="title class_">Key</span>: <span class="string">&quot;signedurlobject.json&quot;</span>,</span><br><span class="line">    &#125;),</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">expiresIn</span>: <span class="number">600</span>,</span><br><span class="line">    &#125;</span><br><span class="line">  );</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;put signed url result: &quot;</span>, putSignedURL);</span><br><span class="line"></span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt; upload by signedurl &lt;&lt;&lt;&lt;&lt;&lt;&lt;&quot;</span>);</span><br><span class="line">  <span class="keyword">await</span> axios.<span class="title function_">put</span>(putSignedURL, &#123; <span class="attr">data</span>: <span class="title class_">JSON</span>.<span class="title function_">stringify</span>(&#123; <span class="attr">hello</span>: <span class="string">&quot;Jimmy&quot;</span> &#125;) &#125;);</span><br><span class="line"></span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt; get signed url &lt;&lt;&lt;&lt;&lt;&lt;&lt;&quot;</span>);</span><br><span class="line">  <span class="keyword">const</span> getSignedURL = <span class="keyword">await</span> <span class="title function_">getSignedUrl</span>(</span><br><span class="line">    s3,</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">GetObjectCommand</span>(&#123;</span><br><span class="line">      <span class="title class_">Bucket</span>: bucket,</span><br><span class="line">      <span class="title class_">Key</span>: <span class="string">&quot;signedurlobject.json&quot;</span>,</span><br><span class="line">    &#125;),</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">expiresIn</span>: <span class="number">600</span>,</span><br><span class="line">    &#125;</span><br><span class="line">  );</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;get signed url result: &quot;</span>, getSignedURL);</span><br><span class="line"></span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt; download by signedurl &lt;&lt;&lt;&lt;&lt;&lt;&lt;&quot;</span>);</span><br><span class="line">  <span class="keyword">const</span> getSignedURLResult = <span class="keyword">await</span> axios.<span class="title function_">get</span>(getSignedURL);</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;download by signedurl result: &quot;</span>, getSignedURLResult.<span class="property">data</span>);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 读取</span></span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt; getObject &lt;&lt;&lt;&lt;&lt;&lt;&lt;&quot;</span>);</span><br><span class="line">  <span class="keyword">const</span> getResult = <span class="keyword">await</span> s3.<span class="title function_">getObject</span>(&#123;</span><br><span class="line">    <span class="title class_">Bucket</span>: bucket,</span><br><span class="line">    <span class="title class_">Key</span>: <span class="string">&quot;signedurlobject.json&quot;</span>,</span><br><span class="line">  &#125;);</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(</span><br><span class="line">    <span class="string">&quot;get object(signedurl upload) result: %s&quot;</span>,</span><br><span class="line">    <span class="keyword">await</span> getResult.<span class="property">Body</span>?.<span class="title function_">transformToString</span>(<span class="string">&quot;utf8&quot;</span>)</span><br><span class="line">  );</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 删除</span></span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt; deleteObject &lt;&lt;&lt;&lt;&lt;&lt;&lt;&quot;</span>);</span><br><span class="line">  <span class="keyword">const</span> deleteResult = <span class="keyword">await</span> s3.<span class="title function_">deleteObject</span>(&#123;</span><br><span class="line">    <span class="title class_">Bucket</span>: bucket,</span><br><span class="line">    <span class="title class_">Key</span>: <span class="string">&quot;putobject-copy.json&quot;</span>,</span><br><span class="line">  &#125;);</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(</span><br><span class="line">    <span class="string">&quot;delete object result: %s&quot;</span>,</span><br><span class="line">    deleteResult.<span class="property">$metadata</span>.<span class="property">httpStatusCode</span></span><br><span class="line">  );</span><br><span class="line"></span><br><span class="line">  <span class="keyword">await</span> s3</span><br><span class="line">    .<span class="title function_">headObject</span>(&#123;</span><br><span class="line">      <span class="title class_">Bucket</span>: bucket,</span><br><span class="line">      <span class="title class_">Key</span>: <span class="string">&quot;putobject-copy.json&quot;</span>,</span><br><span class="line">    &#125;)</span><br><span class="line">    .<span class="title function_">catch</span>(<span class="function">(<span class="params">err</span>) =&gt;</span> &#123;</span><br><span class="line">      <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;head object result: %s&quot;</span>, err.<span class="property">message</span>);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="title function_">exec</span>()</span><br><span class="line">  .<span class="title function_">then</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;done&quot;</span>);</span><br><span class="line">  &#125;)</span><br><span class="line">  .<span class="title function_">catch</span>(<span class="function">(<span class="params">err</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(err);</span><br><span class="line">  &#125;);</span><br></pre></td></tr></table></figure>
+
+<p>运行该脚本查看测试结果是否 OK.</p>
+<h2 id="3-2-测试对象事件"><a href="#3-2-测试对象事件" class="headerlink" title="3.2 测试对象事件"></a>3.2 测试对象事件</h2><p>这里需要一些操作: 1. 添加事件; 2. 将事件绑定到 bucket. 可以通过控制台配置, 配置方式如下:</p>
+<p><img src="https://raw.githubusercontent.com/nnsay/gist/main/imgimage-20240105194545975.png" alt="image-20240105194545975"></p>
+<blockquote>
+<p>‼️ 注意: Auth Token 可以自己使用<code>jsonwebtoken</code>生成一个不过期的 jwt token, 用于在 webhook 服务中验证来源是否合法</p>
+</blockquote>
+<p><img src="https://raw.githubusercontent.com/nnsay/gist/main/imgimage-20240105194626214.png" alt="image-20240105194626214"></p>
+<p>手动上传文件&#x2F;删除文件查看 webhook 容器日志检查事件是否 OK</p>
+<h2 id="3-2-aws-cli-操作"><a href="#3-2-aws-cli-操作" class="headerlink" title="3.2 aws-cli 操作"></a>3.2 aws-cli 操作</h2><p>添加 aws profile:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[default]</span><br><span class="line">region=cn-northwest-1</span><br><span class="line">outputh=json</span><br><span class="line">cli_pager=</span><br><span class="line">endpoint_url=http://localhost:9000</span><br></pre></td></tr></table></figure>
+
+<p>添加 credentials:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[default]</span><br><span class="line">aws_access_key_id=x01paW1tNk9pbim9VH2D</span><br><span class="line">aws_secret_access_key=D76Xc3aJ1yVrTcYPVkm6pOnAclBcCXo7YgRIcFlK</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>ℹ️ AK&#x2F;SK 也可以从 <a target="_blank" rel="noopener" href="http://localhost:9001/access-keys">http://localhost:9001/access-keys</a> 中生成一份</p>
+</blockquote>
+<p>测试 awscli 命令如下:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">-&gt; aws s3 <span class="built_in">ls</span></span><br><span class="line">2024-01-05 16:40:20 vd-main</span><br><span class="line"></span><br><span class="line">-&gt; aws s3 <span class="built_in">ls</span> s3://vd-main --recursive --summarize</span><br><span class="line">2024-01-05 18:01:12         18 putobject.json</span><br><span class="line">2024-01-05 18:01:12         32 signedurlobject.json</span><br><span class="line"></span><br><span class="line">Total Objects: 2</span><br><span class="line">   Total Size: 50</span><br></pre></td></tr></table></figure>
+
+<h2 id="3-3-生命周期"><a href="#3-3-生命周期" class="headerlink" title="3.3 生命周期"></a>3.3 生命周期</h2><p>通过控制台配置生命周期:</p>
+<p><img src="https://raw.githubusercontent.com/nnsay/gist/main/imgimage-20240105201754664.png" alt="image-20240105201754664"></p>
+<h1 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h1><p>minio 基本上可以替换 s3, 并且在 s3 对象操作和事件上也有比较好的兼容, 推荐在云下使用.</p>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2023/12/11/zip-in-browser/" class="article-next" title="浏览器中zip的处理"><i class="icon-arrow-right"></i></a>
+
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "97756444bcca78613c207a3a5206f8db",
+        distractionFreeMode: true,
+        title: "使用minio替换s3",
+        body: "https://nnsay.github.io/2024/01/05/replace-s3-with-minio/",
+        labels: ["研究"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?1f97030bb3a44256d81e14447104bef8";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+    
+    
+      <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+      </script>
+        <!-- <script src='https://unpkg.com/mermaid@10/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script> -->
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

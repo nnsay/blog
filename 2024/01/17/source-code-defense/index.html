@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>Source Code Defense | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="1. Topicdefende the source code in commercial distribution.How do you protect Python source code?Use Compiled BytecodeExecutable Creators (or Installers)Software as a ServicePython Source Code ObfuscatorsWhich language?nodejspython2. Pythonsourcedefe" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 6.3.0"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-Topic"><span class="toc-text">1. Topic</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-Python"><span class="toc-text">2. Python</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-NodeJs"><span class="toc-text">3. NodeJs</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-Test"><span class="toc-text">4. Test</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#4-1-python"><span class="toc-text">4.1 python</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-2-nodejs"><span class="toc-text">4.2 nodejs</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#5-Is-python-compilation-safe"><span class="toc-text">5. Is python compilation safe?</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            Source Code Defense
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2024/01/17/source-code-defense/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2024-01-17T09:26:33.000Z" itemprop="datePublished">2024-01-17</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/%E7%A0%94%E7%A9%B6/" rel="tag">研究</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h1 id="1-Topic"><a href="#1-Topic" class="headerlink" title="1. Topic"></a>1. Topic</h1><p>defende the source code in commercial distribution.</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://wiki.python.org/moin/Asking%20for%20Help/How%20do%20you%20protect%20Python%20source%20code%3F">How do you protect Python source code?</a><ul>
+<li>Use Compiled Bytecode</li>
+<li>Executable Creators (or Installers)</li>
+<li>Software as a Service</li>
+<li>Python Source Code Obfuscators</li>
+</ul>
+</li>
+<li>Which language?<ul>
+<li>nodejs</li>
+<li>python</li>
+</ul>
+</li>
+</ul>
+<h1 id="2-Python"><a href="#2-Python" class="headerlink" title="2. Python"></a>2. Python</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://pypi.org/project/sourcedefender/">sourcedefender(commercial)</a>: SOURCEdefender can protect your plaintext Python source code with AES 256-bit Encryption. There is no impact on the performance of your running application as the decryption process takes place during the import of your module or when loading your script on the command-line. Encrypted code won’t run any slower once loaded from a .pye file compared to loading from a .py or .pyc file</li>
+<li><a target="_blank" rel="noopener" href="https://pypi.org/project/pyarmor/">pyarmor(commercial)</a>: A tool used to obfuscate python scripts, bind obfuscated scripts to fixed machine or expire obfuscated scripts.</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/mauricelambert/PyObfuscator/">PyObfuscator</a>: This module obfuscates python code.</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/Falldog/pyconcrete">pyconcrete</a>: Protect your python script, encrypt it as .pye and decrypt when import it</li>
+<li><a target="_blank" rel="noopener" href="https://docs.python.org/3/library/py_compile.html">py_complie</a>: The <a target="_blank" rel="noopener" href="https://docs.python.org/3/library/py_compile.html#module-py_compile"><code>py_compile</code></a> module provides a function to generate a byte-code file from a source file, and another function used when the module source file is invoked as a script.</li>
+<li><a target="_blank" rel="noopener" href="https://pyinstaller.org/en/stable/">pyinstaller</a>: PyInstaller bundles a Python application and all its dependencies into a single package. The user can run the packaged app without installing a Python interpreter or any modules. PyInstaller supports Python 3.8 and newer, and correctly bundles many major Python packages such as numpy, matplotlib, PyQt, wxPython, and others.</li>
+</ul>
+<h1 id="3-NodeJs"><a href="#3-NodeJs" class="headerlink" title="3. NodeJs"></a>3. NodeJs</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/javascript-obfuscator/javascript-obfuscator">javascript-obfuscator</a>: JavaScript Obfuscator is a powerful free obfuscator for JavaScript, containing a variety of features which provide protection for your source code.</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/mishoo/UglifyJS">uglifyjs</a>: UglifyJS is a JavaScript parser, minifier, compressor and beautifier toolkit.</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/vercel/pkg">pkg</a>: Package your Node.js project into an executable</li>
+<li><a target="_blank" rel="noopener" href="https://github.com/bytenode/bytenode">bytenode</a>: A minimalist bytecode compiler for Node.js</li>
+</ul>
+<h1 id="4-Test"><a href="#4-Test" class="headerlink" title="4. Test"></a>4. Test</h1><h2 id="4-1-python"><a href="#4-1-python" class="headerlink" title="4.1 python"></a>4.1 python</h2><p>Skip the commercial tool test because they need to register or license, so just include OSS. All test code can be find at <a target="_blank" rel="noopener" href="https://github.com/nnsay/sourcedefender-tutorial">sourcedefender-tutorial</a>.</p>
+<p>Setup the virtual python environment before testing:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">python3.11 -m venv .venv</span><br><span class="line"><span class="built_in">source</span> .venv/bin/activate</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>pyconcrete(★★★★)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># install, <span class="doctag">NOTE:</span> https://github.com/Falldog/pyconcrete/issues/94</span></span><br><span class="line">PYCONCRETE_PASSPHRASE=sourcedefender CFLAGS=<span class="string">&quot;-Wno-implicit-function-declaration&quot;</span> pip install pyconcrete <span class="comment"># https://github.com/Falldog/pyconcrete/</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># compile, find more info by run: pyconcrete-admin.py --help</span></span><br><span class="line">pyconcrete-admin.py compile --<span class="built_in">source</span> main.py --pye</span><br><span class="line">pyconcrete-admin.py compile --<span class="built_in">source</span> main.py --pyc</span><br><span class="line"></span><br><span class="line"><span class="comment"># run</span></span><br><span class="line">pyconcrete main.pye</span><br><span class="line">python main.pyc</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>⚠️ PYCONCRETE_PASSPHRASE is required when install pyconcrete</p>
+</blockquote>
+</li>
+<li><p>PyObfuscator(★★)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># obfuscate, find more info by: PyObfuscator -h</span></span><br><span class="line">PyObfuscator main.py --output main-obfuscated.py</span><br><span class="line"><span class="comment"># obfuscate and generate deobfuscate.json</span></span><br><span class="line">PyObfuscator main.py --output main-obfuscated.py --deobfuscate</span><br><span class="line"></span><br><span class="line"><span class="comment"># run</span></span><br><span class="line">python main-obfuscated.py</span><br></pre></td></tr></table></figure>
+
+<p><code>main-obfuscated.py</code>:</p>
+<p><img src="https://img.picgo.net/2024/01/16/20240116172935c8eb692221454f64.png" alt="image-20240116173002242"></p>
+<p><code>deobfuscate.json</code>:</p>
+<p><img src="https://img.picgo.net/2024/01/16/image-20240116173123459ab6db12a0d8d3fb2.png" alt="image-20240116173123459"></p>
+<ul>
+<li><p>py_complie(★)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># compile</span></span><br><span class="line">python -m py_compile main.py <span class="comment"># or</span></span><br><span class="line">python -m compileall main.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># run</span></span><br><span class="line">python ./__pycache__/main.cpython-311.pyc</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>pyinstaller(★★★★★)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># compile</span></span><br><span class="line">pyinstaller --onefile main.py</span><br><span class="line"></span><br><span class="line"><span class="comment"># run</span></span><br><span class="line">./dist/main</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p><strong>Summary</strong>:</p>
+<ul>
+<li><code>pyconcrete</code> is safer than <code>PyObfuscator</code> because pyconcrete result is binary file, but its dependences are not bundled</li>
+<li><code>PyObfuscator</code> defendes the source code with obfuscation, while <code>pyconcrete</code> utilizes compile technology</li>
+<li><code>pyinstaller</code> binary result size is big because its dependences are bundled</li>
+</ul>
+</li>
+</ul>
+<h2 id="4-2-nodejs"><a href="#4-2-nodejs" class="headerlink" title="4.2 nodejs"></a>4.2 nodejs</h2><ul>
+<li><p>uglify.js(★)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">npm install uglify-js -g</span><br><span class="line"></span><br><span class="line"><span class="comment"># obfuscate file and compare the output with source file</span></span><br><span class="line">uglifyjs --compress --mangle -- dist/libs/infra-config/src/lib/api-config.js</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>javascript-obfuscator(★★★)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">npm install javascript-obfuscator -g</span><br><span class="line"></span><br><span class="line"><span class="comment"># obfuscate file</span></span><br><span class="line">javascript-obfuscator dist/apps/demo-service/main.js</span><br><span class="line"></span><br><span class="line"><span class="comment"># run obfuscated nest application and test the apis</span></span><br><span class="line">node dist/apps/demo-service/main-obfuscated.js</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>main.js is the output result for a nest application building with webpack</p>
+</blockquote>
+</li>
+<li><p>pkg</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">npm install pkg -g</span><br><span class="line"></span><br><span class="line"><span class="comment"># compile</span></span><br><span class="line">pkg --target node18-linux-x64 main.js</span><br><span class="line"></span><br><span class="line"><span class="comment"># run</span></span><br><span class="line">./main-linux <span class="comment"># error</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>⚠️ the <code>pkg</code> has been archived.</p>
+<p>❌ <a target="_blank" rel="noopener" href="https://github.com/vercel/pkg/issues/641">comiple failure</a> on darwin(m2) and linux(x64) with node@18</p>
+<p>❌ execute error when run the linux binary</p>
+</blockquote>
+</li>
+<li><p>bytenode(★★★★)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">npm install -g bytenode</span><br><span class="line"></span><br><span class="line"><span class="comment"># compile</span></span><br><span class="line">ENV_NAME=dev bytenode -c dist/apps/demo-service/main.js</span><br><span class="line"></span><br><span class="line"><span class="comment"># run</span></span><br><span class="line">ENV_NAME=dev bytenode dist/apps/demo-service/main.jsc</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p><strong>Summary</strong>:</p>
+<ul>
+<li><code>javascript-obfuscator</code> obfuscate file is harder to read than <code>uglifyjs</code>, but the log also is obfuscated if your class name and function name in it</li>
+<li><code>uglifyjs</code> is not a obfuscator</li>
+<li><code>bytenode</code> compile the binary result which is better than the obfucated file</li>
+</ul>
+<h1 id="5-Is-python-compilation-safe"><a href="#5-Is-python-compilation-safe" class="headerlink" title="5. Is python compilation safe?"></a>5. Is python compilation safe?</h1><p>There many tool to decompile:</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://github.com/zrax/pycdc">pycdc</a>: C++ python bytecode disassembler and decompiler</li>
+<li><a target="_blank" rel="noopener" href="https://medium.com/@bolexzy/decompiling-a-compiled-python-pyc-file-crackme4-edad72784c7e">others</a></li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># install</span></span><br><span class="line">git <span class="built_in">clone</span> https://github.com/zrax/pycdc</span><br><span class="line"><span class="built_in">cd</span> pycdc</span><br><span class="line">cmake .</span><br><span class="line">make</span><br><span class="line">make check</span><br><span class="line"><span class="built_in">cp</span> pycdc ~/.local/bin</span><br><span class="line"></span><br><span class="line"><span class="comment"># decompile</span></span><br><span class="line">pycdc __pycache__/main.cpython-311.pyc</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>The decompile result:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Source Generated with Decompyle++</span></span><br><span class="line"><span class="comment"># File: main.cpython-311.pyc (Python 3.11)</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> requests</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_github_status</span>():</span><br><span class="line">Unsupported opcode: PUSH_EXC_INFO</span><br><span class="line">    api_url = <span class="string">&#x27;https://www.githubstatus.com/api/v2/status.json&#x27;</span></span><br><span class="line">    response = requests.get(api_url)</span><br><span class="line">    <span class="keyword">if</span> response.status_code == <span class="number">200</span>:</span><br><span class="line">        status_data = response.json()</span><br><span class="line">        status = status_data.get(<span class="string">&#x27;status&#x27;</span>)</span><br><span class="line">        description = status_data.get(<span class="string">&#x27;body&#x27;</span>, &#123; &#125;).get(<span class="string">&#x27;markdown&#x27;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&#x27;&#x27;&#x27;GitHub Status: <span class="subst">&#123;status&#125;</span>&#x27;&#x27;&#x27;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&#x27;&#x27;&#x27;Status Description: <span class="subst">&#123;description&#125;</span>&#x27;&#x27;&#x27;</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line">    <span class="literal">None</span>(<span class="string">f&#x27;&#x27;&#x27;Failed to retrieve GitHub status. Status code: <span class="subst">&#123;response.status_code&#125;</span>&#x27;&#x27;&#x27;</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line"><span class="comment"># WARNING: Decompyle incomplete</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&#x27;__main__&#x27;</span>:</span><br><span class="line">    get_github_status()</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">None</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>Summary</strong>:</p>
+<p>The decompile result is very close to real code, so the <code>python compile</code> is not 100% safe.</p>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2024/01/08/aws-dynamodb-alternative/" class="article-next" title="AWS DynamoDB 替代方案"><i class="icon-arrow-right"></i></a>
+
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "4d568bd243ab4e19eba8acdbb30244c1",
+        distractionFreeMode: true,
+        title: "Source Code Defense",
+        body: "https://nnsay.github.io/2024/01/17/source-code-defense/",
+        labels: ["研究"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?1f97030bb3a44256d81e14447104bef8";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+    
+    
+      <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+      </script>
+        <!-- <script src='https://unpkg.com/mermaid@10/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script> -->
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

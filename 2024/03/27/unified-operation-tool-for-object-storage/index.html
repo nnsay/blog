@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>统一文件对象存储操作 | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="1. 痛点一个微服支持不同的原厂商提供的文件存储, 假设我们的服务要适配:AWS S3Aliyun OSSMinio一般情况下我们会在服务中因为不同厂商的 SDK 进行文件对象操作, 那么此时要引入三种 SDK, 其次为了不在代码中写很多 If-Else 我们需要抽象为工具包, 业务中使用工具包而不是直接使用 SDK 进行操作. 这就使得代码仓库依赖变多体积变大. 如果和解决这个问题, 是否有统一化的文件对象操作?2. 事实上统一兼容性如果仔细查看阿里云&amp;#x2F;腾讯云&amp;#x2F;Minio " />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 6.3.0"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E7%97%9B%E7%82%B9"><span class="toc-text">1. 痛点</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E4%BA%8B%E5%AE%9E%E4%B8%8A%E7%BB%9F%E4%B8%80%E5%85%BC%E5%AE%B9%E6%80%A7"><span class="toc-text">2. 事实上统一兼容性</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E4%BB%A3%E7%A0%81%E5%AE%9E%E8%B7%B5"><span class="toc-text">3. 代码实践</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E6%80%BB%E7%BB%93"><span class="toc-text">4. 总结</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            统一文件对象存储操作
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2024/03/27/unified-operation-tool-for-object-storage/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2024-03-27T06:24:22.000Z" itemprop="datePublished">2024-03-27</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/Code/" rel="tag">Code</a>, <a class="article-tag-link" href="/tags/Tips/" rel="tag">Tips</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h1 id="1-痛点"><a href="#1-痛点" class="headerlink" title="1. 痛点"></a>1. 痛点</h1><p>一个微服支持不同的原厂商提供的文件存储, 假设我们的服务要适配:</p>
+<ul>
+<li>AWS S3</li>
+<li>Aliyun OSS</li>
+<li>Minio</li>
+</ul>
+<p>一般情况下我们会在服务中因为不同厂商的 SDK 进行文件对象操作, 那么此时要引入三种 SDK, 其次为了不在代码中写很多 If-Else 我们需要抽象为工具包, 业务中使用工具包而不是直接使用 SDK 进行操作. 这就使得代码仓库依赖变多体积变大. 如果和解决这个问题, 是否有统一化的文件对象操作?</p>
+<h1 id="2-事实上统一兼容性"><a href="#2-事实上统一兼容性" class="headerlink" title="2. 事实上统一兼容性"></a>2. 事实上统一兼容性</h1><p>如果仔细查看阿里云&#x2F;腾讯云&#x2F;Minio 的文档, 我们可以得到结论: S3 API 已经成为实际上的文件对象操作标准. 各个厂商都对自己的文件操作服务做了 S3 API 兼容性操作, 具体可以参考一下文档:</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://help.aliyun.com/zh/oss/developer-reference/compatibility-with-amazon-s3">OSS 兼容 S3 API 说明</a></li>
+<li><a target="_blank" rel="noopener" href="https://help.aliyun.com/zh/oss/developer-reference/use-amazon-s3-sdks-to-access-oss">AWS SDK 操作 Aliyun OSS</a></li>
+<li><a target="_blank" rel="noopener" href="https://min.io/product/s3-compatibility">MINIO AWS S3 Compatibility</a></li>
+<li><a target="_blank" rel="noopener" href="https://cloud.tencent.com/document/product/436/37421#node.js">使用 AWS S3 SDK 访问 COS</a></li>
+</ul>
+<p>经过文档的调研分析我们可以进一步总结: S3&#x2F;OSS&#x2F;Minio&#x2F;COS 在绝大部分文件操作上有统一性. 所以要解决痛点问题, 可以尝试使用 AWS S3 SDK 作为统一的文件对象操作工具.</p>
+<h1 id="3-代码实践"><a href="#3-代码实践" class="headerlink" title="3. 代码实践"></a>3. 代码实践</h1><p>验证的文件操作有:</p>
+<ul>
+<li>GetObject</li>
+<li>PutObject</li>
+<li>CopyObject</li>
+<li>HeadObject</li>
+<li>DeleteObject</li>
+<li>XxxSignedUrl</li>
+</ul>
+<p>除了上面的常用 API 以外, 根据阿里云的文兼容性说明文档, 分片操作也是兼容的, 但是不在本文测试验证的代码中, Typescript 测试验证代码如下:</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123;</span><br><span class="line">  S3Client,</span><br><span class="line">  <span class="title class_">PutObjectCommand</span>,</span><br><span class="line">  <span class="title class_">CopyObjectCommand</span>,</span><br><span class="line">  <span class="title class_">GetObjectCommand</span>,</span><br><span class="line">  <span class="title class_">DeleteObjectCommand</span>,</span><br><span class="line">  <span class="title class_">HeadObjectCommand</span>,</span><br><span class="line">&#125; <span class="keyword">from</span> <span class="string">&quot;@aws-sdk/client-s3&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; fromIni &#125; <span class="keyword">from</span> <span class="string">&quot;@aws-sdk/credential-provider-ini&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; getSignedUrl &#125; <span class="keyword">from</span> <span class="string">&quot;@aws-sdk/s3-request-presigner&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> axios <span class="keyword">from</span> <span class="string">&quot;axios&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> fs <span class="keyword">from</span> <span class="string">&quot;fs&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">enum</span> <span class="title class_">OSSProviderType</span> &#123;</span><br><span class="line">  <span class="variable constant_">S3</span>,</span><br><span class="line">  <span class="variable constant_">OSS</span>,</span><br><span class="line">  <span class="variable constant_">MINIO</span>,</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> <span class="title function_">getClient</span> = (<span class="params">providerType = OSSProviderType.S3</span>) =&gt; &#123;</span><br><span class="line">  <span class="keyword">if</span> (providerType === <span class="title class_">OSSProviderType</span>.<span class="property">OSS</span>) &#123;</span><br><span class="line">    <span class="keyword">const</span> <span class="attr">aliConfig</span>: &#123;</span><br><span class="line">      <span class="attr">profiles</span>: &#123; <span class="attr">access_key_id</span>: <span class="built_in">string</span>; <span class="attr">access_key_secret</span>: <span class="built_in">string</span> &#125;[];</span><br><span class="line">    &#125; = <span class="title class_">JSON</span>.<span class="title function_">parse</span>(</span><br><span class="line">      fs.<span class="title function_">readFileSync</span>(<span class="string">`<span class="subst">$&#123;process.env.HOME&#125;</span>/.aliyun/config.json`</span>).<span class="title function_">toString</span>()</span><br><span class="line">    );</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title function_">S3Client</span>(&#123;</span><br><span class="line">      <span class="attr">region</span>: <span class="string">&quot;oss-cn-hangzhou&quot;</span>,</span><br><span class="line">      <span class="attr">credentials</span>: &#123;</span><br><span class="line">        <span class="attr">accessKeyId</span>: aliConfig.<span class="property">profiles</span>[<span class="number">0</span>].<span class="property">access_key_id</span>,</span><br><span class="line">        <span class="attr">secretAccessKey</span>: aliConfig.<span class="property">profiles</span>[<span class="number">0</span>].<span class="property">access_key_secret</span>,</span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="attr">endpoint</span>: <span class="string">&quot;https://oss-cn-hangzhou.aliyuncs.com&quot;</span>,</span><br><span class="line">      <span class="attr">apiVersion</span>: <span class="string">&quot;2006-03-01&quot;</span>,</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125; <span class="keyword">else</span> <span class="keyword">if</span> (providerType === <span class="title class_">OSSProviderType</span>.<span class="property">MINIO</span>) &#123;</span><br><span class="line">    <span class="keyword">const</span> <span class="attr">minioConfig</span>: &#123;</span><br><span class="line">      <span class="attr">aliases</span>: &#123;</span><br><span class="line">        [<span class="attr">k</span>: <span class="built_in">string</span>]: &#123;</span><br><span class="line">          <span class="attr">url</span>: <span class="built_in">string</span>;</span><br><span class="line">          <span class="attr">accessKey</span>: <span class="built_in">string</span>;</span><br><span class="line">          <span class="attr">secretKey</span>: <span class="built_in">string</span>;</span><br><span class="line">          <span class="attr">api</span>: <span class="built_in">string</span>;</span><br><span class="line">          <span class="attr">path</span>: <span class="built_in">string</span>;</span><br><span class="line">        &#125;;</span><br><span class="line">      &#125;;</span><br><span class="line">    &#125; = <span class="title class_">JSON</span>.<span class="title function_">parse</span>(</span><br><span class="line">      fs.<span class="title function_">readFileSync</span>(<span class="string">`<span class="subst">$&#123;process.env.HOME&#125;</span>/.mc/config.json`</span>).<span class="title function_">toString</span>()</span><br><span class="line">    );</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title function_">S3Client</span>(&#123;</span><br><span class="line">      <span class="attr">credentials</span>: &#123;</span><br><span class="line">        <span class="attr">accessKeyId</span>: minioConfig.<span class="property">aliases</span>.<span class="property">local</span>.<span class="property">accessKey</span>,</span><br><span class="line">        <span class="attr">secretAccessKey</span>: minioConfig.<span class="property">aliases</span>.<span class="property">local</span>.<span class="property">secretKey</span>,</span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="attr">endpoint</span>: minioConfig.<span class="property">aliases</span>.<span class="property">local</span>.<span class="property">url</span>,</span><br><span class="line">      <span class="attr">forcePathStyle</span>: <span class="literal">true</span>,</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="keyword">new</span> <span class="title function_">S3Client</span>(&#123;</span><br><span class="line">    <span class="attr">region</span>: <span class="string">&quot;cn-northwest-1&quot;</span>,</span><br><span class="line">    <span class="attr">credentials</span>: <span class="title function_">fromIni</span>(&#123; <span class="attr">profile</span>: <span class="string">&quot;sandbox&quot;</span> &#125;),</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> <span class="title function_">exec</span> = <span class="keyword">async</span> (<span class="params"></span>) =&gt; &#123;</span><br><span class="line">  <span class="comment">// get object storage client for AWS S3 or Aliyun OSS</span></span><br><span class="line">  <span class="keyword">const</span> client = <span class="title function_">getClient</span>(<span class="title class_">OSSProviderType</span>.<span class="property">MINIO</span>);</span><br><span class="line">  <span class="keyword">const</span> bucket = <span class="string">&quot;nnsay-cn&quot;</span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 创建/修改</span></span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt; putObject &lt;&lt;&lt;&lt;&lt;&lt;&lt;&quot;</span>);</span><br><span class="line">  <span class="keyword">const</span> putResult = <span class="keyword">await</span> client.<span class="title function_">send</span>(</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">PutObjectCommand</span>(&#123;</span><br><span class="line">      <span class="title class_">Bucket</span>: bucket,</span><br><span class="line">      <span class="title class_">Key</span>: <span class="string">&quot;putobject.json&quot;</span>,</span><br><span class="line">      <span class="title class_">Body</span>: <span class="string">&quot;hello&quot;</span>,</span><br><span class="line">    &#125;)</span><br><span class="line">  );</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;put object result: &quot;</span>, putResult.<span class="property">ETag</span>);</span><br><span class="line">  <span class="comment">// 复制</span></span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt; copyObject &lt;&lt;&lt;&lt;&lt;&lt;&lt;&quot;</span>);</span><br><span class="line">  <span class="keyword">const</span> copyResult = <span class="keyword">await</span> client.<span class="title function_">send</span>(</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">CopyObjectCommand</span>(&#123;</span><br><span class="line">      <span class="title class_">Bucket</span>: bucket,</span><br><span class="line">      <span class="title class_">Key</span>: <span class="string">&quot;putobject-copy.json&quot;</span>,</span><br><span class="line">      <span class="title class_">CopySource</span>: <span class="string">`<span class="subst">$&#123;bucket&#125;</span>/putobject.json`</span>,</span><br><span class="line">    &#125;)</span><br><span class="line">  );</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;copy object result: &quot;</span>, copyResult.<span class="property">CopyObjectResult</span>?.<span class="property">ETag</span>);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// put signed url</span></span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt; put signed url &lt;&lt;&lt;&lt;&lt;&lt;&lt;&quot;</span>);</span><br><span class="line">  <span class="keyword">const</span> putSignedURL = <span class="keyword">await</span> <span class="title function_">getSignedUrl</span>(</span><br><span class="line">    client,</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">PutObjectCommand</span>(&#123;</span><br><span class="line">      <span class="title class_">Bucket</span>: bucket,</span><br><span class="line">      <span class="title class_">Key</span>: <span class="string">&quot;signedurlobject.json&quot;</span>,</span><br><span class="line">    &#125;),</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">expiresIn</span>: <span class="number">600</span>,</span><br><span class="line">    &#125;</span><br><span class="line">  );</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;put signed url result: &quot;</span>, putSignedURL);</span><br><span class="line"></span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt; upload by signedurl &lt;&lt;&lt;&lt;&lt;&lt;&lt;&quot;</span>);</span><br><span class="line">  <span class="keyword">await</span> axios.<span class="title function_">put</span>(putSignedURL, <span class="title class_">JSON</span>.<span class="title function_">stringify</span>(&#123; <span class="attr">hello</span>: <span class="string">&quot;Jimmy&quot;</span> &#125;));</span><br><span class="line"></span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt; get signed url &lt;&lt;&lt;&lt;&lt;&lt;&lt;&quot;</span>);</span><br><span class="line">  <span class="keyword">const</span> getSignedURL = <span class="keyword">await</span> <span class="title function_">getSignedUrl</span>(</span><br><span class="line">    client,</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">GetObjectCommand</span>(&#123;</span><br><span class="line">      <span class="title class_">Bucket</span>: bucket,</span><br><span class="line">      <span class="title class_">Key</span>: <span class="string">&quot;signedurlobject.json&quot;</span>,</span><br><span class="line">    &#125;),</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="attr">expiresIn</span>: <span class="number">600</span>,</span><br><span class="line">    &#125;</span><br><span class="line">  );</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;get signed url result: &quot;</span>, getSignedURL);</span><br><span class="line"></span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt; download by signedurl &lt;&lt;&lt;&lt;&lt;&lt;&lt;&quot;</span>);</span><br><span class="line">  <span class="keyword">const</span> getSignedURLResult = <span class="keyword">await</span> axios.<span class="title function_">get</span>(getSignedURL);</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;download by signedurl result: &quot;</span>, getSignedURLResult.<span class="property">data</span>);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 读取</span></span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt; getObject &lt;&lt;&lt;&lt;&lt;&lt;&lt;&quot;</span>);</span><br><span class="line">  <span class="keyword">const</span> getResult = <span class="keyword">await</span> client.<span class="title function_">send</span>(</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">GetObjectCommand</span>(&#123;</span><br><span class="line">      <span class="title class_">Bucket</span>: bucket,</span><br><span class="line">      <span class="title class_">Key</span>: <span class="string">&quot;signedurlobject.json&quot;</span>,</span><br><span class="line">    &#125;)</span><br><span class="line">  );</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(</span><br><span class="line">    <span class="string">&quot;get object(signedurl upload) result: %s&quot;</span>,</span><br><span class="line">    <span class="keyword">await</span> getResult.<span class="property">Body</span>?.<span class="title function_">transformToString</span>(<span class="string">&quot;utf8&quot;</span>)</span><br><span class="line">  );</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 删除</span></span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt; deleteObject &lt;&lt;&lt;&lt;&lt;&lt;&lt;&quot;</span>);</span><br><span class="line">  <span class="keyword">const</span> deleteResult = <span class="keyword">await</span> client.<span class="title function_">send</span>(</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">DeleteObjectCommand</span>(&#123;</span><br><span class="line">      <span class="title class_">Bucket</span>: bucket,</span><br><span class="line">      <span class="title class_">Key</span>: <span class="string">&quot;putobject-copy.json&quot;</span>,</span><br><span class="line">    &#125;)</span><br><span class="line">  );</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(</span><br><span class="line">    <span class="string">&quot;delete object result: %s&quot;</span>,</span><br><span class="line">    deleteResult.<span class="property">$metadata</span>.<span class="property">httpStatusCode</span></span><br><span class="line">  );</span><br><span class="line"></span><br><span class="line">  <span class="comment">// Head</span></span><br><span class="line">  <span class="keyword">const</span> headResult = <span class="keyword">await</span> client.<span class="title function_">send</span>(</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">HeadObjectCommand</span>(&#123;</span><br><span class="line">      <span class="title class_">Bucket</span>: bucket,</span><br><span class="line">      <span class="title class_">Key</span>: <span class="string">&quot;putobject.json&quot;</span>,</span><br><span class="line">    &#125;)</span><br><span class="line">  );</span><br><span class="line"></span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;head object result: %s&quot;</span>, headResult.<span class="property">ETag</span>);</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="title function_">exec</span>()</span><br><span class="line">  .<span class="title function_">then</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;done&quot;</span>);</span><br><span class="line">  &#125;)</span><br><span class="line">  .<span class="title function_">catch</span>(<span class="function">(<span class="params">err</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="variable language_">console</span>.<span class="title function_">log</span>(err);</span><br><span class="line">  &#125;);</span><br></pre></td></tr></table></figure>
+
+<p>同理, 我们验证一下 Python SDK 具体代码如下:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> io <span class="keyword">import</span> BufferedReader</span><br><span class="line"><span class="keyword">from</span> typing <span class="keyword">import</span> <span class="type">Union</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> boto3</span><br><span class="line"><span class="keyword">from</span> botocore.config <span class="keyword">import</span> Config</span><br><span class="line"></span><br><span class="line">default_signed_url_expires = <span class="number">3600</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ObjectStorage</span>:</span><br><span class="line">  <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, provider: <span class="built_in">str</span>, config: <span class="built_in">dict</span>[<span class="built_in">str</span>, <span class="type">Union</span>[<span class="built_in">str</span>, <span class="literal">None</span>]]</span>):</span><br><span class="line">    <span class="keyword">if</span> provider == <span class="string">&#x27;OSS&#x27;</span>:</span><br><span class="line">      self.client = boto3.client(</span><br><span class="line">        <span class="string">&#x27;s3&#x27;</span>,</span><br><span class="line">        aws_access_key_id=config[<span class="string">&#x27;access_key_id&#x27;</span>],</span><br><span class="line">        aws_secret_access_key=config[<span class="string">&#x27;access_key_secret&#x27;</span>],</span><br><span class="line">        endpoint_url=<span class="string">f&quot;https://<span class="subst">&#123;config[<span class="string">&#x27;region&#x27;</span>]&#125;</span>.aliyuncs.com&quot;</span>,</span><br><span class="line">        config=Config(s3=&#123;<span class="string">&#x27;addressing_style&#x27;</span>: <span class="string">&#x27;virtual&#x27;</span>, <span class="string">&#x27;signature_version&#x27;</span>: <span class="string">&#x27;s3v4&#x27;</span>&#125;),</span><br><span class="line">      )</span><br><span class="line">    <span class="keyword">elif</span> provider == <span class="string">&#x27;MINIO&#x27;</span>:</span><br><span class="line">      self.client = boto3.client(</span><br><span class="line">        <span class="string">&#x27;s3&#x27;</span>,</span><br><span class="line">        aws_access_key_id=config[<span class="string">&#x27;access_key_id&#x27;</span>],</span><br><span class="line">        aws_secret_access_key=config[<span class="string">&#x27;access_key_secret&#x27;</span>],</span><br><span class="line">        endpoint_url=config[<span class="string">&#x27;endpoint&#x27;</span>],</span><br><span class="line">        config=Config(s3=&#123;<span class="string">&#x27;addressing_style&#x27;</span>: <span class="string">&#x27;path&#x27;</span>, <span class="string">&#x27;signature_version&#x27;</span>: <span class="string">&#x27;s3v4&#x27;</span>&#125;),</span><br><span class="line">      )</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">      self.client = boto3.client(<span class="string">&#x27;s3&#x27;</span>)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">def</span> <span class="title function_">download_file</span>(<span class="params">self, local_file: <span class="built_in">str</span>, bucket: <span class="built_in">str</span>, key: <span class="built_in">str</span></span>):</span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(local_file, <span class="string">&#x27;wb&#x27;</span>) <span class="keyword">as</span> data:</span><br><span class="line">      self.client.download_fileobj(Bucket=bucket, Key=key, Fileobj=data)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">def</span> <span class="title function_">put_object</span>(<span class="params">self, bucket: <span class="built_in">str</span>, key: <span class="built_in">str</span>, body: <span class="type">Union</span>[<span class="built_in">bytes</span>, <span class="built_in">str</span>, BufferedReader]</span>):</span><br><span class="line">    res = self.client.put_object(Bucket=bucket, Key=key, Body=body)</span><br><span class="line">    <span class="keyword">return</span> res[<span class="string">&#x27;ETag&#x27;</span>]</span><br><span class="line"></span><br><span class="line">  <span class="keyword">def</span> <span class="title function_">get_object</span>(<span class="params">self, bucket: <span class="built_in">str</span>, key: <span class="built_in">str</span></span>):</span><br><span class="line">    res = self.client.get_object(Bucket=bucket, Key=key)</span><br><span class="line">    <span class="keyword">return</span> res[<span class="string">&#x27;Body&#x27;</span>].read()</span><br><span class="line"></span><br><span class="line">  <span class="keyword">def</span> <span class="title function_">get_object_signed_url</span>(<span class="params">self, bucket: <span class="built_in">str</span>, key: <span class="built_in">str</span>, expires: <span class="built_in">int</span> = default_signed_url_expires</span>):</span><br><span class="line">    <span class="keyword">return</span> self.client.generate_presigned_url(</span><br><span class="line">      <span class="string">&#x27;get_object&#x27;</span>, Params=&#123;<span class="string">&#x27;Bucket&#x27;</span>: bucket, <span class="string">&#x27;Key&#x27;</span>: key&#125;, ExpiresIn=expires</span><br><span class="line">    )</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>[!note] &gt; <a target="_blank" rel="noopener" href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html">boto3 s3 文档</a></p>
+</blockquote>
+<blockquote>
+<p>[!note]<br>该包已开源: Github 项目<a target="_blank" rel="noopener" href="https://github.com/nnsay/python-object-storage">python-object-storage</a>, PyPI 包 <a target="_blank" rel="noopener" href="https://pypi.org/project/nnsay.object-storage/">nnsay.object-storage</a></p>
+</blockquote>
+<p>测试验证代码如下:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">bucket = <span class="string">&#x27;nnsay-cn&#x27;</span></span><br><span class="line">provider = os.environ.get(<span class="string">&quot;OBJECT_STORAGE_PROVIDER&quot;</span>, <span class="string">&quot;OSS&quot;</span>)</span><br><span class="line">config = &#123;</span><br><span class="line">    <span class="string">&quot;access_key_id&quot;</span>: os.environ.get(<span class="string">&quot;OBJECT_STORAGE_AK&quot;</span>),</span><br><span class="line">    <span class="string">&quot;access_key_secret&quot;</span>: os.environ.get(<span class="string">&quot;OBJECT_STORAGE_SK&quot;</span>),</span><br><span class="line">    <span class="string">&quot;region&quot;</span>: os.environ.get(<span class="string">&quot;OBJECT_STORAGE_REGION&quot;</span>),</span><br><span class="line">    <span class="string">&quot;endpoint&quot;</span>: os.environ.get(<span class="string">&quot;OBJECT_STORAGE_ENDPOINT&quot;</span>)</span><br><span class="line">&#125;</span><br><span class="line">object_storage = ObjectStorage(provider, config)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 上传操作</span></span><br><span class="line"><span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&#x27;hello.log&#x27;</span>, <span class="string">&#x27;rb&#x27;</span>) <span class="keyword">as</span> data:</span><br><span class="line">    etag = object_storage.put_object(bucket, <span class="string">&#x27;hello.log&#x27;</span>, data)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">f&quot;etag: <span class="subst">&#123;etag&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 下载操作</span></span><br><span class="line">object_storage.download_file(<span class="string">&#x27;download-hello-minio.log&#x27;</span>, bucket, <span class="string">&#x27;hello.log&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 获取对象</span></span><br><span class="line"><span class="built_in">bytes</span> = object_storage.get_object(bucket, <span class="string">&#x27;hello.log&#x27;</span>)</span><br><span class="line">data = <span class="built_in">bytes</span>.decode(<span class="string">&quot;utf-8&quot;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;get data: <span class="subst">&#123;data&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 获取下载地址</span></span><br><span class="line">url = object_storage.get_object_signed_url(bucket, <span class="string">&#x27;hello.log&#x27;</span>)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;download signed url: <span class="subst">&#123;url&#125;</span>&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<h1 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h1><p>以上代码已经测试验证通过, 可以证明: AWS S3 SDK 可以在绝大部分文件操作中作为统一的文件操作工具使用.</p>
+<p>以上代码中其中 Typescript 并没有封装成类, 在实践中可以可靠具体的封装, 比如使用 Nest 框架时封装为 Nest Service; 而 Python 的简单封装已经发布到了 PyPI</p>
+<p>本文也提及了腾讯云 COS 也对 S3 API 有兼容, 但是因为没有测试环境所以代码中没有封装和测试, 感兴趣的同学可以自行尝试.</p>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2024/03/08/data-migration-from-dynamodb-to-postgresql/" class="article-next" title="DynamoDB数据迁移至PostgreSQL"><i class="icon-arrow-right"></i></a>
+
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "a21685fd6e416aebb3d50f94783b622b",
+        distractionFreeMode: true,
+        title: "统一文件对象存储操作",
+        body: "https://nnsay.github.io/2024/03/27/unified-operation-tool-for-object-storage/",
+        labels: ["Tips","Code"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?1f97030bb3a44256d81e14447104bef8";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+    
+    
+      <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+      </script>
+        <!-- <script src='https://unpkg.com/mermaid@10/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script> -->
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

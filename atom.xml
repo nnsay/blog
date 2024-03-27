@@ -6,7 +6,7 @@
   <link href="https://nnsay.github.io/atom.xml" rel="self"/>
   
   <link href="https://nnsay.github.io/"/>
-  <updated>2024-03-08T08:55:31.081Z</updated>
+  <updated>2024-03-27T07:01:32.378Z</updated>
   <id>https://nnsay.github.io/</id>
   
   <author>
@@ -17,11 +17,30 @@
   <generator uri="https://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>统一文件对象存储操作</title>
+    <link href="https://nnsay.github.io/2024/03/27/unified-operation-tool-for-object-storage/"/>
+    <id>https://nnsay.github.io/2024/03/27/unified-operation-tool-for-object-storage/</id>
+    <published>2024-03-27T06:24:22.000Z</published>
+    <updated>2024-03-27T07:01:32.378Z</updated>
+    
+    
+    <summary type="html">使用AWS S3 SDK统一操作对象存储</summary>
+    
+    
+    
+    
+    <category term="Tips" scheme="https://nnsay.github.io/tags/Tips/"/>
+    
+    <category term="Code" scheme="https://nnsay.github.io/tags/Code/"/>
+    
+  </entry>
+  
+  <entry>
     <title>DynamoDB数据迁移至PostgreSQL</title>
     <link href="https://nnsay.github.io/2024/03/08/data-migration-from-dynamodb-to-postgresql/"/>
     <id>https://nnsay.github.io/2024/03/08/data-migration-from-dynamodb-to-postgresql/</id>
     <published>2024-03-08T08:36:22.000Z</published>
-    <updated>2024-03-08T08:55:31.081Z</updated>
+    <updated>2024-03-27T07:01:32.374Z</updated>
     
     
     <summary type="html">使用Typescript脚本从DynamoDB迁移数据到PostgreSQL</summary>
@@ -40,7 +59,7 @@
     <link href="https://nnsay.github.io/2024/01/17/source-code-defense/"/>
     <id>https://nnsay.github.io/2024/01/17/source-code-defense/</id>
     <published>2024-01-17T09:26:33.000Z</published>
-    <updated>2024-03-08T08:55:31.085Z</updated>
+    <updated>2024-03-27T07:01:32.374Z</updated>
     
     
     <summary type="html">How to do the source code defence?</summary>
@@ -57,7 +76,7 @@
     <link href="https://nnsay.github.io/2024/01/08/aws-dynamodb-alternative/"/>
     <id>https://nnsay.github.io/2024/01/08/aws-dynamodb-alternative/</id>
     <published>2024-01-08T10:47:06.000Z</published>
-    <updated>2024-03-08T08:55:31.081Z</updated>
+    <updated>2024-03-27T07:01:32.374Z</updated>
     
     
     <summary type="html">调研DynamoDB替换的可行性</summary>
@@ -74,7 +93,7 @@
     <link href="https://nnsay.github.io/2024/01/05/replace-s3-with-minio/"/>
     <id>https://nnsay.github.io/2024/01/05/replace-s3-with-minio/</id>
     <published>2024-01-05T11:58:25.000Z</published>
-    <updated>2024-03-08T08:55:31.085Z</updated>
+    <updated>2024-03-27T07:01:32.374Z</updated>
     
     
     <summary type="html">使用minio替换s3的可行性</summary>
@@ -91,7 +110,7 @@
     <link href="https://nnsay.github.io/2023/12/11/zip-in-browser/"/>
     <id>https://nnsay.github.io/2023/12/11/zip-in-browser/</id>
     <published>2023-12-11T08:42:39.000Z</published>
-    <updated>2024-03-08T08:55:31.089Z</updated>
+    <updated>2024-03-27T07:01:32.378Z</updated>
     
     
     <summary type="html">使用js解压/抽取/创建zip</summary>
@@ -110,7 +129,7 @@
     <link href="https://nnsay.github.io/2023/10/26/sync-dynamodb-and-s3/"/>
     <id>https://nnsay.github.io/2023/10/26/sync-dynamodb-and-s3/</id>
     <published>2023-10-26T07:56:42.000Z</published>
-    <updated>2024-03-08T08:55:31.085Z</updated>
+    <updated>2024-03-27T07:01:32.378Z</updated>
     
     
     <summary type="html">优雅同步DynamoDB和S3数据</summary>
@@ -131,7 +150,7 @@
     <link href="https://nnsay.github.io/2023/09/09/go-wasm/"/>
     <id>https://nnsay.github.io/2023/09/09/go-wasm/</id>
     <published>2023-09-09T10:57:42.000Z</published>
-    <updated>2024-03-08T08:55:31.085Z</updated>
+    <updated>2024-03-27T07:01:32.374Z</updated>
     
     
     <summary type="html">使用go编译wasm并在浏览器中调用和使用</summary>
@@ -150,7 +169,7 @@
     <link href="https://nnsay.github.io/2023/09/05/frontend-security/"/>
     <id>https://nnsay.github.io/2023/09/05/frontend-security/</id>
     <published>2023-09-05T07:45:25.000Z</published>
-    <updated>2024-03-08T08:55:31.085Z</updated>
+    <updated>2024-03-27T07:01:32.374Z</updated>
     
     
     <summary type="html">通过加密等各种手动保护网站数据安全</summary>
@@ -169,7 +188,7 @@
     <link href="https://nnsay.github.io/2023/07/28/github-self-hosted-runner/"/>
     <id>https://nnsay.github.io/2023/07/28/github-self-hosted-runner/</id>
     <published>2023-07-28T03:58:19.000Z</published>
-    <updated>2024-03-08T08:55:31.085Z</updated>
+    <updated>2024-03-27T07:01:32.374Z</updated>
     
     
     <summary type="html">使用 Mac mini 搭建自托管的 Github Runner</summary>
@@ -186,7 +205,7 @@
     <link href="https://nnsay.github.io/2023/07/20/nx-invalid-cache/"/>
     <id>https://nnsay.github.io/2023/07/20/nx-invalid-cache/</id>
     <published>2023-07-20T10:03:19.000Z</published>
-    <updated>2024-03-08T08:55:31.085Z</updated>
+    <updated>2024-03-27T07:01:32.374Z</updated>
     
     
     <summary type="html">关于Nx缓存失效的Troubleshooting</summary>
@@ -203,7 +222,7 @@
     <link href="https://nnsay.github.io/2023/07/17/code-coverage/"/>
     <id>https://nnsay.github.io/2023/07/17/code-coverage/</id>
     <published>2023-07-17T00:47:58.000Z</published>
-    <updated>2024-03-08T08:55:31.081Z</updated>
+    <updated>2024-03-27T07:01:32.374Z</updated>
     
     
     <summary type="html">Monorepo 中代码测试覆盖率报告的使用和实践</summary>
@@ -222,7 +241,7 @@
     <link href="https://nnsay.github.io/2023/06/07/serverless-nest-log/"/>
     <id>https://nnsay.github.io/2023/06/07/serverless-nest-log/</id>
     <published>2023-06-07T10:11:54.000Z</published>
-    <updated>2024-03-08T08:55:31.085Z</updated>
+    <updated>2024-03-27T07:01:32.374Z</updated>
     
     
     <summary type="html">自定义 Nest 日志让 AWS Lambda 日志自动携带 awsRequestId</summary>
@@ -241,7 +260,7 @@
     <link href="https://nnsay.github.io/2023/05/24/sync-dynamodb-table/"/>
     <id>https://nnsay.github.io/2023/05/24/sync-dynamodb-table/</id>
     <published>2023-05-24T08:49:11.000Z</published>
-    <updated>2024-03-08T08:55:31.085Z</updated>
+    <updated>2024-03-27T07:01:32.378Z</updated>
     
     
     <summary type="html">一行脚本同步DynamoDB表数据</summary>
@@ -260,7 +279,7 @@
     <link href="https://nnsay.github.io/2023/05/12/security-monorepo/"/>
     <id>https://nnsay.github.io/2023/05/12/security-monorepo/</id>
     <published>2023-05-12T03:30:38.000Z</published>
-    <updated>2024-03-08T08:55:31.085Z</updated>
+    <updated>2024-03-27T07:01:32.374Z</updated>
     
     
     <summary type="html">调研如何针对monorepo做敏感代码保护</summary>
@@ -279,7 +298,7 @@
     <link href="https://nnsay.github.io/2023/05/08/bing-map-api/"/>
     <id>https://nnsay.github.io/2023/05/08/bing-map-api/</id>
     <published>2023-05-08T06:33:35.000Z</published>
-    <updated>2024-03-08T08:55:31.081Z</updated>
+    <updated>2024-03-27T07:01:32.374Z</updated>
     
     
     <summary type="html">使用必应地图API替换谷歌地图API</summary>
@@ -300,7 +319,7 @@
     <link href="https://nnsay.github.io/2023/04/26/github-verify-commit/"/>
     <id>https://nnsay.github.io/2023/04/26/github-verify-commit/</id>
     <published>2023-04-26T09:37:39.000Z</published>
-    <updated>2024-03-08T08:55:31.085Z</updated>
+    <updated>2024-03-27T07:01:32.374Z</updated>
     
     
     <summary type="html">开启提交验证让你的代码更被信任</summary>
@@ -317,7 +336,7 @@
     <link href="https://nnsay.github.io/2023/04/23/sentry-best-practices/"/>
     <id>https://nnsay.github.io/2023/04/23/sentry-best-practices/</id>
     <published>2023-04-23T04:56:17.000Z</published>
-    <updated>2024-03-08T08:55:31.085Z</updated>
+    <updated>2024-03-27T07:01:32.374Z</updated>
     
     
     <summary type="html">了解Sentry真实项目中的最佳使用实践</summary>
@@ -336,7 +355,7 @@
     <link href="https://nnsay.github.io/2023/04/18/nest-dynamodb-unit-test/"/>
     <id>https://nnsay.github.io/2023/04/18/nest-dynamodb-unit-test/</id>
     <published>2023-04-18T11:24:24.000Z</published>
-    <updated>2024-03-08T08:55:31.085Z</updated>
+    <updated>2024-03-27T07:01:32.374Z</updated>
     
     
     <summary type="html">了解如何实现DynamoDB在Nest框架中如何进行依赖注入/mock数据</summary>
@@ -355,27 +374,10 @@
     <link href="https://nnsay.github.io/2023/04/14/research-sentry-knowlege/"/>
     <id>https://nnsay.github.io/2023/04/14/research-sentry-knowlege/</id>
     <published>2023-04-14T09:46:40.000Z</published>
-    <updated>2024-03-08T08:55:31.085Z</updated>
+    <updated>2024-03-27T07:01:32.374Z</updated>
     
     
     <summary type="html">快速了解并实现一套完整的应用程序异常/性能捕获和通知提醒的流程</summary>
-    
-    
-    
-    
-    <category term="DevOps" scheme="https://nnsay.github.io/tags/DevOps/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Sentry+Nestjs</title>
-    <link href="https://nnsay.github.io/2023/04/13/research-sentry/"/>
-    <id>https://nnsay.github.io/2023/04/13/research-sentry/</id>
-    <published>2023-04-13T09:56:48.000Z</published>
-    <updated>2024-03-08T08:55:31.085Z</updated>
-    
-    
-    <summary type="html">使用Sentry给Nestjs应用程序增加监控</summary>
     
     
     

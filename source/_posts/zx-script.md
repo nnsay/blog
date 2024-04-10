@@ -3,7 +3,7 @@ title: zx脚本工具
 date: 2024-04-10 15:27:12
 tags:
   - DevOps
-  - Code
+  - 工具
 excerpt: 简单高效的使用JavaScript编写脚本
 ---
 

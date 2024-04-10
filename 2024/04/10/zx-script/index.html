@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>zx脚本工具 | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="1. ZX介绍zx 是 google 的一个脚本工具, 可以帮助开发者轻松的编写脚本, 主要有以下优势:使用 js 书写脚本可以利用丰富的 js 库2. 代码演练example.mjs123456789101112131415161718192021222324252627282930313233343536373839404142434445#!/usr/bin/env zximport &amp;#123; $, echo, os, chalk &amp;#125; from &amp;quot;zx&amp;quot;;" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 6.3.0"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-ZX%E4%BB%8B%E7%BB%8D"><span class="toc-text">1. ZX介绍</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E4%BB%A3%E7%A0%81%E6%BC%94%E7%BB%83"><span class="toc-text">2. 代码演练</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E6%89%A7%E8%A1%8C%E6%96%B9%E5%BC%8F"><span class="toc-text">3. 执行方式</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E5%AD%A6%E4%B9%A0%E6%9B%B4%E5%A4%9A"><span class="toc-text">4. 学习更多</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            zx脚本工具
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2024/04/10/zx-script/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2024-04-10T07:27:12.000Z" itemprop="datePublished">2024-04-10</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/Code/" rel="tag">Code</a>, <a class="article-tag-link" href="/tags/DevOps/" rel="tag">DevOps</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h1 id="1-ZX介绍"><a href="#1-ZX介绍" class="headerlink" title="1. ZX介绍"></a>1. <a target="_blank" rel="noopener" href="https://google.github.io/zx/">ZX</a>介绍</h1><p>zx 是 google 的一个脚本工具, 可以帮助开发者轻松的编写脚本, 主要有以下优势:</p>
+<ul>
+<li>使用 js 书写脚本</li>
+<li>可以利用丰富的 js 库</li>
+</ul>
+<h1 id="2-代码演练"><a href="#2-代码演练" class="headerlink" title="2. 代码演练"></a>2. 代码演练</h1><p>example.mjs</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">#!<span class="regexp">/usr/</span>bin/env zx</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> &#123; $, echo, os, chalk &#125; <span class="keyword">from</span> <span class="string">&quot;zx&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 调用shell命令</span></span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">  <span class="keyword">const</span> projectName = <span class="keyword">await</span> $<span class="string">`jq -r &#x27;.name&#x27; &lt; package.json`</span>;</span><br><span class="line">  echo<span class="string">`1. projectName: <span class="subst">$&#123;projectName&#125;</span>`</span>;</span><br><span class="line">&#125; <span class="keyword">catch</span> (e) &#123;</span><br><span class="line">  <span class="keyword">const</span> &#123; stderr, exitCode &#125; = e;</span><br><span class="line">  <span class="variable language_">console</span>.<span class="title function_">error</span>(&#123; stderr, exitCode &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 打印: console/echo</span></span><br><span class="line"><span class="keyword">const</span> date = <span class="keyword">await</span> $<span class="string">`date`</span>;</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">`2. Current date is <span class="subst">$&#123;date.stdout.trim()&#125;</span>.`</span>);</span><br><span class="line">echo<span class="string">`3. Current date is <span class="subst">$&#123;date&#125;</span>.`</span>;</span><br><span class="line"><span class="keyword">const</span> echoResult = <span class="keyword">await</span> $<span class="string">`echo 4. Current date is <span class="subst">$&#123;date&#125;</span>.`</span>; <span class="comment">// 调用shell中的echo如果不获取结果,在脚本输出结果中看不到</span></span><br><span class="line">echo<span class="string">`<span class="subst">$&#123;echoResult&#125;</span>`</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 颜色</span></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&quot;console.log&quot;</span>, chalk.<span class="title function_">blue</span>(<span class="string">&quot;蓝色&quot;</span>));</span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">`console.log <span class="subst">$&#123;chalk.blue(<span class="string">&quot;蓝色&quot;</span>)&#125;</span> template`</span>);</span><br><span class="line"><span class="title function_">echo</span>(<span class="string">&quot;echo&quot;</span>, chalk.<span class="title function_">blue</span>(<span class="string">&quot;蓝色&quot;</span>));</span><br><span class="line"><span class="title function_">echo</span>(<span class="string">`echo <span class="subst">$&#123;chalk.blue(<span class="string">&quot;蓝色&quot;</span>)&#125;</span> template `</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 批量操作</span></span><br><span class="line"><span class="keyword">const</span> batchResult = <span class="keyword">await</span> <span class="title class_">Promise</span>.<span class="title function_">all</span>([</span><br><span class="line">  $<span class="string">`sleep 1; echo 1`</span>,</span><br><span class="line">  $<span class="string">`sleep 2; echo 2`</span>,</span><br><span class="line">  $<span class="string">`sleep 3; echo 3`</span>,</span><br><span class="line">]);</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">const</span> result <span class="keyword">of</span> batchResult) &#123;</span><br><span class="line">  echo<span class="string">`batch result: <span class="subst">$&#123;result&#125;</span>`</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 文件和流</span></span><br><span class="line"><span class="keyword">await</span> $<span class="string">`echo &quot;Hello, stdout!&quot;`</span>.<span class="title function_">pipe</span>(</span><br><span class="line">  fs.<span class="title function_">createWriteStream</span>(<span class="string">`<span class="subst">$&#123;__dirname&#125;</span>/output.txt`</span>)</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 系统</span></span><br><span class="line">echo<span class="string">`home目录: <span class="subst">$&#123;os.homedir()&#125;</span>`</span>;</span><br><span class="line">echo<span class="string">`日志目录: <span class="subst">$&#123;path.resolve(path.join(os.homedir(), <span class="string">&quot;tmp&quot;</span>, <span class="string">&quot;output.log&quot;</span>))&#125;</span>`</span>;</span><br><span class="line">echo<span class="string">`当前目录: <span class="subst">$&#123;__dirname&#125;</span>`</span>;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>[!note]<br>第三行的引用实则未必, 但是在写脚本时候可以提供很多类型感知防止写错;<br>另外如果脚本依赖第三方包也是需要在前面引用的.</p>
+</blockquote>
+<p>结果输出:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">1. projectName: albedo-services</span><br><span class="line">2. Current date is Wed Apr 10 15:03:36 CST 2024.</span><br><span class="line">3. Current date is Wed Apr 10 15:03:36 CST 2024.</span><br><span class="line">4. Current date is Wed Apr 10 15:03:36 CST 2024.</span><br><span class="line">console.log 蓝色</span><br><span class="line">console.log 蓝色 template</span><br><span class="line">echo 蓝色</span><br><span class="line">echo 蓝色 template</span><br><span class="line">batch result: 1</span><br><span class="line">batch result: 2</span><br><span class="line">batch result: 3</span><br><span class="line">home目录: /Users/wangjian</span><br><span class="line">日志目录: /Users/wangjian/tmp/output.log</span><br><span class="line">当前目录: /Users/wangjian/github/vd/albedo-services/tmp/zxshell</span><br></pre></td></tr></table></figure>
+
+<h1 id="3-执行方式"><a href="#3-执行方式" class="headerlink" title="3. 执行方式"></a>3. 执行方式</h1><ul>
+<li><p>可执行文件执行</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 增加可执行权限</span></span><br><span class="line"><span class="built_in">chmod</span> +x example.mjs</span><br><span class="line"><span class="comment"># 执行</span></span><br><span class="line">./example.mjs</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>[!note]</p>
+<p>确保 shebang 已配置, zx 的 shengbang 是: <code>#!/usr/bin/env zx</code></p>
+</blockquote>
+</li>
+<li><p>zx 执行</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装 zx, 使用npm或者brew</span></span><br><span class="line">npm install -g zx</span><br><span class="line">brew install zx</span><br><span class="line"></span><br><span class="line"><span class="comment"># 执行</span></span><br><span class="line">zx ./example.mjs</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h1 id="4-学习更多"><a href="#4-学习更多" class="headerlink" title="4. 学习更多"></a>4. 学习更多</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://google.github.io/zx/process-promise">执行 Promise</a></li>
+<li><a target="_blank" rel="noopener" href="https://google.github.io/zx/api">内置 API</a></li>
+<li><a target="_blank" rel="noopener" href="https://google.github.io/zx/configuration">配置</a></li>
+</ul>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2024/03/27/unified-operation-tool-for-object-storage/" class="article-next" title="统一文件对象存储操作"><i class="icon-arrow-right"></i></a>
+
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "4bb2c4fc00c39d7dd3cd80509a75b94f",
+        distractionFreeMode: true,
+        title: "zx脚本工具",
+        body: "https://nnsay.github.io/2024/04/10/zx-script/",
+        labels: ["DevOps","Code"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?1f97030bb3a44256d81e14447104bef8";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+    
+    
+      <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+      </script>
+        <!-- <script src='https://unpkg.com/mermaid@10/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script> -->
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

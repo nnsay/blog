@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>集成Poetry和Cython | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="1. Poetry and CythonPoetry是一个 Python 的包和依赖管理工具, 使用 Poetry 开发一个PyPi包是非常快速的:poetry cli 可以快速一个 python 项目脚手架poetry 可以分别管理开发依赖和包依赖poetry 打包发布也很简单Cython 是针对 Python 编程语言和扩展的 Cython 编程语言（基于 Pyrex）的优化静态编译器。它使为 Python 编写 C 扩展就像 Python 本身一样简单.本文的重点不是介绍 poetry 和" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 6.3.0"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-Poetry-and-Cython"><span class="toc-text">1. Poetry and Cython</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E9%9B%86%E6%88%90-Poetry-%E5%92%8C-Cython"><span class="toc-text">2. 集成 Poetry 和 Cython</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-%E4%BB%A3%E7%A0%81%E6%96%87%E4%BB%B6"><span class="toc-text">2.1 代码文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-Cython-%E7%BC%96%E8%AF%91"><span class="toc-text">2.2 Cython 编译</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3-Poetry-%E9%9B%86%E6%88%90"><span class="toc-text">2.3 Poetry 集成</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A2%9E%E5%8A%A0%E7%BC%96%E8%AF%91%E4%BE%9D%E8%B5%96"><span class="toc-text">增加编译依赖</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89-Poetry-%E6%9E%84%E5%BB%BA"><span class="toc-text">自定义 Poetry 构建</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Poetry-%E6%89%93%E5%8C%85"><span class="toc-text">Poetry 打包</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-4-%E6%B5%8B%E8%AF%95%E5%92%8C%E4%BD%BF%E7%94%A8"><span class="toc-text">2.4 测试和使用</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%85"><span class="toc-text">安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B5%8B%E8%AF%95"><span class="toc-text">测试</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E6%80%BB%E7%BB%93"><span class="toc-text">3. 总结</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            集成Poetry和Cython
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2024/04/28/poetry-and-cython/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2024-04-28T03:22:08.000Z" itemprop="datePublished">2024-04-28</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/Code/" rel="tag">Code</a>, <a class="article-tag-link" href="/tags/%E7%A0%94%E7%A9%B6/" rel="tag">研究</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h1 id="1-Poetry-and-Cython"><a href="#1-Poetry-and-Cython" class="headerlink" title="1. Poetry and Cython"></a>1. Poetry and Cython</h1><p><a target="_blank" rel="noopener" href="https://python-poetry.org/">Poetry</a>是一个 Python 的包和依赖管理工具, 使用 Poetry 开发一个<a target="_blank" rel="noopener" href="https://pypi.org/">PyPi</a>包是非常快速的:</p>
+<ul>
+<li>poetry cli 可以快速一个 python 项目脚手架</li>
+<li>poetry 可以分别管理开发依赖和包依赖</li>
+<li>poetry 打包发布也很简单</li>
+</ul>
+<p>Cython 是针对 Python 编程语言和扩展的 Cython 编程语言（基于 Pyrex）的优化静态编译器。它使为 Python 编写 C 扩展就像 Python 本身一样简单.</p>
+<p>本文的重点不是介绍 poetry 和 cython 如何使用, 在本文中大致认为 poetry 是一种打包工具, 而 cython 是一种编译工具, 使用 cython 将敏感代码编译为.so 文件然后使用 poetry 打包这些.so 文件为一个 wheel 包可以用 pip 进行安装.</p>
+<h1 id="2-集成-Poetry-和-Cython"><a href="#2-集成-Poetry-和-Cython" class="headerlink" title="2. 集成 Poetry 和 Cython"></a>2. 集成 Poetry 和 Cython</h1><h2 id="2-1-代码文件"><a href="#2-1-代码文件" class="headerlink" title="2.1 代码文件"></a>2.1 代码文件</h2><p>假设我们的代码结构如下;</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── README.md</span><br><span class="line">├── object_storage</span><br><span class="line">├── poetry.lock</span><br><span class="line">├── poetry.toml</span><br><span class="line">├── pyproject.toml</span><br></pre></td></tr></table></figure>
+
+<p>object_storage 文件夹存放的项目或者包的源码, poetry 的配置文件也在根目录, 这个结构也是 poetry 自动生成的脚手架代码, 其中 object_storage 是创建项目是提供的名称.</p>
+<h2 id="2-2-Cython-编译"><a href="#2-2-Cython-编译" class="headerlink" title="2.2 Cython 编译"></a>2.2 Cython 编译</h2><p>cython 编译没有想象中复杂, 这里的编译代码和技巧也是从官方文档的<a target="_blank" rel="noopener" href="https://cython.readthedocs.io/en/latest/src/quickstart/build.html">快速上手文档</a>中了解的. 在根目录创建一个 build.py 文件, 内容如下:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> Cython.Build <span class="keyword">import</span> cythonize</span><br><span class="line"><span class="keyword">from</span> setuptools <span class="keyword">import</span> setup</span><br><span class="line"></span><br><span class="line">setup(</span><br><span class="line">  name=<span class="string">&#x27;object-storage&#x27;</span>,</span><br><span class="line">  ext_modules=cythonize(<span class="string">&#x27;object_storage/*.py&#x27;</span>),</span><br><span class="line">  script_args=[<span class="string">&#x27;build_ext&#x27;</span>, <span class="string">&#x27;--inplace&#x27;</span>],</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>[!tip]<br>其实如果不想和 poetry 集成, 只需要将将文件名称修改为 setup.py, 然后就可以通过 pip intall git+https 的方案是安装了</p>
+</blockquote>
+<h2 id="2-3-Poetry-集成"><a href="#2-3-Poetry-集成" class="headerlink" title="2.3 Poetry 集成"></a>2.3 Poetry 集成</h2><h3 id="增加编译依赖"><a href="#增加编译依赖" class="headerlink" title="增加编译依赖"></a>增加编译依赖</h3><p>修改 pyproject.toml 修改 build-system 内容如下:</p>
+<figure class="highlight toml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[build-system]</span></span><br><span class="line"><span class="attr">requires</span> = [<span class="string">&quot;poetry-core&quot;</span>, <span class="string">&quot;Cython&quot;</span>, <span class="string">&quot;setuptools&quot;</span>]</span><br><span class="line"><span class="attr">build-backend</span> = <span class="string">&quot;poetry.core.masonry.api&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>其中主要增加: Cython 和 setuptools 两个构建依赖</p>
+<h3 id="自定义-Poetry-构建"><a href="#自定义-Poetry-构建" class="headerlink" title="自定义 Poetry 构建"></a>自定义 Poetry 构建</h3><p>修改 pyproject.toml 修改 tool.poetry.build 内容如下:</p>
+<figure class="highlight toml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[tool.poetry.build]</span></span><br><span class="line"><span class="attr">script</span> = <span class="string">&quot;build.py&quot;</span></span><br><span class="line"><span class="attr">generate-setup-file</span> = <span class="literal">false</span></span><br><span class="line"><span class="section">[tool.poetry.group.dev.dependencies]</span></span><br><span class="line"><span class="attr">cython</span> = <span class="string">&quot;^3.0.10&quot;</span></span><br><span class="line"><span class="attr">setuptools</span> = <span class="string">&quot;^69.5.1&quot;</span></span><br><span class="line"><span class="attr">wheel</span> = <span class="string">&quot;^0.43.0&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>这里主要是让 poetry 构建的时候使用自定义的脚本, 因为要本地测试做在开发依赖中需要安装: cython&#x2F;setuptools&#x2F;wheel</p>
+<h3 id="Poetry-打包"><a href="#Poetry-打包" class="headerlink" title="Poetry 打包"></a>Poetry 打包</h3><p>修改 pyproject.toml 修改 tool.poetry 内容如下:</p>
+<figure class="highlight toml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[tool.poetry]</span></span><br><span class="line"><span class="attr">name</span> = <span class="string">&quot;object-storage&quot;</span></span><br><span class="line"><span class="attr">readme</span> = <span class="string">&#x27;README.md&#x27;</span></span><br><span class="line"><span class="attr">include</span> = [<span class="string">&quot;object_storage/**/*.so&quot;</span>]</span><br><span class="line"><span class="attr">exclude</span> = [<span class="string">&quot;object_storage/**/*.py&quot;</span>]</span><br></pre></td></tr></table></figure>
+
+<p>这里主要增加: include 和 exclude, 作用是排除.py 源码文件仅保留.so, 为什么这么做和本文的主题有关, 本文的主题是构建一个源码被保护的 python 包</p>
+<h2 id="2-4-测试和使用"><a href="#2-4-测试和使用" class="headerlink" title="2.4 测试和使用"></a>2.4 测试和使用</h2><p>本文中的代码已经开源到 github, 这里直接使用 git+https 的方式进行安装和测试</p>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(<span class="built_in">env</span>) ➜  pythontest pip install git+https://github.com/nnsay/object_storage.git@cython</span><br></pre></td></tr></table></figure>
+
+<h3 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h3><p>测试脚本与包的发布包的代码相关, 我的包是一个针对不同对象存储厂商服务的抽象包, 所以这里测试一下是不是可以调用生成 signedURL 即可.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(<span class="built_in">env</span>) ➜  pythontest python testoos.py</span><br><span class="line">download signed url: https://nnsay-cn.None.aliyuncs.com/hello.log?X-Amz-Algorithm=AWS4-HMAC-SHA256&amp;X-Amz-Credential=AKIAxxxxxxxxxxxxxxxx%2F20240428%2Fcn-northwest-1%2Fs3%2Faws4_request&amp;X-Amz-Date=20240428T024809Z&amp;X-Amz-Expires=3600&amp;X-Amz-SignedHeaders=host&amp;X-Amz-Signature=85a71f9c8c988cfda1786c1b77b4d7f428b948de30db13b31039a8fcc0cca15b</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>[!note]<br>请问忽略测试结果输出, 理论上只要可以调用成功, 就证明.so 的 python 包安装成功了</p>
+</blockquote>
+<h1 id="3-总结"><a href="#3-总结" class="headerlink" title="3. 总结"></a>3. 总结</h1><p>本文从简单介绍了 cython 和 poetry 对的集成, 但是更具有核心价值的是: 利用 cython 将代码 python 代码编译, 然后结合使用 poetry 将包发布和安装. 如果结合 docker, 该方式可以交付编译后的代码制品, 更好的保护源码.</p>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2024/04/12/json-stream/" class="article-next" title="json stream"><i class="icon-arrow-right"></i></a>
+
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "31c206ee926842a5b752cb083b69cd45",
+        distractionFreeMode: true,
+        title: "集成Poetry和Cython",
+        body: "https://nnsay.github.io/2024/04/28/poetry-and-cython/",
+        labels: ["研究","Code"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?1f97030bb3a44256d81e14447104bef8";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+    
+    
+      <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+      </script>
+        <!-- <script src='https://unpkg.com/mermaid@10/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script> -->
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

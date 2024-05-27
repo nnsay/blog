@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>openai chat stream | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="1. 介绍本教程使用 openai sdk 调用大模型并将大模型流式返回给前端, 以及前端如何承接这种数据流和处理.注意: 本文虽然使用了 openai sdk 但是大模型并不是 openai 的 chatgpt 系列模型, 而是 moonshot, 该模型出自月之暗面 openai 的 api 已经成为其他大模型服务标准, 经过简单的调研: 阿里云(qwen)和月之暗面(moonshot)都是支持使用 openai sdk 记性调用的, 比如: 文件操作(创建&amp;#x2F;列表&amp;#x2F;删除&amp;" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 6.3.0"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E4%BB%8B%E7%BB%8D"><span class="toc-text">1. 介绍</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E5%90%8E%E7%AB%AF%E8%AE%BE%E8%AE%A1%E5%92%8C%E5%AE%9E%E7%8E%B0"><span class="toc-text">2. 后端设计和实现</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E5%89%8D%E7%AB%AF%E8%AE%BE%E8%AE%A1%E5%92%8C%E5%AE%9E%E7%8E%B0"><span class="toc-text">3. 前端设计和实现</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E6%80%BB%E7%BB%93"><span class="toc-text">4. 总结</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            openai chat stream
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2024/05/27/openai-chat-stream/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2024-05-27T09:57:39.000Z" itemprop="datePublished">2024-05-27</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/Code/" rel="tag">Code</a>, <a class="article-tag-link" href="/tags/%E7%A0%94%E7%A9%B6/" rel="tag">研究</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h1 id="1-介绍"><a href="#1-介绍" class="headerlink" title="1. 介绍"></a>1. 介绍</h1><p>本教程使用 openai sdk 调用大模型并将大模型流式返回给前端, 以及前端如何承接这种数据流和处理.</p>
+<p>注意: 本文虽然使用了 openai sdk 但是大模型并不是 openai 的 chatgpt 系列模型, 而是 <a target="_blank" rel="noopener" href="https://platform.moonshot.cn/docs/intro#%E4%B8%BB%E8%A6%81%E6%A6%82%E5%BF%B5">moonshot</a>, 该模型出自月之暗面 openai 的 api 已经成为其他大模型服务标准, 经过简单的调研: 阿里云(qwen)和月之暗面(moonshot)都是支持使用 openai sdk 记性调用的, 比如: 文件操作(创建&#x2F;列表&#x2F;删除&#x2F;基本信息), 会话</p>
+<p>使用 openai sdk 调用其他模型也比较简单, 只需要按照各个厂商的文档, 基本只需要修改以下两项:</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; <span class="title class_">OpenAI</span> &#125; <span class="keyword">from</span> <span class="string">&quot;openai&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> client = <span class="keyword">new</span> <span class="title class_">OpenAI</span>(&#123;</span><br><span class="line">  <span class="attr">apiKey</span>: process.<span class="property">env</span>.<span class="property">MOONSHOT_API_KEY</span>,</span><br><span class="line">  <span class="attr">baseURL</span>: <span class="string">&quot;https://api.moonshot.cn/v1&quot;</span>,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<h1 id="2-后端设计和实现"><a href="#2-后端设计和实现" class="headerlink" title="2. 后端设计和实现"></a>2. 后端设计和实现</h1><p>通常不会在前端直接调用大模型 API, 因为 Key 有泄露的风险, 所以一般会在自己的后端服务中封装一下, 这里使用 nodejs 的后端服务框架 nest 实现, 因为逻辑简单这里不写 Controller 路由的, 仅实现 Service.</p>
+<p>要实现和大模型交互并返回结果核心的步骤有以下几个:</p>
+<ul>
+<li>初始化 openai sdk</li>
+<li>调用大模型</li>
+<li>返回大模型流式结果</li>
+</ul>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; <span class="title class_">Injectable</span>, <span class="title class_">Logger</span> &#125; <span class="keyword">from</span> <span class="string">&quot;@nestjs/common&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; <span class="title class_">ConfigService</span> &#125; <span class="keyword">from</span> <span class="string">&quot;@nestjs/config&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; <span class="title class_">OpenAI</span> &#125; <span class="keyword">from</span> <span class="string">&quot;openai&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> <span class="keyword">type</span> &#123; <span class="title class_">Response</span> &#125; <span class="keyword">from</span> <span class="string">&quot;express&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Injectable</span>()</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> <span class="title class_">LLMService</span> &#123;</span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">readonly</span> logger = <span class="keyword">new</span> <span class="title class_">Logger</span>(<span class="title class_">LLMService</span>.<span class="property">name</span>);</span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">readonly</span> <span class="attr">client</span>: <span class="title class_">OpenAI</span>;</span><br><span class="line"></span><br><span class="line">  <span class="title function_">constructor</span>(<span class="params"><span class="keyword">private</span> <span class="keyword">readonly</span> configService: ConfigService</span>) &#123;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">client</span> = <span class="keyword">new</span> <span class="title class_">OpenAI</span>(&#123;</span><br><span class="line">      <span class="attr">apiKey</span>: <span class="variable language_">this</span>.<span class="property">configService</span>.<span class="title function_">get</span>(<span class="string">&quot;MOONSHOT_API_KEY&quot;</span>),</span><br><span class="line">      <span class="attr">baseURL</span>: <span class="string">&quot;https://api.moonshot.cn/v1&quot;</span>,</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/**</span></span><br><span class="line"><span class="comment">   * 对话</span></span><br><span class="line"><span class="comment">   * <span class="doctag">@param</span> data 对话上下文参数</span></span><br><span class="line"><span class="comment">   * <span class="doctag">@returns</span> <span class="variable">stream</span></span></span><br><span class="line"><span class="comment">   */</span></span><br><span class="line">  <span class="keyword">async</span> <span class="title function_">chat</span>(<span class="params">data: &#123; question: <span class="built_in">string</span> &#125;, res: Response</span>) &#123;</span><br><span class="line">    <span class="variable language_">this</span>.<span class="property">logger</span>.<span class="title function_">log</span>(<span class="string">&quot;chat&quot;</span>);</span><br><span class="line">    <span class="keyword">const</span> chunkStream = <span class="keyword">await</span> <span class="variable language_">this</span>.<span class="property">client</span>.<span class="property">chat</span>.<span class="property">completions</span>.<span class="title function_">create</span>(&#123;</span><br><span class="line">      <span class="attr">model</span>: <span class="string">&quot;moonshot-v1-8k&quot;</span>,</span><br><span class="line">      <span class="attr">messages</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">role</span>: <span class="string">&quot;system&quot;</span>,</span><br><span class="line">          <span class="attr">content</span>: <span class="string">&quot;你是数学老师的智能助理, 可以帮助老师处理各类教学问题&quot;</span>,</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">role</span>: <span class="string">&quot;system&quot;</span>,</span><br><span class="line">          <span class="attr">content</span>: <span class="string">&quot;请准确精简回答, 请勿过度发散&quot;</span>,</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123; <span class="attr">role</span>: <span class="string">&quot;user&quot;</span>, <span class="attr">content</span>: data.<span class="property">question</span> &#125;,</span><br><span class="line">      ],</span><br><span class="line">      <span class="attr">stream</span>: <span class="literal">true</span>,</span><br><span class="line">    &#125;);</span><br><span class="line">    res.<span class="title function_">setHeader</span>(<span class="string">&quot;Content-Type&quot;</span>, <span class="string">&quot;text/event-stream&quot;</span>);</span><br><span class="line">    res.<span class="title function_">setHeader</span>(<span class="string">&quot;Cache-Control&quot;</span>, <span class="string">&quot;no-cache&quot;</span>);</span><br><span class="line">    res.<span class="title function_">setHeader</span>(<span class="string">&quot;Connection&quot;</span>, <span class="string">&quot;keep-alive&quot;</span>);</span><br><span class="line">    <span class="keyword">for</span> <span class="keyword">await</span> (<span class="keyword">const</span> chunk <span class="keyword">of</span> chunkStream) &#123;</span><br><span class="line">      <span class="comment">// <span class="doctag">NOTE:</span> Print the token usage when the chunk stop</span></span><br><span class="line">      <span class="keyword">if</span> (chunk.<span class="property">choices</span>[<span class="number">0</span>] &amp;&amp; chunk.<span class="property">choices</span>[<span class="number">0</span>][<span class="string">&quot;usage&quot;</span>]) &#123;</span><br><span class="line">        <span class="variable language_">this</span>.<span class="property">logger</span>.<span class="title function_">log</span>(<span class="string">`usage: <span class="subst">$&#123;<span class="built_in">JSON</span>.stringify(chunk.choices[<span class="number">0</span>][<span class="string">&quot;usage&quot;</span>])&#125;</span>`</span>);</span><br><span class="line">      &#125;</span><br><span class="line">      res.<span class="title function_">write</span>(chunk.<span class="property">choices</span>[<span class="number">0</span>]?.<span class="property">delta</span>?.<span class="property">content</span> || <span class="string">&quot;&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    res.<span class="title function_">end</span>();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在上面的代码中, 调用大模型传递参数: stream: true, 这样模型会实时吐出文本信息, 我们将每个 chunk 的文本信息直接通过 res.write 返回, 在最后使用 res.end 结束 HTTP 请求.</p>
+<p>在返回 chunk 流之前我们设置了 http 返回数据类型是: text&#x2F;event-stream, 这是一种后端推送数据技术, 和 websocket 不一样的只支持从服务器端推送到客户端.</p>
+<h1 id="3-前端设计和实现"><a href="#3-前端设计和实现" class="headerlink" title="3. 前端设计和实现"></a>3. 前端设计和实现</h1><p>前端采用 vue 来演示如何请求后端 API 并处理 text&#x2F;event-stream 数据.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line">&lt;template&gt;</span><br><span class="line">  &lt;h1&gt;获取EventSource流&lt;/h1&gt;</span><br><span class="line">  &lt;div class=&quot;container&quot;&gt;</span><br><span class="line">    &lt;input</span><br><span class="line">      type=&quot;text&quot;</span><br><span class="line">      name=&quot;question&quot;</span><br><span class="line">      placeholder=&quot;请详细介绍一下安妮海瑟薇&quot;</span><br><span class="line">      style=&quot;width: 100%;&quot;</span><br><span class="line">    /&gt;</span><br><span class="line">    &lt;button type=&quot;button&quot; @click=&quot;sendQuestion&quot; style=&quot;width: 10%;&quot;&gt;</span><br><span class="line">      提问</span><br><span class="line">    &lt;/button&gt;</span><br><span class="line">  &lt;/div&gt;</span><br><span class="line">  &lt;div class=&quot;container&quot;&gt;</span><br><span class="line">    &lt;textarea type=&quot;text&quot; name=&quot;answer&quot;&gt;&lt;/textarea&gt;</span><br><span class="line">  &lt;/div&gt;</span><br><span class="line">&lt;/template&gt;</span><br><span class="line"></span><br><span class="line">&lt;script setup lang=&quot;ts&quot;&gt;</span><br><span class="line">import axios from &quot;axios&quot;;</span><br><span class="line"></span><br><span class="line">const sendQuestion = async () =&gt; &#123;</span><br><span class="line">  const answer = document.querySelector&lt;HTMLTextAreaElement&gt;(</span><br><span class="line">    &#x27;textarea[name=&quot;answer&quot;]&#x27;</span><br><span class="line">  )!;</span><br><span class="line">  const questionInput = document.querySelector&lt;HTMLInputElement&gt;(</span><br><span class="line">    &#x27;input[name=&quot;question&quot;]&#x27;</span><br><span class="line">  )!;</span><br><span class="line">  const question = questionInput.value;</span><br><span class="line">  console.log(&#123; question &#125;);</span><br><span class="line"></span><br><span class="line">  const url = &quot;http://localhost:4020/chatbot/llm/chatstream&quot;;</span><br><span class="line">  const res = await fetch(url, &#123;</span><br><span class="line">    method: &quot;POST&quot;,</span><br><span class="line">    headers: &#123;</span><br><span class="line">      &quot;Content-Type&quot;: &quot;application/json&quot;, // 该header明确指定传递的参数是JSON格式, 去除后会导致后端参数验证失败</span><br><span class="line">      Accept: &quot;text/event-stream&quot;, // 可忽略</span><br><span class="line">    &#125;,</span><br><span class="line">    body: JSON.stringify(&#123; question &#125;),</span><br><span class="line">  &#125;);</span><br><span class="line">  const reader = res.body!.getReader();</span><br><span class="line">  const decoder = new TextDecoder();</span><br><span class="line"></span><br><span class="line">  while (true) &#123;</span><br><span class="line">    const &#123; done, value &#125; = await reader.read();</span><br><span class="line">    if (done) break;</span><br><span class="line">    const text = decoder.decode(value, &#123; stream: true &#125;);</span><br><span class="line">    answer.textContent += text;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line">&lt;/script&gt;</span><br><span class="line"></span><br><span class="line">&lt;style scoped&gt;</span><br><span class="line">.container &#123;</span><br><span class="line">  display: flex;</span><br><span class="line">  flex-direction: row;</span><br><span class="line">  align-items: stretch;</span><br><span class="line">  /* 默认值，可选 */</span><br><span class="line"></span><br><span class="line">  /* 可以根据需要调整高度 */</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">textarea &#123;</span><br><span class="line">  height: 300px;</span><br><span class="line">  flex: 1;</span><br><span class="line">  resize: none;</span><br><span class="line">  /* 可选，防止用户调整文本框大小 */</span><br><span class="line">  margin-bottom: 0px;</span><br><span class="line">  /* 可选，设置按钮和文本框之间的间距 */</span><br><span class="line">&#125;</span><br><span class="line">&lt;/style&gt;</span><br></pre></td></tr></table></figure>
+
+<p>在上面的代码中使用 fetch 请求后端接口, 当然也可以用别的, 前提是支持 ReadableStream, 经过代码实践 axios 是不可用的.</p>
+<h1 id="4-总结"><a href="#4-总结" class="headerlink" title="4. 总结"></a>4. 总结</h1><p>本文的代码虽然不复杂, 但是提供了两个开发技巧:</p>
+<ul>
+<li>openai 成为了后续大模型的 api 交互标准, 所以可以使用 openai 的 sdk 操作其他大模型</li>
+<li>可以使用 event-stream 流向客户端推送实时处理结果</li>
+</ul>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2024/04/28/poetry-and-cython/" class="article-next" title="集成Poetry和Cython"><i class="icon-arrow-right"></i></a>
+
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "31cf6af5e8bee2cfaa79ffe07de56600",
+        distractionFreeMode: true,
+        title: "openai chat stream",
+        body: "https://nnsay.github.io/2024/05/27/openai-chat-stream/",
+        labels: ["研究","Code"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?1f97030bb3a44256d81e14447104bef8";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+    
+    
+      <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+      </script>
+        <!-- <script src='https://unpkg.com/mermaid@10/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script> -->
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

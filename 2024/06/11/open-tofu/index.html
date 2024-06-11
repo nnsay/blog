@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>open tofu | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="1. 什么是 ToFutofu 是 terraform 的一个开源分支, 因为在 2023 年 8 月 10 日 terraform 的许可从 Mozilla Public License (v2.0) (the “MPL”)变为了 Business Source License (v1.1) (the “BUSL”), 新的许可对商业不友好, 所以社区创建了 tofu, 详情可以查看这里. 我们私有化部署也将采用 tofu 在 kubernetes 进行服务的部署和维护.本文不介绍太详细的理论" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 6.3.0"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E4%BB%80%E4%B9%88%E6%98%AF-ToFu"><span class="toc-text">1. 什么是 ToFu</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E5%B7%A5%E7%A8%8B%E5%AE%9E%E8%B7%B5"><span class="toc-text">2. 工程实践</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-%E7%8A%B6%E6%80%81"><span class="toc-text">2.1 状态</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-text">2.2 初始化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3-%E6%A8%A1%E5%9D%97%E5%8C%96%E5%AE%9E%E8%B7%B5"><span class="toc-text">2.3 模块化实践</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E7%BB%8F%E9%AA%8C%E6%8A%80%E5%B7%A7"><span class="toc-text">3. 经验技巧</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            open tofu
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2024/06/11/open-tofu/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2024-06-11T06:54:13.000Z" itemprop="datePublished">2024-06-11</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/DevOps/" rel="tag">DevOps</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h1 id="1-什么是-ToFu"><a href="#1-什么是-ToFu" class="headerlink" title="1. 什么是 ToFu"></a>1. 什么是 ToFu</h1><p>tofu 是 terraform 的一个开源分支, 因为在 2023 年 8 月 10 日 terraform 的许可从 Mozilla Public License (v2.0) (the “MPL”)变为了 Business Source License (v1.1) (the “BUSL”), 新的许可对商业不友好, 所以社区创建了 tofu, 详情可以查看<a target="_blank" rel="noopener" href="https://opentofu.org/manifesto/">这里</a>. 我们私有化部署也将采用 tofu 在 kubernetes 进行服务的部署和维护.</p>
+<p>本文不介绍太详细的理论知识, 要学习了解细节的同学可先查看<a target="_blank" rel="noopener" href="https://opentofu.org/docs/">官网文档</a>. 本文针对有 terraform 经验的同学, 学习替换 terraform 到 open tofu 如何进行开发, 涉及以下内容:</p>
+<ul>
+<li>主模块配置</li>
+<li>Provider</li>
+<li>状态存储</li>
+<li>模块化</li>
+<li>技巧</li>
+</ul>
+<h1 id="2-工程实践"><a href="#2-工程实践" class="headerlink" title="2. 工程实践"></a>2. 工程实践</h1><h2 id="2-1-状态"><a href="#2-1-状态" class="headerlink" title="2.1 状态"></a>2.1 状态</h2><p>要实现 IaC 状态文件肯定是不能缺少, 否则就不可能产生对比, 进而产生对资源的增删改操作, 最简单的状态是将状态文件存在本地, 但是本地容易丢失, 如果部署多个对象是本地就要维护个状态文件, 所以这里我们采用将状态文件保存在远程, tofu 支持 kubernetes 作为 backend 所以我们将状态文件实际上保存在了 kubernetes 中.</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">terraform</span> &#123;</span><br><span class="line"><span class="string">backend</span> <span class="string">&quot;kubernetes&quot;</span> &#123;</span><br><span class="line"><span class="string">secret_suffix</span> <span class="string">=</span> <span class="string">&quot;state&quot;</span></span><br><span class="line"><span class="string">namespace</span>     <span class="string">=</span> <span class="string">&quot;solarsketch-com&quot;</span></span><br><span class="line"><span class="string">config_path</span>   <span class="string">=</span> <span class="string">&quot;~/.kube/config&quot;</span></span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-2-初始化"><a href="#2-2-初始化" class="headerlink" title="2.2 初始化"></a>2.2 初始化</h2><p>因为要保存状态且我们的服务也需要一个命名空间, 这里约定我们的命名空间是: solarsketch-com, 所以提前创建好命名空间</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl create namespace solarsketch-com</span><br></pre></td></tr></table></figure>
+
+<p>在第一次或者一个新的环境中首先需要初始化, 初始化会下载 provider 和初始化状态, 这个操作可以频繁执行</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> TF_VAR_image_registry=$(jq -c -n --arg password <span class="variable">$GITHUB_TOKEN</span> <span class="string">&#x27;&#123;server:&quot;ghcr.io&quot;,username:&quot;cicd&quot;,password:$password,email:&quot;cicd@visualdynamics.cn&quot;&#125;&#x27;</span>)</span><br><span class="line"></span><br><span class="line">tofu init -var-file=<span class="string">&quot;local.tfvars&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>初始化之后就可以查看状态了, 按照如上的配置 kubernetes 中的状态是:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">kubectl get secret tfstate-default-state  -n solarsketch-com -o jsonpath=<span class="string">&#x27;&#123;.data.tfstate&#125;&#x27;</span> | <span class="built_in">base64</span> --decode | gunzip</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;version&quot;</span>: 4,</span><br><span class="line">  <span class="string">&quot;terraform_version&quot;</span>: <span class="string">&quot;1.7.2&quot;</span>,</span><br><span class="line">  <span class="string">&quot;serial&quot;</span>: 1,</span><br><span class="line">  <span class="string">&quot;lineage&quot;</span>: <span class="string">&quot;00318f9b-0f0e-2b46-8bea-a0e24978403d&quot;</span>,</span><br><span class="line">  <span class="string">&quot;outputs&quot;</span>: &#123;&#125;,</span><br><span class="line">  <span class="string">&quot;resources&quot;</span>: [],</span><br><span class="line">  <span class="string">&quot;check_results&quot;</span>: null</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-3-模块化实践"><a href="#2-3-模块化实践" class="headerlink" title="2.3 模块化实践"></a>2.3 模块化实践</h2><p>模块化是常见的抽象方式, 也便于并行开发和协作, 以下是模块化方式和文件命名都是按照个人实践经验总结, 开发者可参考这个结构和命名规范, 不做强制要求.</p>
+<ul>
+<li>root: 根模块就是在根目录配置了<code>terraform</code>的.tf 文件所在的地方<ul>
+<li>main.tf: 语义上的入口文件, 在其中配置<code>terraform</code>, 核心配置如下<ul>
+<li>backend: 定义状态文件保存位置</li>
+<li>required_providers: 定义 providers</li>
+</ul>
+</li>
+<li>output.tf: 定义主模块的输出</li>
+<li>variable.tf: 定义主模块变量</li>
+<li>*.tfvars: 定义变量, 例如 local.tfvars, 使用 -var-file 指定</li>
+<li>*.auto.tfvars: 自动加载变量</li>
+</ul>
+</li>
+<li>根目录中可以调用子模块<ul>
+<li>*-resource.tf: 定义模块下具体的资源</li>
+<li>output.tf: 定义主模块的输出</li>
+<li>variable.tf: 定义主模块变量</li>
+</ul>
+</li>
+</ul>
+<p>结合上面的模块化说明, 举例说明一个还有两个子模块的 main.tf 代码如下:</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">locals</span> &#123;</span><br><span class="line">  <span class="string">k8s_namespace</span>              <span class="string">=</span> <span class="string">&quot;solarsketch-com&quot;</span></span><br><span class="line">  <span class="string">image_registry_secret_name</span> <span class="string">=</span> <span class="string">&quot;regcred&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="string">terraform</span> &#123;</span><br><span class="line">  <span class="string">backend</span> <span class="string">&quot;kubernetes&quot;</span> &#123;</span><br><span class="line">    <span class="string">secret_suffix</span> <span class="string">=</span> <span class="string">&quot;state&quot;</span></span><br><span class="line">    <span class="string">namespace</span>     <span class="string">=</span> <span class="string">&quot;solarsketch-com&quot;</span></span><br><span class="line">    <span class="string">config_path</span>   <span class="string">=</span> <span class="string">&quot;~/.kube/config&quot;</span></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="string">required_providers</span> &#123;</span><br><span class="line">    <span class="string">kubernetes</span> <span class="string">=</span> &#123;</span><br><span class="line">      <span class="string">source</span>  <span class="string">=</span> <span class="string">&quot;hashicorp/kubernetes&quot;</span></span><br><span class="line">      <span class="string">version</span> <span class="string">=</span> <span class="string">&quot;2.30.0&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="string">provider</span> <span class="string">&quot;kubernetes&quot;</span> &#123;</span><br><span class="line">  <span class="string">config_path</span> <span class="string">=</span> <span class="string">&quot;~/.kube/config&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="string">module</span> <span class="string">&quot;common&quot;</span> &#123;</span><br><span class="line">  <span class="string">source</span> <span class="string">=</span> <span class="string">&quot;./common&quot;</span></span><br><span class="line"></span><br><span class="line">  <span class="string">namespace_name</span>             <span class="string">=</span> <span class="string">local.k8s_namespace</span></span><br><span class="line">  <span class="string">image_registry_secret_name</span> <span class="string">=</span> <span class="string">local.image_registry_secret_name</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="string">module</span> <span class="string">&quot;serving&quot;</span> &#123;</span><br><span class="line">  <span class="string">source</span> <span class="string">=</span> <span class="string">&quot;./serving&quot;</span></span><br><span class="line"></span><br><span class="line">  <span class="string">namespace_name</span> <span class="string">=</span> <span class="string">local.k8s_namespace</span></span><br><span class="line">  <span class="string">secret_name</span>    <span class="string">=</span> <span class="string">module.common.secret_name</span> <span class="comment"># 这里有隐式的模块依赖关系, serving依赖common</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="3-经验技巧"><a href="#3-经验技巧" class="headerlink" title="3. 经验技巧"></a>3. 经验技巧</h1><ul>
+<li><p>已经初始化了希望重新初始化重</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tofu init -reconfigure</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>定义复杂类型的变量</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">variable</span> <span class="string">&quot;image_registry&quot;</span> &#123;</span><br><span class="line"><span class="string">type</span> <span class="string">=</span> <span class="string">object(</span>&#123;</span><br><span class="line"><span class="string">server</span>   <span class="string">=</span> <span class="string">string</span></span><br><span class="line"><span class="string">username</span> <span class="string">=</span> <span class="string">string</span></span><br><span class="line"><span class="string">password</span> <span class="string">=</span> <span class="string">string</span></span><br><span class="line"><span class="string">email</span>    <span class="string">=</span> <span class="string">string</span></span><br><span class="line">&#125;<span class="string">)</span></span><br><span class="line"><span class="string">description</span> <span class="string">=</span> <span class="string">&quot;docker image registry credentials&quot;</span></span><br><span class="line"><span class="string">default</span> <span class="string">=</span> &#123;</span><br><span class="line"><span class="string">server</span>   <span class="string">=</span> <span class="string">&quot;ghcr.io&quot;</span></span><br><span class="line"><span class="string">username</span> <span class="string">=</span> <span class="string">&quot;cicd&quot;</span>,</span><br><span class="line"><span class="string">password</span> <span class="string">=</span> <span class="string">&quot;&quot;</span>,</span><br><span class="line"><span class="string">email</span>    <span class="string">=</span> <span class="string">&quot;docker@visualdynamics.cn&quot;</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="string">sensitive</span> <span class="string">=</span> <span class="literal">true</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>定义复杂类型的输出</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">output</span> <span class="string">&quot;secret_name&quot;</span> &#123;</span><br><span class="line"><span class="string">value</span> <span class="string">=</span> &#123;</span><br><span class="line"><span class="string">regcred</span>        <span class="string">=</span> <span class="string">kubernetes_secret.regcred.metadata</span>[<span class="number">0</span>]<span class="string">.name</span></span><br><span class="line"><span class="string">awslocal</span>       <span class="string">=</span> <span class="string">kubernetes_secret.awslocal.metadata</span>[<span class="number">0</span>]<span class="string">.name</span></span><br><span class="line"><span class="string">common</span>         <span class="string">=</span> <span class="string">kubernetes_secret.common.metadata</span>[<span class="number">0</span>]<span class="string">.name</span></span><br><span class="line"><span class="string">apikey</span>         <span class="string">=</span> <span class="string">kubernetes_secret.apikey.metadata</span>[<span class="number">0</span>]<span class="string">.name</span></span><br><span class="line"><span class="string">database</span>       <span class="string">=</span> <span class="string">kubernetes_secret.database.metadata</span>[<span class="number">0</span>]<span class="string">.name</span></span><br><span class="line"><span class="string">object_storage</span> <span class="string">=</span> <span class="string">kubernetes_secret.object_storage.metadata</span>[<span class="number">0</span>]<span class="string">.name</span></span><br><span class="line"><span class="string">bucket</span>         <span class="string">=</span> <span class="string">kubernetes_secret.bucket_name.metadata</span>[<span class="number">0</span>]<span class="string">.name</span></span><br><span class="line"><span class="string">lambda</span>         <span class="string">=</span> <span class="string">kubernetes_secret.lambda_name.metadata</span>[<span class="number">0</span>]<span class="string">.name</span></span><br><span class="line"><span class="string">service</span>        <span class="string">=</span> <span class="string">kubernetes_secret.service_name.metadata</span>[<span class="number">0</span>]<span class="string">.name</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="string">description</span> <span class="string">=</span> <span class="string">&quot;all secret name object which is used in container environment variables&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>查看执行计划</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tofu plan -var-file=<span class="string">&quot;local.tfvars&quot;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>跳过交互性批准</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tofu apply -auto-approve -var-file=<span class="string">&quot;local.tfvars&quot;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>自动加载变量</p>
+<ul>
+<li>使用 .auto.tfvars 结尾的文件定义变量</li>
+<li>使用<code>terraform.tfvars</code>文件定义变量</li>
+</ul>
+<blockquote>
+<p>[!NOTE]</p>
+<p>tofu 加载变量的顺序:</p>
+<ul>
+<li>Environment variables</li>
+<li>The <code>terraform.tfvars</code> file, if present.</li>
+<li>The <code>terraform.tfvars.json</code> file, if present.</li>
+<li>Any <code>*.auto.tfvars</code> or <code>*.auto.tfvars.json</code> files, processed in lexical order of their filenames.</li>
+<li>Any <code>-var</code> and <code>-var-file</code> options on the command line, in the order they are provided. (This includes variables set by an HCP Terraform workspace.)</li>
+</ul>
+</blockquote>
+</li>
+<li><p>强制解锁</p>
+<p>锁的 ID 一般会在提示信息中指出:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">╷</span><br><span class="line">│ Error: Error acquiring the state lock</span><br><span class="line">│</span><br><span class="line">│ Error message: the state is already locked by another tofu client</span><br><span class="line">│ Lock Info:</span><br><span class="line">│   ID:        81b32749-3f9d-eadc-bc16-c81278ca9414</span><br><span class="line">│   Path:</span><br><span class="line">│   Operation: OperationTypeApply</span><br><span class="line">│   Who:       wangjian@JimmyOfficeMacBookPro.local</span><br><span class="line">│   Version:   1.7.2</span><br><span class="line">│   Created:   2024-06-07 06:08:14.68546 +0000 UTC</span><br><span class="line">│   Info:</span><br><span class="line">│</span><br><span class="line">│</span><br><span class="line">│ OpenTofu acquires a state lock to protect the state from being written</span><br><span class="line">│ by multiple users at the same time. Please resolve the issue above and try</span><br><span class="line">│ again. For most commands, you can disable locking with the &quot;-lock=false&quot;</span><br><span class="line">│ flag, but this is not recommended.</span><br><span class="line">╵</span><br></pre></td></tr></table></figure>
+
+<p>通过下面的命令强制解锁:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tofu force-unlock 81b32749-3f9d-eadc-bc16-c81278ca9414</span><br></pre></td></tr></table></figure></li>
+</ul>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2024/05/27/openai-chat-stream/" class="article-next" title="openai chat stream"><i class="icon-arrow-right"></i></a>
+
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "b2d5c159d26675efd6602887f6714d99",
+        distractionFreeMode: true,
+        title: "open tofu",
+        body: "https://nnsay.github.io/2024/06/11/open-tofu/",
+        labels: ["DevOps"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?1f97030bb3a44256d81e14447104bef8";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+    
+    
+      <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+      </script>
+        <!-- <script src='https://unpkg.com/mermaid@10/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script> -->
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

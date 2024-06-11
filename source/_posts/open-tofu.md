@@ -28,7 +28,7 @@ tofu 是 terraform 的一个开源分支, 因为在 2023 年 8 月 10 日 terraf
 terraform {
 backend "kubernetes" {
 secret_suffix = "state"
-namespace     = "solarsketch-com"
+namespace     = "nnsay-com"
 config_path   = "~/.kube/config"
 }
 }
@@ -36,10 +36,10 @@ config_path   = "~/.kube/config"
 
 ## 2.2 初始化
 
-因为要保存状态且我们的服务也需要一个命名空间, 这里约定我们的命名空间是: solarsketch-com, 所以提前创建好命名空间
+因为要保存状态且我们的服务也需要一个命名空间, 这里约定我们的命名空间是: nnsay-com, 所以提前创建好命名空间
 
 ```bash
-kubectl create namespace solarsketch-com
+kubectl create namespace nnsay-com
 ```
 
 在第一次或者一个新的环境中首先需要初始化, 初始化会下载 provider 和初始化状态, 这个操作可以频繁执行
@@ -53,7 +53,7 @@ tofu init -var-file="local.tfvars"
 初始化之后就可以查看状态了, 按照如上的配置 kubernetes 中的状态是:
 
 ```bash
-kubectl get secret tfstate-default-state  -n solarsketch-com -o jsonpath='{.data.tfstate}' | base64 --decode | gunzip
+kubectl get secret tfstate-default-state  -n nnsay-com -o jsonpath='{.data.tfstate}' | base64 --decode | gunzip
 
 {
   "version": 4,
@@ -87,14 +87,14 @@ kubectl get secret tfstate-default-state  -n solarsketch-com -o jsonpath='{.data
 
 ```yaml
 locals {
-  k8s_namespace              = "solarsketch-com"
+  k8s_namespace              = "nnsay-com"
   image_registry_secret_name = "regcred"
 }
 
 terraform {
   backend "kubernetes" {
     secret_suffix = "state"
-    namespace     = "solarsketch-com"
+    namespace     = "nnsay-com"
     config_path   = "~/.kube/config"
   }
   required_providers {

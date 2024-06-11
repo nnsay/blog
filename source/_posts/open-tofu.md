@@ -45,7 +45,7 @@ kubectl create namespace nnsay-com
 在第一次或者一个新的环境中首先需要初始化, 初始化会下载 provider 和初始化状态, 这个操作可以频繁执行
 
 ```bash
-export TF_VAR_image_registry=$(jq -c -n --arg password $GITHUB_TOKEN '{server:"ghcr.io",username:"cicd",password:$password,email:"cicd@visualdynamics.cn"}')
+export TF_VAR_image_registry=$(jq -c -n --arg password $GITHUB_TOKEN '{server:"ghcr.io",username:"cicd",password:$password,email:"cicd@nnsay.cn"}')
 
 tofu init -var-file="local.tfvars"
 ```
@@ -147,7 +147,7 @@ module "serving" {
   server   = "ghcr.io"
   username = "cicd",
   password = "",
-  email    = "docker@visualdynamics.cn"
+  email    = "docker@nnsay.cn"
   }
   sensitive = true
   }

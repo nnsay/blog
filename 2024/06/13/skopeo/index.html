@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>skopeo | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="1. 介绍如今大部分服务的交付都是通过镜像进行交付的, 例如: 私有化部署场景, 需要将打好的镜像放到客户的 CR(容器镜像仓库)中, 或者我们有多个环境(dev, test, staging, prod)每个环境因为隔离都会保存一份镜像用于部署. 其实保存多分是避免不了的, 但是在每个 CR 的镜像需要构建就太浪费时间, 以多环境为例, 完全可以将 test 测试通过的镜像无需构建同步到到 staging 和 prod 进行使用即可.本文介绍一种针对容器镜像操作的工具: skopeo. 该工具" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 6.3.0"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E4%BB%8B%E7%BB%8D"><span class="toc-text">1. 介绍</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E5%AE%9E%E8%B7%B5"><span class="toc-text">2. 实践</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-%E5%AE%89%E8%A3%85"><span class="toc-text">2.1 安装</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-%E7%99%BB%E5%BD%95"><span class="toc-text">2.2 登录</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3-%E9%95%9C%E5%83%8F%E6%A3%80%E6%9F%A5"><span class="toc-text">2.3 镜像检查</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-4-%E6%9F%A5%E8%AF%A2%E9%95%9C%E5%83%8F-Tag"><span class="toc-text">2.4 查询镜像 Tag</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-5-%E6%8B%B7%E8%B4%9D"><span class="toc-text">2.5 拷贝</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-5-1-CR-%E5%88%B0-CR"><span class="toc-text">2.5.1 CR 到 CR</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-5-2-CR-%E5%88%B0-Local"><span class="toc-text">2.5.2 CR 到 Local</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-5-3-Local-%E5%88%B0-CR"><span class="toc-text">2.5.3 Local 到 CR</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-6-%E5%88%A0%E9%99%A4%E9%95%9C%E5%83%8F"><span class="toc-text">2.6 删除镜像</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-8-%E5%90%8C%E6%AD%A5"><span class="toc-text">2.8 同步</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-8-1-CR-%E5%88%B0-Local"><span class="toc-text">2.8.1 CR 到 Local</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-8-2-Local-%E5%88%B0-CR"><span class="toc-text">2.8.2 Local 到 CR</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-8-3-CR-%E5%88%B0-CR"><span class="toc-text">2.8.3 CR 到 CR</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E6%80%BB%E7%BB%93"><span class="toc-text">3. 总结</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            skopeo
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2024/06/13/skopeo/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2024-06-13T03:37:41.000Z" itemprop="datePublished">2024-06-13</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/DevOps/" rel="tag">DevOps</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h1 id="1-介绍"><a href="#1-介绍" class="headerlink" title="1. 介绍"></a>1. 介绍</h1><p>如今大部分服务的交付都是通过镜像进行交付的, 例如: 私有化部署场景, 需要将打好的镜像放到客户的 CR(容器镜像仓库)中, 或者我们有多个环境(dev, test, staging, prod)每个环境因为隔离都会保存一份镜像用于部署. 其实保存多分是避免不了的, 但是在每个 CR 的镜像需要构建就太浪费时间, 以多环境为例, 完全可以将 test 测试通过的镜像无需构建同步到到 staging 和 prod 进行使用即可.</p>
+<p>本文介绍一种针对容器镜像操作的工具: <a target="_blank" rel="noopener" href="https://github.com/containers/skopeo">skopeo</a>. 该工具可以是一个命令行工具, 可以操作容器镜像和镜像仓库, 当然上面场景提到的多个仓库同步镜像正式该工具的核心功能, 我们可以像拷贝文件一样将一个 CR 的镜像拷贝到另外一个 CR. 以下是 skopeo 的简介:</p>
+<p>Skopeo 支持 API V2 容器镜像注册表，如 docker.io 和 quay.io 注册表、私有注册表、本地目录以及本地 OCI 布局目录。Skopeo 可以执行以下操作：</p>
+<ul>
+<li>从各种存储机制中复制镜像。例如，你可以在不需要权限的情况下将镜像从一个注册表复制到另一个注册表。</li>
+<li>检查远程镜像，显示其属性，包括其层，而无需将镜像拉取到主机。</li>
+<li>从镜像仓库中删除镜像。</li>
+<li>将外部镜像仓库同步到内部注册表以用于隔离部署。</li>
+<li>在注册表要求时，skopeo 可以传递适当的凭据和证书进行身份验证。</li>
+</ul>
+<h1 id="2-实践"><a href="#2-实践" class="headerlink" title="2. 实践"></a>2. 实践</h1><h2 id="2-1-安装"><a href="#2-1-安装" class="headerlink" title="2.1 安装"></a>2.1 <a target="_blank" rel="noopener" href="https://github.com/containers/skopeo/blob/main/install.md">安装</a></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">brew install skopeo</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-2-登录"><a href="#2-2-登录" class="headerlink" title="2.2 登录"></a>2.2 登录</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker hub</span></span><br><span class="line">~ skopeo login --username=nnsay docker.io</span><br><span class="line">Password:</span><br><span class="line">Login Succeeded!</span><br><span class="line"><span class="comment"># github cr</span></span><br><span class="line">~ skopeo login --username=nnsay ghcr.io</span><br><span class="line">Password:</span><br><span class="line">Login Succeeded!</span><br><span class="line"><span class="comment"># quay</span></span><br><span class="line">~ skopeo login --username=nnsay quay.io</span><br><span class="line">Password:</span><br><span class="line">Login Succeeded!</span><br></pre></td></tr></table></figure>
+
+<p>查看当前登录的 CR 的用户:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">~ skopeo login --get-login docker.io</span><br><span class="line">nnsay</span><br><span class="line">~ skopeo login --get-login ghcr.io</span><br><span class="line">nnsay</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-3-镜像检查"><a href="#2-3-镜像检查" class="headerlink" title="2.3 镜像检查"></a>2.3 镜像检查</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">skopeo inspect docker://docker.io/nnsay/rest-nodejs</span><br><span class="line">skopeo inspect docker://docker.io/nnsay/rest-nodejs:latest</span><br></pre></td></tr></table></figure>
+
+<p>检查结果:</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;Name&quot;</span><span class="punctuation">:</span> <span class="string">&quot;docker.io/nnsay/rest-nodejs&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;Digest&quot;</span><span class="punctuation">:</span> <span class="string">&quot;sha256:894e14608ea6748686f76f1a389e4be4eaff83363cf8d6720ab60a007e6881d8&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;RepoTags&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">&quot;01eb900&quot;</span><span class="punctuation">,</span> <span class="string">&quot;b4dc8c9-dirty&quot;</span><span class="punctuation">,</span> <span class="string">&quot;b54e9e6&quot;</span><span class="punctuation">,</span> <span class="string">&quot;latest&quot;</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;Created&quot;</span><span class="punctuation">:</span> <span class="string">&quot;2024-05-08T10:32:19.570088304Z&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;DockerVersion&quot;</span><span class="punctuation">:</span> <span class="string">&quot;&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;Labels&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;Architecture&quot;</span><span class="punctuation">:</span> <span class="string">&quot;arm64&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;Os&quot;</span><span class="punctuation">:</span> <span class="string">&quot;linux&quot;</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;Layers&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="string">&quot;sha256:bca4290a96390d7a6fc6f2f9929370d06f8dfcacba591c76e3d5c5044e7f420c&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="string">&quot;sha256:6f96711d72f7a535656ea52a3109d569cde16c6d218d52e04957afd2402afa0e&quot;</span></span><br><span class="line">  <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;LayersData&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;MIMEType&quot;</span><span class="punctuation">:</span> <span class="string">&quot;application/vnd.docker.image.rootfs.diff.tar.gzip&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;Digest&quot;</span><span class="punctuation">:</span> <span class="string">&quot;sha256:bca4290a96390d7a6fc6f2f9929370d06f8dfcacba591c76e3d5c5044e7f420c&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;Size&quot;</span><span class="punctuation">:</span> <span class="number">3347715</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;Annotations&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="punctuation">&#123;</span></span><br><span class="line">      <span class="attr">&quot;MIMEType&quot;</span><span class="punctuation">:</span> <span class="string">&quot;application/vnd.docker.image.rootfs.diff.tar.gzip&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;Digest&quot;</span><span class="punctuation">:</span> <span class="string">&quot;sha256:6f96711d72f7a535656ea52a3109d569cde16c6d218d52e04957afd2402afa0e&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;Size&quot;</span><span class="punctuation">:</span> <span class="number">62254</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">&quot;Annotations&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line">  <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;Env&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span></span><br><span class="line">    <span class="string">&quot;PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="string">&quot;NODE_VERSION=18.20.2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="string">&quot;YARN_VERSION=1.22.19&quot;</span></span><br><span class="line">  <span class="punctuation">]</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>[!important]<br>inspect 命令重镜像地址是否有 tag 的唯一区别是 Digest 结果不一样</p>
+</blockquote>
+<h2 id="2-4-查询镜像-Tag"><a href="#2-4-查询镜像-Tag" class="headerlink" title="2.4 查询镜像 Tag"></a>2.4 查询镜像 Tag</h2><p>inspect 命令可以检查镜像 tag, 如上面结果中的<code>RepoTags</code>, 也可以直接获取 tag:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">~ skopeo list-tags docker://docker.io/nnsay/rest</span><br><span class="line">&#123;</span><br><span class="line">    <span class="string">&quot;Repository&quot;</span>: <span class="string">&quot;docker.io/nnsay/rest&quot;</span>,</span><br><span class="line">    <span class="string">&quot;Tags&quot;</span>: [</span><br><span class="line">        <span class="string">&quot;01eb900&quot;</span>,</span><br><span class="line">        <span class="string">&quot;b4dc8c9-dirty&quot;</span>,</span><br><span class="line">        <span class="string">&quot;b54e9e6&quot;</span>,</span><br><span class="line">        <span class="string">&quot;latest&quot;</span></span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-5-拷贝"><a href="#2-5-拷贝" class="headerlink" title="2.5 拷贝"></a>2.5 拷贝</h2><p>目前支持的 CR 有: Quay, Docker Hub, OpenShift, GCR, Artifactory…</p>
+<h3 id="2-5-1-CR-到-CR"><a href="#2-5-1-CR-到-CR" class="headerlink" title="2.5.1 CR 到 CR"></a>2.5.1 CR 到 CR</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># docker.io -&gt; quay.io</span></span><br><span class="line">skopeo copy --multi-arch=all docker://docker.io/nnsay/rest-nodejs:latest docker://quay.io/nnsay/rest-nodejs:latest</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>[!note]</p>
+<ul>
+<li>拷贝时 quay.io 不需要提前创建镜像仓库</li>
+<li>拷贝是可以通过<code>multi-arch</code>指定平台: system, all, or index-only</li>
+</ul>
+</blockquote>
+<h3 id="2-5-2-CR-到-Local"><a href="#2-5-2-CR-到-Local" class="headerlink" title="2.5.2 CR 到 Local"></a>2.5.2 CR 到 Local</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> rest-nodejs</span><br><span class="line">skopeo copy docker://docker.io/nnsay/rest-nodejs:latest <span class="built_in">dir</span>:./rest-nodejs</span><br></pre></td></tr></table></figure>
+
+<p>查看拷贝到本地的镜像文件:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 目录结构</span></span><br><span class="line">➜  rest-nodejs tree .</span><br><span class="line">.</span><br><span class="line">├── 505c806c8fed7a9d50910aef54f57a067bb1703f868e5e851e85664f96b671ab</span><br><span class="line">├── ...</span><br><span class="line">├── ed2e2467392d69d8fcbdc4cf428a936bd933c0546a89f34afd9afe2a150b4f73</span><br><span class="line">├── manifest.json</span><br><span class="line">└── version</span><br><span class="line"></span><br><span class="line"><span class="comment"># 版本</span></span><br><span class="line">➜  rest-nodejs <span class="built_in">cat</span> version</span><br><span class="line">Directory Transport Version: 1.1</span><br><span class="line"></span><br><span class="line"><span class="comment"># manifest</span></span><br><span class="line">➜  rest-nodejs <span class="built_in">cat</span> manifest.json</span><br><span class="line">&#123;</span><br><span class="line">   <span class="string">&quot;schemaVersion&quot;</span>: 2,</span><br><span class="line">   <span class="string">&quot;mediaType&quot;</span>: <span class="string">&quot;application/vnd.docker.distribution.manifest.v2+json&quot;</span>,</span><br><span class="line">   <span class="string">&quot;config&quot;</span>: &#123;</span><br><span class="line">      <span class="string">&quot;mediaType&quot;</span>: <span class="string">&quot;application/vnd.docker.container.image.v1+json&quot;</span>,</span><br><span class="line">      <span class="string">&quot;size&quot;</span>: 7690,</span><br><span class="line">      <span class="string">&quot;digest&quot;</span>: <span class="string">&quot;sha256:505c806c8fed7a9d50910aef54f57a067bb1703f868e5e851e85664f96b671ab&quot;</span></span><br><span class="line">   &#125;,</span><br><span class="line">   <span class="string">&quot;layers&quot;</span>: [</span><br><span class="line">      &#123;</span><br><span class="line">         <span class="string">&quot;mediaType&quot;</span>: <span class="string">&quot;application/vnd.docker.image.rootfs.diff.tar.gzip&quot;</span>,</span><br><span class="line">         <span class="string">&quot;size&quot;</span>: 3347715,</span><br><span class="line">         <span class="string">&quot;digest&quot;</span>: <span class="string">&quot;sha256:bca4290a96390d7a6fc6f2f9929370d06f8dfcacba591c76e3d5c5044e7f420c&quot;</span></span><br><span class="line">      &#125;,</span><br><span class="line">      ...</span><br><span class="line">      &#123;</span><br><span class="line">         <span class="string">&quot;mediaType&quot;</span>: <span class="string">&quot;application/vnd.docker.image.rootfs.diff.tar.gzip&quot;</span>,</span><br><span class="line">         <span class="string">&quot;size&quot;</span>: 62254,</span><br><span class="line">         <span class="string">&quot;digest&quot;</span>: <span class="string">&quot;sha256:6f96711d72f7a535656ea52a3109d569cde16c6d218d52e04957afd2402afa0e&quot;</span></span><br><span class="line">      &#125;</span><br><span class="line">   ]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># 层文件类型: JSON和gzip(也可以从manifest.json中知晓)</span></span><br><span class="line">➜  rest-nodejs file 505c806c8fed7a9d50910aef54f57a067bb1703f868e5e851e85664f96b671ab</span><br><span class="line">505c806c8fed7a9d50910aef54f57a067bb1703f868e5e851e85664f96b671ab: JSON data</span><br><span class="line">➜  rest-nodejs file 6f96711d72f7a535656ea52a3109d569cde16c6d218d52e04957afd2402afa0e</span><br><span class="line">6f96711d72f7a535656ea52a3109d569cde16c6d218d52e04957afd2402afa0e: gzip compressed data, original size modulo 2^32 18636</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-5-3-Local-到-CR"><a href="#2-5-3-Local-到-CR" class="headerlink" title="2.5.3 Local 到 CR"></a>2.5.3 Local 到 CR</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">skopeo copy <span class="built_in">dir</span>:./rest-nodejs docker://docker.io/nnsay/rest-nodejs:copytest</span><br><span class="line">Getting image <span class="built_in">source</span> signatures</span><br><span class="line">Copying blob bca4290a9639 skipped: already exists</span><br><span class="line">Copying blob ed2e2467392d skipped: already exists</span><br><span class="line">Copying blob 8409080807cd skipped: already exists</span><br><span class="line">Copying blob 8fabd45d2d86 skipped: already exists</span><br><span class="line">Copying blob 58ae15b6393a skipped: already exists</span><br><span class="line">Copying blob 9cfe8bf71bbe skipped: already exists</span><br><span class="line">Copying blob b1befdbe30a8 skipped: already exists</span><br><span class="line">Copying blob eb547ff4872f skipped: already exists</span><br><span class="line">Copying blob 6f96711d72f7 skipped: already exists</span><br><span class="line">Copying config 505c806c8f <span class="keyword">done</span>   |</span><br><span class="line">Writing manifest to image destination</span><br></pre></td></tr></table></figure>
+
+<p>上面的例子虽然层都存在了, 但是还是新增了一个 tag, 去 docker hub 可以查看到:</p>
+<img src="https://img.picgo.net/2024/06/12/image-20240612143650799fa26ab665abcf1c2.png" alt="image-20240612143650799" style="zoom:50%;" />
+
+<h2 id="2-6-删除镜像"><a href="#2-6-删除镜像" class="headerlink" title="2.6 删除镜像"></a>2.6 删除镜像</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">skopeo delete docker://quay.io/nnsay/rest-nodejs</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>[!note]</p>
+<ul>
+<li>不提供 tag 是 tag 是 latest</li>
+<li>如果镜像有依赖删除不掉</li>
+</ul>
+</blockquote>
+<h2 id="2-8-同步"><a href="#2-8-同步" class="headerlink" title="2.8 同步"></a>2.8 同步</h2><h3 id="2-8-1-CR-到-Local"><a href="#2-8-1-CR-到-Local" class="headerlink" title="2.8.1 CR 到 Local"></a>2.8.1 CR 到 Local</h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">skopeo sync --src docker --dest dir --scoped docker.io/nnsay/rest-nodejs ./rest-nodejs</span><br></pre></td></tr></table></figure>
+
+<p><code>sync</code>比<code>copy</code>的优势是批量, 可以将一个镜像的所有的 tag 都同步目标. 拷贝后的文件目录树如下:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">├── docker.io</span><br><span class="line">│   └── nnsay</span><br><span class="line">│       ├── rest-nodejs:01eb900</span><br><span class="line">│       │   ├── 5730c637dadbf0ad9b9e4903c62e30d9f239a79626ebec5cfaeba38861638678</span><br><span class="line">│       │   ├── 6a75fad5c66c981a46081a9f10761c4066b3bc553eb18ce4f298d45aed2f1991</span><br><span class="line">│       │   ├── 6f5a403356d97a11bfa5349e025293b8d634ff7d6e0ebc5df63351e87cd7f5cc</span><br><span class="line">│       │   ├── 7049a133eb54d652049fa44657d24cef7298dc371ffab6e27f5cd5e53e62159f</span><br><span class="line">│       │   ├── 70c397145e382faacb37dd6122975c7de70024f24dc832853bbd7fd96d916170</span><br><span class="line">│       │   ├── 717ea7c8282c75dcb840c9de1b608545a8b9464ef255885f361b2b2ec4b7ee7c</span><br><span class="line">│       │   ├── 7f16613f31035b565d5cf89e9af3fa8890136e7799bddca2a06f6f432e52709e</span><br><span class="line">│       │   ├── 90577567f13c6046278cbfa4a557cb5a19ed5f9c281ab540e84ddd8f74c71922</span><br><span class="line">│       │   ├── c303524923177661067f7eb378c3dd5277088c2676ebd1cd78e68397bb80fdbf</span><br><span class="line">│       │   ├── eb7895eb72c1a145d166631d5a81c61bffd747783c52e8a1de9fa0e7d5871817</span><br><span class="line">│       │   ├── manifest.json</span><br><span class="line">│       │   └── version</span><br><span class="line">│       └── rest-nodejs:latest</span><br><span class="line">│           ├── 505c806c8fed7a9d50910aef54f57a067bb1703f868e5e851e85664f96b671ab</span><br><span class="line">│           ├── 58ae15b6393a39efbae7529155a59479af3f7ed318524c6eda40e7dac0fded7e</span><br><span class="line">│           ├── 6f96711d72f7a535656ea52a3109d569cde16c6d218d52e04957afd2402afa0e</span><br><span class="line">│           ├── 8409080807cdb96ff66696e7ee976364d3ecbf0e297a79e472460ad4f983aeff</span><br><span class="line">│           ├── 8fabd45d2d86badb5acb8689ed8665436d31b2b00e40e51a003960507c234488</span><br><span class="line">│           ├── 9cfe8bf71bbea49c32593429360ce2e678838611977df04274ddef5426551048</span><br><span class="line">│           ├── b1befdbe30a812a37ada093c2f0b39b47089dd4a7ee1497aaf9c24aca0e008af</span><br><span class="line">│           ├── bca4290a96390d7a6fc6f2f9929370d06f8dfcacba591c76e3d5c5044e7f420c</span><br><span class="line">│           ├── eb547ff4872f702330c428133d4056ed3cf33d305cbde77fb0a472790894e332</span><br><span class="line">│           ├── ed2e2467392d69d8fcbdc4cf428a936bd933c0546a89f34afd9afe2a150b4f73</span><br><span class="line">│           ├── manifest.json</span><br><span class="line">│           └── version</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-8-2-Local-到-CR"><a href="#2-8-2-Local-到-CR" class="headerlink" title="2.8.2 Local 到 CR"></a>2.8.2 Local 到 CR</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cr 到 local</span></span><br><span class="line">skopeo <span class="built_in">sync</span> --src docker --dest <span class="built_in">dir</span> --scoped docker.io/nnsay/rest ./rest</span><br><span class="line"><span class="comment"># local 到 cr</span></span><br><span class="line">skopeo <span class="built_in">sync</span> --src <span class="built_in">dir</span> --dest docker ./rest quay.io/nnsay/rest</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>[!warning]</p>
+<ul>
+<li><p>cr 同步到 local, 然后利用同步的结果重新返回同步到 cr 报错(skopeo sync –src dir –dest docker .&#x2F;rest docker.io&#x2F;nnsay&#x2F;rest):</p>
+<p>FATA[0008] Error copying ref “dir:rest&#x2F;docker.io&#x2F;nnsay&#x2F;rest:latest”: trying to reuse blob sha256:c303524923177661067f7eb378c3dd5277088c2676ebd1cd78e68397bb80fdbf at destination: checking whether a blob sha256:c303524923177661067f7eb378c3dd5277088c2676ebd1cd78e68397bb80fdbf exists in docker.io&#x2F;nnsay&#x2F;rest&#x2F;rest: requested access to the resource is denied</p>
+</li>
+<li><p>cr 同步到 local, 再次执行报错(skopeo sync –src docker –dest dir –scoped docker.io&#x2F;nnsay&#x2F;rest .&#x2F;rest):</p>
+<p>FATA[0002] Refusing to overwrite destination directory “rest&#x2F;docker.io&#x2F;nnsay&#x2F;rest:latest</p>
+</li>
+<li><p>local 同步到另一个 CR 成功(skopeo sync –src dir –dest docker .&#x2F;rest quay.io&#x2F;nnsay&#x2F;rest)</p>
+</li>
+</ul>
+</blockquote>
+<p>建议在具体使用 sync 保持同步目录干净, 且不要试图覆盖, 不管是 cr 到 local 还是 local 到 cr</p>
+<h3 id="2-8-3-CR-到-CR"><a href="#2-8-3-CR-到-CR" class="headerlink" title="2.8.3 CR 到 CR"></a>2.8.3 CR 到 CR</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">~ skopeo <span class="built_in">sync</span> --src docker --dest docker docker.io/nnsay/aliyundrive-webdav quay.io/nnsay/aliyundrive-webdav</span><br><span class="line">INFO[0000] Tag presence check                            imagename=docker.io/nnsay/aliyundrive-webdav tagged=<span class="literal">false</span></span><br><span class="line">INFO[0000] Getting tags                                  image=docker.io/nnsay/aliyundrive-webdav</span><br><span class="line">INFO[0002] Copying image ref 1/1                         from=<span class="string">&quot;docker://nnsay/aliyundrive-webdav:latest&quot;</span> to=<span class="string">&quot;docker://quay.io/nnsay/aliyundrive-webdav/aliyundrive-webdav:latest&quot;</span></span><br><span class="line">Getting image <span class="built_in">source</span> signatures</span><br><span class="line">Copying blob 9d6aed3dd5e1 <span class="keyword">done</span>   |</span><br><span class="line">Copying blob 213ec9aee27d <span class="keyword">done</span>   |</span><br><span class="line">Copying blob 114a5ea8ad83 <span class="keyword">done</span>   |</span><br><span class="line">Copying blob a661876d736d <span class="keyword">done</span>   |</span><br><span class="line">Copying blob 4f4fb700ef54 <span class="keyword">done</span>   |</span><br><span class="line">Copying blob 988498f5135b <span class="keyword">done</span>   |</span><br><span class="line">Copying config 847ce028e6 <span class="keyword">done</span>   |</span><br><span class="line">Writing manifest to image destination</span><br><span class="line">INFO[0017] Synced 1 images from 1 sources</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>[!warning]<br>如果镜像是多平台同步且和本地系统默认平台不一致则报错(skopeo copy docker:&#x2F;&#x2F;docker.io&#x2F;nnsay&#x2F;rest-nodejs:latest docker:&#x2F;&#x2F;quay.io&#x2F;nnsay&#x2F;rest-nodejs:latest):</p>
+<p>ERRO[0002] Couldn’t get cpu architecture: getCPUInfo for OS darwin not implemented</p>
+<p>FATA[0002] choosing an image from manifest list docker:&#x2F;&#x2F;nnsay&#x2F;rest-nodejs:latest: no image found in image index for architecture arm64, variant “”, OS darwin</p>
+<p>此时, 建议使用 copy: skopeo copy –multi-arch&#x3D;all docker:&#x2F;&#x2F;docker.io&#x2F;nnsay&#x2F;rest-nodejs:latest docker:&#x2F;&#x2F;quay.io&#x2F;nnsay&#x2F;rest-nodejs:latest</p>
+</blockquote>
+<h1 id="3-总结"><a href="#3-总结" class="headerlink" title="3. 总结"></a>3. 总结</h1><p>skopeo 在多个 cr 中操作镜像还是比较方便的: 针对私有化部署场景, 如果是内网 cr, 则可以使用 copy 或者 sync 命令将镜像保存在本地, 然后再从本地转存到内网 cr, 但是要特别注意本地文件目录要干净且不要覆盖; 如果 cr 可访问则可以直接使用 cr 到 cr 的方式同步镜像.</p>
+<p>一般情况下我们会有的放矢的同步镜像, 中小型的项目镜像也不会太多, 即使很多也可以写 Shell 脚本, 所以综合考虑个人觉得 copy 比 sync 更好用, 因为语法上也更简洁和清晰, 限制和错误也更少.</p>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2024/06/11/open-tofu/" class="article-next" title="open tofu"><i class="icon-arrow-right"></i></a>
+
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "61a1dbbae3864c81dc9f841e23a94dd3",
+        distractionFreeMode: true,
+        title: "skopeo",
+        body: "https://nnsay.github.io/2024/06/13/skopeo/",
+        labels: ["DevOps"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?1f97030bb3a44256d81e14447104bef8";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+    
+    
+      <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+      </script>
+        <!-- <script src='https://unpkg.com/mermaid@10/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script> -->
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

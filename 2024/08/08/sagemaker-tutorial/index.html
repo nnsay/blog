@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>Sagemaker上手练习 | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="0. 基本介绍本文是我作为机器学习小白的入门教程, 主要介绍 SageMaker 的基本使用, 以及一些最佳实践. 在本文中你可以了解到以下知识点:SageMaker 介绍使用 CDK 搭建基础设施SageMaker Studio 的使用和测试本地开发最佳实践使用 sagemaker 训练出来一个线性回归的模型 demo1. SageMaker 介绍1.1 基本介绍Amazon SageMaker 是一项完全托管的机器学习 (ML) 服务。借助 SageMaker，数据科学家和开发人员可以快速、" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 6.3.0"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#0-%E5%9F%BA%E6%9C%AC%E4%BB%8B%E7%BB%8D"><span class="toc-text">0. 基本介绍</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1-SageMaker-%E4%BB%8B%E7%BB%8D"><span class="toc-text">1. SageMaker 介绍</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-1-%E5%9F%BA%E6%9C%AC%E4%BB%8B%E7%BB%8D"><span class="toc-text">1.1 基本介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-2-%E4%BD%BF%E7%94%A8%E6%B5%81%E7%A8%8B"><span class="toc-text">1.2 使用流程</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-3-%E8%AE%BE%E7%BD%AE"><span class="toc-text">1.3 设置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-4-IaC"><span class="toc-text">1.4 IaC</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E5%9F%BA%E7%A1%80%E8%AE%BE%E6%96%BD%E6%90%AD%E5%BB%BA"><span class="toc-text">2. 基础设施搭建</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-%E5%88%9B%E5%BB%BA-SageMaker"><span class="toc-text">2.1 创建 SageMaker</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-SageMaker-Studio"><span class="toc-text">2.2 SageMaker Studio</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5"><span class="toc-text">3 最佳实践</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#3-1-%E5%A6%82%E4%BD%95%E4%BB%8E%E7%8E%B0%E6%9C%89%E7%9A%84-DB-x2F-S3-%E4%B8%AD%E5%88%B6%E9%80%A0%E8%AE%AD%E7%BB%83%E6%95%B0%E6%8D%AE%E3%80%81%E5%AD%98%E5%82%A8"><span class="toc-text">3.1 如何从现有的 DB&#x2F;S3 中制造训练数据、存储?</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-2-jupyter-notebook-%E6%A8%A1%E5%9E%8B%E4%BB%A3%E7%A0%81-repo-%E5%A6%82%E4%BD%95%E7%AE%A1%E7%90%86"><span class="toc-text">3.2 jupyter notebook 模型代码 repo 如何管理?</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E6%A1%A3"><span class="toc-text">参考文档</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            Sagemaker上手练习
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2024/08/08/sagemaker-tutorial/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2024-08-08T10:18:23.000Z" itemprop="datePublished">2024-08-08</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/Code/" rel="tag">Code</a>, <a class="article-tag-link" href="/tags/%E7%A0%94%E7%A9%B6/" rel="tag">研究</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h1 id="0-基本介绍"><a href="#0-基本介绍" class="headerlink" title="0. 基本介绍"></a>0. 基本介绍</h1><p>本文是我作为机器学习小白的入门教程, 主要介绍 SageMaker 的基本使用, 以及一些最佳实践. 在本文中你可以了解到以下知识点:</p>
+<ul>
+<li>SageMaker 介绍</li>
+<li>使用 CDK 搭建基础设施</li>
+<li>SageMaker Studio 的使用和测试</li>
+<li>本地开发最佳实践</li>
+<li>使用 sagemaker 训练出来一个线性回归的模型 demo</li>
+</ul>
+<h1 id="1-SageMaker-介绍"><a href="#1-SageMaker-介绍" class="headerlink" title="1. SageMaker 介绍"></a>1. <a target="_blank" rel="noopener" href="https://docs.amazonaws.cn/sagemaker/latest/dg/whatis.html">SageMaker 介绍</a></h1><h2 id="1-1-基本介绍"><a href="#1-1-基本介绍" class="headerlink" title="1.1 基本介绍"></a>1.1 基本介绍</h2><p>Amazon SageMaker 是一项完全托管的机器学习 (ML) 服务。借助 SageMaker，数据科学家和开发人员可以快速、自信地构建、训练机器学习模型，并将其部署到生产就绪的托管环境中。它为运行机器学习工作流程提供了用户界面体验，使 SageMaker 机器学习工具可在多个集成开发环境 (IDE) 中使用。</p>
+<h2 id="1-2-使用流程"><a href="#1-2-使用流程" class="headerlink" title="1.2 使用流程"></a>1.2 使用流程</h2><p>在机器学习中，你<em>教</em>计算机做出预测或推断。首先，您使用一种算法和示例数据来训练模型。然后，您将模型集成到应用程序中，以实时和大规模地生成推论</p>
+<ul>
+<li>生成示例数据<ul>
+<li>获取数据</li>
+<li>清理数据</li>
+<li>准备或转化数据</li>
+</ul>
+</li>
+<li>训练模型<ul>
+<li>训练模型</li>
+<li>评估模型</li>
+</ul>
+</li>
+<li>部署模型</li>
+</ul>
+<img src="https://docs.amazonaws.cn/sagemaker/latest/dg/images/ml-concepts-10.png" alt="机器学习模型创建的三个阶段，包括生成示例数据、训练模型和部署模型。" style="zoom: 80%;" />
+
+<h2 id="1-3-设置"><a href="#1-3-设置" class="headerlink" title="1.3 设置"></a>1.3 <a target="_blank" rel="noopener" href="https://docs.amazonaws.cn/sagemaker/latest/dg/gs.html">设置</a></h2><ul>
+<li>**<a target="_blank" rel="noopener" href="https://docs.amazonaws.cn/sagemaker/latest/dg/onboard-quick-start.html">快速设置</a>**：对于使用默认设置的个人用户来说，设置速度最快。</li>
+<li>**<a target="_blank" rel="noopener" href="https://docs.amazonaws.cn/sagemaker/latest/dg/onboard-custom.html">自定义设置</a>**：适用于企业 Machine Learning (ML) 管理员的高级设置。机器学习管理员为多个用户或组织 SageMaker 进行设置的理想选择。</li>
+</ul>
+<h2 id="1-4-IaC"><a href="#1-4-IaC" class="headerlink" title="1.4 IaC"></a>1.4 IaC</h2><p>aws sagemaker 没有 L2 级别的 CDK 实现, 只能基于 L1 基本做一些自动化, 详情查看: <a target="_blank" rel="noopener" href="https://docs.aws.amazon.com/cdk/api/v2/docs/aws-cdk-lib.aws_sagemaker-readme.html">aws_sagmaker 概要说明</a></p>
+<h1 id="2-基础设施搭建"><a href="#2-基础设施搭建" class="headerlink" title="2. 基础设施搭建"></a>2. 基础设施搭建</h1><h2 id="2-1-创建-SageMaker"><a href="#2-1-创建-SageMaker" class="headerlink" title="2.1 创建 SageMaker"></a>2.1 创建 SageMaker</h2><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123;</span><br><span class="line">  <span class="title class_">Stack</span>,</span><br><span class="line">  <span class="title class_">App</span>,</span><br><span class="line">  aws_s3 <span class="keyword">as</span> s3,</span><br><span class="line">  aws_iam <span class="keyword">as</span> iam,</span><br><span class="line">  aws_sagemaker <span class="keyword">as</span> sagemaker,</span><br><span class="line">  <span class="title class_">RemovalPolicy</span>,</span><br><span class="line">&#125; <span class="keyword">from</span> <span class="string">&quot;aws-cdk-lib&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; <span class="title class_">CommmonStackProps</span> &#125; <span class="keyword">from</span> <span class="string">&quot;../../../@types/stack-props&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; infraConfig &#125; <span class="keyword">from</span> <span class="string">&quot;@albedo-inc/infra-config&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> <span class="title class_">MLStack</span> <span class="keyword">extends</span> <span class="title class_ inherited__">Stack</span> &#123;</span><br><span class="line">  <span class="title function_">constructor</span>(<span class="params">scope: App, id: <span class="built_in">string</span>, props?: CommmonStackProps</span>) &#123;</span><br><span class="line">    <span class="variable language_">super</span>(scope, id, props);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> sagemakerBucket = <span class="keyword">new</span> s3.<span class="title class_">Bucket</span>(</span><br><span class="line">      <span class="variable language_">this</span>,</span><br><span class="line">      <span class="string">`<span class="subst">$&#123;props.envName&#125;</span>-SageMakerBucket`</span>,</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">removalPolicy</span>: <span class="title class_">RemovalPolicy</span>.<span class="property">DESTROY</span>,</span><br><span class="line">        <span class="attr">autoDeleteObjects</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="attr">bucketName</span>: <span class="string">`<span class="subst">$&#123;props.envName&#125;</span>-sagemaker`</span>,</span><br><span class="line">      &#125;</span><br><span class="line">    );</span><br><span class="line">    <span class="keyword">const</span> sageMakerExecutorRole = <span class="keyword">new</span> iam.<span class="title class_">Role</span>(</span><br><span class="line">      <span class="variable language_">this</span>,</span><br><span class="line">      <span class="string">`<span class="subst">$&#123;props.envName&#125;</span>-SageMakerExecutorRole`</span>,</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">roleName</span>: <span class="string">`<span class="subst">$&#123;props.envName&#125;</span>-SageMakerExecutorRole`</span>,</span><br><span class="line">        <span class="attr">assumedBy</span>: <span class="keyword">new</span> iam.<span class="title class_">ServicePrincipal</span>(<span class="string">&quot;sagemaker.amazonaws.com&quot;</span>),</span><br><span class="line">        <span class="attr">managedPolicies</span>: [</span><br><span class="line">          iam.<span class="property">ManagedPolicy</span>.<span class="title function_">fromAwsManagedPolicyName</span>(</span><br><span class="line">            <span class="string">&quot;AmazonSageMakerFullAccess&quot;</span></span><br><span class="line">          ),</span><br><span class="line">        ],</span><br><span class="line">      &#125;</span><br><span class="line">    );</span><br><span class="line">    sagemakerBucket.<span class="title function_">grantReadWrite</span>(sageMakerExecutorRole);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> sagemakerDomain = <span class="keyword">new</span> sagemaker.<span class="title class_">CfnDomain</span>(</span><br><span class="line">      <span class="variable language_">this</span>,</span><br><span class="line">      <span class="string">`<span class="subst">$&#123;props.envName&#125;</span>-SageMakerDomain`</span>,</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">authMode</span>: <span class="string">&quot;IAM&quot;</span>,</span><br><span class="line">        <span class="attr">domainName</span>: <span class="string">`<span class="subst">$&#123;props.envName&#125;</span>-SageMakerDomain`</span>,</span><br><span class="line">        <span class="attr">subnetIds</span>: infraConfig[props.<span class="property">envName</span>].<span class="property">vpc</span>.<span class="property">subnetIds</span>,</span><br><span class="line">        <span class="attr">vpcId</span>: infraConfig[props.<span class="property">envName</span>].<span class="property">vpc</span>.<span class="property">id</span>,</span><br><span class="line">        <span class="attr">appNetworkAccessType</span>: <span class="string">&quot;VpcOnly&quot;</span>,</span><br><span class="line">        <span class="attr">defaultUserSettings</span>: &#123;</span><br><span class="line">          <span class="attr">executionRole</span>: sageMakerExecutorRole.<span class="property">roleArn</span>,</span><br><span class="line">          <span class="attr">securityGroups</span>: [infraConfig[props.<span class="property">envName</span>].<span class="property">vpc</span>.<span class="property">securityId</span>],</span><br><span class="line">        &#125;,</span><br><span class="line">      &#125;</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> sagemakerUserProfile = <span class="keyword">new</span> sagemaker.<span class="title class_">CfnUserProfile</span>(</span><br><span class="line">      <span class="variable language_">this</span>,</span><br><span class="line">      <span class="string">`<span class="subst">$&#123;props.envName&#125;</span>-SageMakerUserProfile`</span>,</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">domainId</span>: sagemakerDomain.<span class="property">attrDomainId</span>,</span><br><span class="line">        <span class="attr">userProfileName</span>: <span class="string">`<span class="subst">$&#123;props.envName&#125;</span>-SageMakerUserProfile`</span>,</span><br><span class="line">        <span class="attr">userSettings</span>: &#123;</span><br><span class="line">          <span class="attr">executionRole</span>: sageMakerExecutorRole.<span class="property">roleArn</span>,</span><br><span class="line">        &#125;,</span><br><span class="line">      &#125;</span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-2-SageMaker-Studio"><a href="#2-2-SageMaker-Studio" class="headerlink" title="2.2 SageMaker Studio"></a>2.2 SageMaker Studio</h2><p>脚本测试验证环境是否可以访问 s3:</p>
+<p><img src="https://img.picgo.net/2024/07/30/image-2024073017024675199d5b7077e3eaca0.png" alt="image-20240730170246751"></p>
+<p>上面例子中的<code>bucket_name</code>是新建的, 也可以选择已有的 Bucket, 但是需要将 Bucket 授权给域的执行角色有读写权限.</p>
+<h1 id="3-最佳实践"><a href="#3-最佳实践" class="headerlink" title="3 最佳实践"></a>3 最佳实践</h1><h2 id="3-1-如何从现有的-DB-x2F-S3-中制造训练数据、存储"><a href="#3-1-如何从现有的-DB-x2F-S3-中制造训练数据、存储" class="headerlink" title="3.1 如何从现有的 DB&#x2F;S3 中制造训练数据、存储?"></a>3.1 如何从现有的 DB&#x2F;S3 中制造训练数据、存储?</h2><p>对于已有的 Bucket, 可以在 CDK 中找到引用到 Bucket 并授 SageMaker 执行角色可以读写这个 Bucket 即可:</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> exitBucket = s3.<span class="property">Bucket</span>.<span class="title function_">fromBucketName</span>(</span><br><span class="line">  <span class="variable language_">this</span>,</span><br><span class="line">  <span class="string">`<span class="subst">$&#123;props.envName&#125;</span>-ExitBucket`</span>,</span><br><span class="line">  <span class="string">&quot;xxxx&quot;</span></span><br><span class="line">);</span><br><span class="line"><span class="keyword">const</span> sageMakerExecutorRole = <span class="keyword">new</span> iam.<span class="title class_">Role</span>(</span><br><span class="line">  <span class="variable language_">this</span>,</span><br><span class="line">  <span class="string">`<span class="subst">$&#123;props.envName&#125;</span>-SageMakerExecutorRole`</span>,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">roleName</span>: <span class="string">`<span class="subst">$&#123;props.envName&#125;</span>-SageMakerExecutorRole`</span>,</span><br><span class="line">    <span class="attr">assumedBy</span>: <span class="keyword">new</span> iam.<span class="title class_">ServicePrincipal</span>(<span class="string">&quot;sagemaker.amazonaws.com&quot;</span>),</span><br><span class="line">    <span class="attr">managedPolicies</span>: [</span><br><span class="line">      iam.<span class="property">ManagedPolicy</span>.<span class="title function_">fromAwsManagedPolicyName</span>(<span class="string">&quot;AmazonSageMakerFullAccess&quot;</span>),</span><br><span class="line">    ],</span><br><span class="line">  &#125;</span><br><span class="line">);</span><br><span class="line">exitBucket.<span class="title function_">grantReadWrite</span>(sageMakerExecutorRole);</span><br></pre></td></tr></table></figure>
+
+<p><strong>实践总结</strong>: 从实际角度出发, 算法所用的数据可能有一定的格式, 所以一般的数据都要经过清洗和转化在使用比较好, 所以建议还是将已有的 Bucket 中的清洗转化后另存到专门数据分析的用的 Bucket 中然后进行读取.</p>
+<h2 id="3-2-jupyter-notebook-模型代码-repo-如何管理"><a href="#3-2-jupyter-notebook-模型代码-repo-如何管理" class="headerlink" title="3.2 jupyter notebook 模型代码 repo 如何管理?"></a>3.2 jupyter notebook 模型代码 repo 如何管理?</h2><p>在 SageMaker 中有对 Git 的支持, 通过测试本质上是在 SageMaker 实例上进行克隆代码, 但是经过测试无法从 github 获取代码, 失败信息如下:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">sagemaker-user@studio$ git clone https://github.com/nnsay/sagemaker-tutorial.git</span><br><span class="line">Cloning into &#x27;sagemaker-tutorial&#x27;...</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">fatal: unable to access &#x27;https://github.com/nnsay/sagemaker-tutorial.git/&#x27;: OpenSSL SSL_connect: SSL_ERROR_SYSCALL in connection to github.com:443</span><br><span class="line">sagemaker-user@studio$</span><br><span class="line">sagemaker-user@studio$</span><br><span class="line">sagemaker-user@studio$ type telnet</span><br><span class="line">bash: type: telnet: not found</span><br><span class="line">sagemaker-user@studio$ git clone https://github.com/nnsay/sagemaker-tutorial.git</span><br><span class="line">Cloning into &#x27;sagemaker-tutorial&#x27;...</span><br><span class="line">fatal: unable to access &#x27;https://github.com/nnsay/sagemaker-tutorial.git/&#x27;: Failed to connect to github.com port 443 after 130273 ms: Couldn&#x27;t connect to server</span><br><span class="line">sagemaker-user@studio$</span><br></pre></td></tr></table></figure>
+
+<p>进而选择在本地进行代码管理和调试, 本地调试方式可以参考视频: <a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=K3ngZKF31mc">Train with Amazon SageMaker on your local machine </a></p>
+<p>视频教程中使用 conda 进行虚拟环境的搭建, 我这里使用 python 自带的虚拟环境, 具体步骤如下:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建虚拟环境</span></span><br><span class="line">python3 -m venv <span class="built_in">env</span></span><br><span class="line"><span class="comment"># 激活虚拟环境</span></span><br><span class="line"><span class="built_in">source</span> ./env/bin/activate</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装必要的依赖</span></span><br><span class="line">pip install pandas tensorflow keras scikit-learn</span><br><span class="line"></span><br><span class="line"><span class="comment"># 安装本地开发环境</span></span><br><span class="line">pip install sagemaker notebook ipykernel pg8000 boto3</span><br><span class="line">python -m ipykernel install --user --name localsagemaker --display-name <span class="string">&quot;Python (LocalSageMaker)&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动本地开发环境</span></span><br><span class="line">jupyter notebook</span><br></pre></td></tr></table></figure>
+
+<p>启动后可以在本地浏览器中打开, 地址可以在终端运行<code>jupyter notebook</code>的输出找到, 效果如下:</p>
+<img src="https://img.picgo.net/2024/07/31/image-20240731140857680ec983e786e739ece.png" alt="image-20240731140857680" style="zoom:25%;" />
+
+<blockquote>
+<p>[!note]</p>
+<p>本地 jupyter 不是很好用, 没有智能感知, 且操作不便, 只是本地开发的一种方式</p>
+</blockquote>
+<p>接下来探索如何在 vscode 安装 jupyter 插件后进行本地开发, 使用 vscode+jupyter 后不用再浏览器中写脚本了, 直接在 vscode 中写即可, 这里给出一个脚本的例子, 创建 test.ipynb 文件并添加以下几个代码单元:</p>
+<ul>
+<li><p>运行时参数</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 运行时参数</span></span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"></span><br><span class="line">os.environ[<span class="string">&quot;AWS_PROFILE&quot;</span>] = <span class="string">&quot;sandbox&quot;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>测试 s3 访问</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 测试s3访问</span></span><br><span class="line"><span class="keyword">import</span> boto3</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建 S3 客户端</span></span><br><span class="line">s3_client = boto3.client(<span class="string">&#x27;s3&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 列出存储桶中的所有对象</span></span><br><span class="line">bucket_name = <span class="string">&#x27;sandbox-sagemaker&#x27;</span></span><br><span class="line">response = s3_client.list_objects_v2(Bucket=bucket_name)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 打印对象键</span></span><br><span class="line"><span class="keyword">if</span> <span class="string">&#x27;Contents&#x27;</span> <span class="keyword">in</span> response:</span><br><span class="line">    <span class="keyword">for</span> obj <span class="keyword">in</span> response[<span class="string">&#x27;Contents&#x27;</span>]:</span><br><span class="line">        <span class="built_in">print</span>(obj[<span class="string">&#x27;Key&#x27;</span>])</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Bucket is empty.&quot;</span>)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>测试数据库访问</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 测试数据库访问</span></span><br><span class="line"><span class="keyword">import</span> pg8000.native</span><br><span class="line"></span><br><span class="line">con = pg8000.native.Connection(database=<span class="string">&quot;sandboxdb&quot;</span>,</span><br><span class="line">                                   host=<span class="string">&quot;postgres-sandbox.internal.nnsay.cn&quot;</span>,</span><br><span class="line">                                   user=<span class="string">&#x27;root&#x27;</span>,</span><br><span class="line">                                   password=<span class="string">&quot;xxx)</span></span><br><span class="line"><span class="string">[[sum]] = con.run(sql=&quot;</span>select  CAST(:n1 AS <span class="built_in">float</span>) + CAST(:n2 AS <span class="built_in">float</span>) <span class="keyword">as</span> <span class="built_in">sum</span><span class="string">&quot;, n1=2, n2=2) # type: ignore</span></span><br><span class="line"><span class="string">print(&#123;&quot;</span><span class="built_in">sum</span><span class="string">&quot;: sum&#125;)</span></span><br><span class="line"><span class="string">con.close()</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>生成数据</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 生成数据</span></span><br><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成随机数据</span></span><br><span class="line">np.random.seed(<span class="number">0</span>)</span><br><span class="line">data_size = <span class="number">1000</span></span><br><span class="line">X1 = np.random.rand(data_size)</span><br><span class="line">X2 = np.random.rand(data_size)</span><br><span class="line">y = X1 + X2 + np.random.rand(data_size) * <span class="number">0.1</span>  <span class="comment"># 简单的线性关系，加上一些噪声</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建DataFrame</span></span><br><span class="line">df = pd.DataFrame(&#123;<span class="string">&quot;X1&quot;</span>: X1, <span class="string">&quot;X2&quot;</span>: X2, <span class="string">&quot;y&quot;</span>: y&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 保存为CSV文件到本地</span></span><br><span class="line">df.to_csv(<span class="string">&quot;demo_data.csv&quot;</span>, index=<span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 保存为CSV文件到s3</span></span><br><span class="line"><span class="comment"># s3_client.put_object(Bucket=bucket_name, Key=&#x27;demo_data.csv&#x27;, Body=df.to_csv(index=False))</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>训练脚本: train.py</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> argparse</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">import</span> boto3</span><br><span class="line"><span class="keyword">from</span> sklearn.model_selection <span class="keyword">import</span> train_test_split</span><br><span class="line"><span class="keyword">from</span> sklearn.linear_model <span class="keyword">import</span> LinearRegression</span><br><span class="line"><span class="keyword">from</span> sklearn.metrics <span class="keyword">import</span> mean_squared_error</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">parse_args</span>():</span><br><span class="line">    parser = argparse.ArgumentParser()</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--epochs&quot;</span>, <span class="built_in">type</span>=<span class="built_in">int</span>, default=<span class="number">10</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--batch-size&quot;</span>, <span class="built_in">type</span>=<span class="built_in">int</span>, default=<span class="number">32</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--learning-rate&quot;</span>, <span class="built_in">type</span>=<span class="built_in">float</span>, default=<span class="number">0.01</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--model-dir&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, default=os.getenv(<span class="string">&quot;SM_MODEL_DIR&quot;</span>))</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--data-dir&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, default=<span class="string">&quot;./&quot;</span>)</span><br><span class="line">    parser.add_argument(<span class="string">&quot;--output-model-dir&quot;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>)</span><br><span class="line">    <span class="keyword">return</span> parser.parse_args()</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">main</span>():</span><br><span class="line">    args = parse_args()</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="comment"># 打印参数以供调试</span></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;Arguments: <span class="subst">&#123;args&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 加载数据</span></span><br><span class="line">        data_path = os.path.join(args.data_dir, <span class="string">&quot;demo_data.csv&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;Loading data from <span class="subst">&#123;data_path&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(data_path):</span><br><span class="line">            <span class="keyword">raise</span> FileNotFoundError(<span class="string">f&quot;Data file not found at <span class="subst">&#123;data_path&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">        df = pd.read_csv(data_path)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;Data loaded successfully&quot;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 分割数据集</span></span><br><span class="line">        X = df[[<span class="string">&quot;X1&quot;</span>, <span class="string">&quot;X2&quot;</span>]]</span><br><span class="line">        y = df[<span class="string">&quot;y&quot;</span>]</span><br><span class="line">        X_train, X_test, y_train, y_test = train_test_split(</span><br><span class="line">            X, y, test_size=<span class="number">0.2</span>, random_state=<span class="number">0</span></span><br><span class="line">        )</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;Data split into training and testing sets&quot;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 训练简单的线性回归模型</span></span><br><span class="line">        model = LinearRegression()</span><br><span class="line">        model.fit(X_train, y_train)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;Model trained successfully&quot;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 预测和评估</span></span><br><span class="line">        y_pred = model.predict(X_test)</span><br><span class="line">        mse = mean_squared_error(y_test, y_pred)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;Mean Squared Error: <span class="subst">&#123;mse&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 保存模型</span></span><br><span class="line">        model_path = os.path.join(args.model_dir, <span class="string">&quot;model.pkl&quot;</span>)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;Saving model to <span class="subst">&#123;model_path&#125;</span>&quot;</span>)</span><br><span class="line">        pd.to_pickle(model, model_path)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&quot;Model saved successfully&quot;</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 上传模型和结果到S3</span></span><br><span class="line">        s3 = boto3.client(<span class="string">&quot;s3&quot;</span>, region_name=<span class="string">&quot;cn-northwest-1&quot;</span>)</span><br><span class="line">        bucket = args.output_model_dir.split(<span class="string">&quot;/&quot;</span>)[<span class="number">2</span>]</span><br><span class="line">        s3_model_path = <span class="string">&quot;/&quot;</span>.join(args.output_model_dir.split(<span class="string">&quot;/&quot;</span>)[<span class="number">3</span>:]) + <span class="string">&quot;/model.pkl&quot;</span></span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;Uploading model to S3 at s3://<span class="subst">&#123;bucket&#125;</span>/<span class="subst">&#123;s3_model_path&#125;</span>&quot;</span>)</span><br><span class="line">        s3.upload_file(model_path, bucket, s3_model_path)</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;Model uploaded to S3 at s3://<span class="subst">&#123;bucket&#125;</span>/<span class="subst">&#123;s3_model_path&#125;</span>&quot;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">except</span> Exception <span class="keyword">as</span> e:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">f&quot;Error during training: <span class="subst">&#123;e&#125;</span>&quot;</span>)</span><br><span class="line">        <span class="keyword">raise</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">&quot;__main__&quot;</span>:</span><br><span class="line">    main()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>提交训练作业</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> sagemaker</span><br><span class="line"><span class="keyword">from</span> sagemaker.sklearn <span class="keyword">import</span> SKLearn</span><br><span class="line"></span><br><span class="line"><span class="comment"># 配置 SageMaker 角色和 S3 路径</span></span><br><span class="line">role = <span class="string">&quot;arn:aws-cn:iam::1212121212:role/sandbox-SageMakerExecutorRole&quot;</span></span><br><span class="line">bucket = <span class="string">&#x27;sandbox-sagemaker&#x27;</span></span><br><span class="line">prefix = <span class="string">&#x27;demo&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建 SageMaker 会话</span></span><br><span class="line">sagemaker_session = sagemaker.Session()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 上传训练数据到S3</span></span><br><span class="line">input_data = sagemaker_session.upload_data(<span class="string">&#x27;demo_data.csv&#x27;</span>, bucket=bucket, key_prefix=<span class="string">f&#x27;<span class="subst">&#123;prefix&#125;</span>/data&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建并配置 SKLearn Estimator</span></span><br><span class="line">sklearn_estimator = SKLearn(</span><br><span class="line">    entry_point=<span class="string">&#x27;train.py&#x27;</span>,</span><br><span class="line">    role=role,</span><br><span class="line">    instance_count=<span class="number">1</span>,</span><br><span class="line">    instance_type=<span class="string">&#x27;ml.m5.large&#x27;</span>,</span><br><span class="line">    framework_version=<span class="string">&#x27;0.23-1&#x27;</span>,</span><br><span class="line">    py_version=<span class="string">&#x27;py3&#x27;</span>,</span><br><span class="line">    source_dir=<span class="string">&#x27;.&#x27;</span>,  <span class="comment"># 指定源代码目录，以便包括 requirements.txt</span></span><br><span class="line">    dependencies=[<span class="string">&#x27;requirements.txt&#x27;</span>],</span><br><span class="line">    <span class="comment"># output_path=f&#x27;s3://&#123;bucket&#125;/&#123;prefix&#125;/output&#x27;,</span></span><br><span class="line">    sagemaker_session=sagemaker_session,</span><br><span class="line">    hyperparameters=&#123;</span><br><span class="line">        <span class="string">&#x27;output-model-dir&#x27;</span>: <span class="string">f&#x27;s3://<span class="subst">&#123;bucket&#125;</span>/<span class="subst">&#123;prefix&#125;</span>/output/model&#x27;</span>  <span class="comment"># SageMaker 的输出路径</span></span><br><span class="line">    &#125;</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 启动训练任务</span></span><br><span class="line">sklearn_estimator.fit(&#123;<span class="string">&#x27;train&#x27;</span>: input_data&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 下载训练结果</span></span><br><span class="line">sagemaker_session.download_data(</span><br><span class="line">    path=<span class="string">&#x27;./output&#x27;</span>,</span><br><span class="line">    bucket=bucket,</span><br><span class="line">    key_prefix=<span class="string">f&#x27;<span class="subst">&#123;prefix&#125;</span>/output&#x27;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>​ 以上几个单元其中前几个是为了测试 s3&#x2F;database 是否连通, 为取数据作准; 最后三个是一个演示训练, 先生成数据然后提交训练任务到 SageMaker.</p>
+<ul>
+<li><p>jupyter 输出</p>
+<p><img src="https://img.picgo.net/2024/07/31/image-20240731182535078dc5da2ec10e7177e.png" alt="image-20240731182535078"></p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line">INFO:sagemaker:Creating training-job with name: sagemaker-scikit-learn-2024-07-31-10-14-32-398</span><br><span class="line">2024-07-31 10:17:08 Starting - Starting the training job...</span><br><span class="line">2024-07-31 10:17:24 Starting - Preparing the instances for training...</span><br><span class="line">2024-07-31 10:18:08 Downloading - Downloading the training image......</span><br><span class="line">2024-07-31 10:18:49 Training - Training image download completed. Training in progress.2024-07-31 10:18:53,823 sagemaker-containers INFO     Imported framework sagemaker_sklearn_container.training</span><br><span class="line">2024-07-31 10:18:53,826 sagemaker-training-toolkit INFO     No GPUs detected (normal if no gpus installed)</span><br><span class="line">2024-07-31 10:18:53,861 sagemaker_sklearn_container.training INFO     Invoking user training script.</span><br><span class="line">2024-07-31 10:19:18,680 sagemaker-training-toolkit INFO     Installing dependencies from requirements.txt:</span><br><span class="line">/miniconda3/bin/python -m pip install -r requirements.txt</span><br><span class="line">Requirement already satisfied: pandas in /miniconda3/lib/python3.7/site-packages (from -r requirements.txt (line 1)) (1.1.3)</span><br><span class="line">Requirement already satisfied: scikit-learn in /miniconda3/lib/python3.7/site-packages (from -r requirements.txt (line 2)) (0.23.2)</span><br><span class="line">Requirement already satisfied: boto3 in /miniconda3/lib/python3.7/site-packages (from -r requirements.txt (line 3)) (1.24.17)</span><br><span class="line">Requirement already satisfied: pytz&gt;=2017.2 in /miniconda3/lib/python3.7/site-packages (from pandas-&gt;-r requirements.txt (line 1)) (2022.7.1)</span><br><span class="line">Requirement already satisfied: numpy&gt;=1.15.4 in /miniconda3/lib/python3.7/site-packages (from pandas-&gt;-r requirements.txt (line 1)) (1.19.2)</span><br><span class="line">Requirement already satisfied: python-dateutil&gt;=2.7.3 in /miniconda3/lib/python3.7/site-packages (from pandas-&gt;-r requirements.txt (line 1)) (2.8.1)</span><br><span class="line">Requirement already satisfied: joblib&gt;=0.11 in /miniconda3/lib/python3.7/site-packages (from scikit-learn-&gt;-r requirements.txt (line 2)) (1.2.0)</span><br><span class="line">Requirement already satisfied: threadpoolctl&gt;=2.0.0 in /miniconda3/lib/python3.7/site-packages (from scikit-learn-&gt;-r requirements.txt (line 2)) (3.1.0)</span><br><span class="line">Requirement already satisfied: scipy&gt;=0.19.1 in /miniconda3/lib/python3.7/site-packages (from scikit-learn-&gt;-r requirements.txt (line 2)) (1.5.3)</span><br><span class="line">Requirement already satisfied: s3transfer&lt;0.7.0,&gt;=0.6.0 in /miniconda3/lib/python3.7/site-packages (from boto3-&gt;-r requirements.txt (line 3)) (0.6.0)</span><br><span class="line">Requirement already satisfied: jmespath&lt;2.0.0,&gt;=0.7.1 in /miniconda3/lib/python3.7/site-packages (from boto3-&gt;-r requirements.txt (line 3)) (1.0.1)</span><br><span class="line">Requirement already satisfied: botocore&lt;1.28.0,&gt;=1.27.17 in /miniconda3/lib/python3.7/site-packages (from boto3-&gt;-r requirements.txt (line 3)) (1.27.18)</span><br><span class="line">Requirement already satisfied: urllib3&lt;1.27,&gt;=1.25.4 in /miniconda3/lib/python3.7/site-packages (from botocore&lt;1.28.0,&gt;=1.27.17-&gt;boto3-&gt;-r requirements.txt (line 3)) (1.26.14)</span><br><span class="line">Requirement already satisfied: six&gt;=1.5 in /miniconda3/lib/python3.7/site-packages (from python-dateutil&gt;=2.7.3-&gt;pandas-&gt;-r requirements.txt (line 1)) (1.15.0)</span><br><span class="line">WARNING: Running pip as the &#x27;root&#x27; user can result in broken permissions and conflicting behaviour with the system package manager. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv</span><br><span class="line">[notice] A new release of pip is available: 23.0 -&gt; 24.0</span><br><span class="line">[notice] To update, run: pip install --upgrade pip</span><br><span class="line">...</span><br><span class="line">2024-07-31 10:19:37 Uploading - Uploading generated training model</span><br><span class="line">2024-07-31 10:19:37 Completed - Training job completed</span><br><span class="line">Training seconds: 114</span><br><span class="line">Billable seconds: 114</span><br><span class="line">Output is truncated. View as a scrollable element or open in a text editor. Adjust cell output settings...</span><br><span class="line">[&#x27;./output/model/model.pkl&#x27;,</span><br><span class="line"> &#x27;./output/sagemaker-scikit-learn-2024-07-31-08-32-48-616/debug-output/training_job_end.ts&#x27;,</span><br><span class="line"> &#x27;./output/sagemaker-scikit-learn-2024-07-31-08-32-48-616/profiler-output/framework/training_job_end.ts&#x27;,</span><br><span class="line"> &#x27;./output/sagemaker-scikit-learn-2024-07-31-08-32-48-616/profiler-output/system/incremental/2024073108/1722414960.algo-1.json&#x27;,</span><br><span class="line"> &#x27;./output/sagemaker-scikit-learn-2024-07-31-08-32-48-616/profiler-output/system/incremental/2024073108/1722415020.algo-1.json&#x27;,</span><br><span class="line"> &#x27;./output/sagemaker-scikit-learn-2024-07-31-08-32-48-616/profiler-output/system/incremental/2024073108/1722415080.algo-1.json&#x27;,</span><br><span class="line"> &#x27;./output/sagemaker-scikit-learn-2024-07-31-08-32-48-616/profiler-output/system/training_job_end.ts&#x27;,</span><br><span class="line"> &#x27;./output/sagemaker-scikit-learn-2024-07-31-09-03-33-277/debug-output/training_job_end.ts&#x27;,</span><br><span class="line"> &#x27;./output/sagemaker-scikit-learn-2024-07-31-09-03-33-277/profiler-output/framework/training_job_end.ts&#x27;,</span><br><span class="line"> &#x27;./output/sagemaker-scikit-learn-2024-07-31-09-03-33-277/profiler-output/system/incremental/2024073109/1722416760.algo-1.json&#x27;,</span><br><span class="line"> &#x27;./output/sagemaker-scikit-learn-2024-07-31-09-03-33-277/profiler-output/system/incremental/2024073109/1722416820.algo-1.json&#x27;,</span><br><span class="line"> &#x27;./output/sagemaker-scikit-learn-2024-07-31-09-03-33-277/profiler-output/system/incremental/2024073109/1722416880.algo-1.json&#x27;,</span><br><span class="line"> &#x27;./output/sagemaker-scikit-learn-2024-07-31-09-03-33-277/profiler-output/system/training_job_end.ts&#x27;,</span><br><span class="line"> &#x27;./output/sagemaker-scikit-learn-2024-07-31-09-26-11-587/debug-output/training_job_end.ts&#x27;,</span><br><span class="line"> &#x27;./output/sagemaker-scikit-learn-2024-07-31-09-26-11-587/output/model.tar.gz&#x27;,</span><br><span class="line"> &#x27;./output/sagemaker-scikit-learn-2024-07-31-09-26-11-587/profiler-output/framework/training_job_end.ts&#x27;,</span><br><span class="line"> &#x27;./output/sagemaker-scikit-learn-2024-07-31-09-26-11-587/profiler-output/system/incremental/2024073109/1722418140.algo-1.json&#x27;,</span><br><span class="line"> &#x27;./output/sagemaker-scikit-learn-2024-07-31-09-26-11-587/profiler-output/system/incremental/2024073109/1722418200.algo-1.json&#x27;,</span><br><span class="line"> &#x27;./output/sagemaker-scikit-learn-2024-07-31-09-26-11-587/profiler-output/system/incremental/2024073109/1722418260.algo-1.json&#x27;,</span><br><span class="line"> &#x27;./output/sagemaker-scikit-learn-2024-07-31-09-26-11-587/profiler-output/system/training_job_end.ts&#x27;,</span><br><span class="line"> &#x27;./output/sagemaker-scikit-learn-2024-07-31-09-38-28-790/debug-output/training_job_end.ts&#x27;,</span><br><span class="line"> &#x27;./output/sagemaker-scikit-learn-2024-07-31-09-38-28-790/profiler-output/framework/training_job_end.ts&#x27;,</span><br><span class="line"> &#x27;./output/sagemaker-scikit-learn-2024-07-31-09-38-28-790/profiler-output/system/incremental/2024073109/1722418860.algo-1.json&#x27;,</span><br><span class="line"> &#x27;./output/sagemaker-scikit-learn-2024-07-31-09-38-28-790/profiler-output/system/incremental/2024073109/1722418920.algo-1.json&#x27;,</span><br><span class="line"> &#x27;./output/sagemaker-scikit-learn-2024-07-31-09-38-28-790/profiler-output/system/incremental/2024073109/1722418980.algo-1.json&#x27;,</span><br><span class="line"> &#x27;./output/sagemaker-scikit-learn-2024-07-31-09-38-28-790/profiler-output/system/training_job_end.ts&#x27;]</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>sage maker 训练任务</p>
+<p><img src="https://img.picgo.net/2024/07/31/image-20240731173008843530ab265dbe046ec.png" alt="image-20240731173008843"></p>
+<p><img src="https://img.picgo.net/2024/07/31/image-202407311820210148331edb96c67c2bc.png" alt="image-20240731182021014"></p>
+<blockquote>
+<p>[!note]<br>训练作业在 aws 中并不能删除, 经过询问这些记录不会删除任何费用</p>
+</blockquote>
+</li>
+</ul>
+<p><strong>实践总结</strong>:</p>
+<ul>
+<li>虽然 aws 教学视频使用 jupyter notebook 在浏览器中进行编辑, 但是体验效果不如 vscode+jupyter 插件, 推荐使用 vscdoe</li>
+<li>jupyter 脚本可以通过 git 进行管理</li>
+<li>模型的版本可以通过在模型保存路径或者具有特殊名称的模型文件名称来做版本控制</li>
+</ul>
+<h1 id="参考文档"><a href="#参考文档" class="headerlink" title="参考文档"></a>参考文档</h1><ul>
+<li><a target="_blank" rel="noopener" href="https://sagemaker.readthedocs.io/en/stable/frameworks/sklearn/using_sklearn.html">Using Scikit-learn with the SageMaker Python SDK</a></li>
+<li><a target="_blank" rel="noopener" href="https://github.com/aws/amazon-sagemaker-examples">aws sagemaker example</a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.amazonaws.cn/aws/latest/userguide/sagemaker.html">中国 AWS Sage Maker 限制</a></li>
+</ul>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2024/07/30/nodejs-unzip/" class="article-next" title="NodeJs Unzip"><i class="icon-arrow-right"></i></a>
+
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "25ba151176a371454dab58a9c4ccb70b",
+        distractionFreeMode: true,
+        title: "Sagemaker上手练习",
+        body: "https://nnsay.github.io/2024/08/08/sagemaker-tutorial/",
+        labels: ["研究","Code"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?1f97030bb3a44256d81e14447104bef8";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+    
+    
+      <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+      </script>
+        <!-- <script src='https://unpkg.com/mermaid@10/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script> -->
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

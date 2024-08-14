@@ -4,7 +4,7 @@ date: 2024-08-14 18:21:54
 tags:
   - Code
   - 研究
-excerpt: 使用 AWS 和开源的 Data Wrangler 进行数据整理
+excerpt: 使用 AWS 和开源的 Data Wrangler 工具进行数据整理
 ---
 
 # 1. [使用 Amazon Data Wrangler 准备机器学习 SageMaker 数据](https://docs.amazonaws.cn/sagemaker/latest/dg/data-wrangler.html)

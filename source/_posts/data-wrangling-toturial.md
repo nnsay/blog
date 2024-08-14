@@ -7,6 +7,14 @@ tags:
 excerpt: 使用 AWS 和开源的 Data Wrangler 工具进行数据整理
 ---
 
+# 0. 介绍
+
+本文介绍在机器学习之前如何进行数据处理, 数据处理是机器学习的必经之路, 而且数据的质量也非常影响最后模型的效果. 本文介绍两种工具进行数据整理, 分别是 AWS 的 Data Wrangler 和 VS Code 的 Data Wrangler Extension, 前者在第一节, 后者在第二节.
+
+AWS Data Wrangler 集成在 SageMaker 产品的 Studio 中, 使用方便, 有很多自动化的功能帮助我们进行数据整理和查看数据质量报告, 但是开发者背景的工程师可能不太习惯这种方式, 所以本文又介绍 VS Code 的 Data Wrangler Extension, 这个扩展工具也很好用, 但是没有数据质量分析报告, 所以要看报告的话可以按照 AWS 相关文档中提示的, 可以结合[altair](https://altair-viz.github.io/index.html)进行数据质量分析.
+
+本文中包含很多图片, 图床时 Github Gist, 所以需要科学上网.
+
 # 1. [使用 Amazon Data Wrangler 准备机器学习 SageMaker 数据](https://docs.amazonaws.cn/sagemaker/latest/dg/data-wrangler.html)
 
 Amazon SageMaker Data Wrangler（Data Wrangler）是 Amazon SageMaker Studio Classic 的一项功能，它提供了导入、准备、转换、特征化和分析数据的 end-to-end 解决方案。您可以将 Data Wrangler 数据准备流集成到机器学习 (ML) 工作流中，以简化和精简数据预处理和特征工程，只需少量甚至无需编码。您还可以添加自己的 Python 脚本和转换，以自定义工作流。

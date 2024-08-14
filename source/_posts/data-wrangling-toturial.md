@@ -7,7 +7,7 @@ tags:
 excerpt: 使用 AWS 和开源的 Data Wrangler 进行数据整理
 ---
 
-# 1. 实践: [使用 Amazon Data Wrangler 准备机器学习 SageMaker 数据](https://docs.amazonaws.cn/sagemaker/latest/dg/data-wrangler.html)
+# 1. [使用 Amazon Data Wrangler 准备机器学习 SageMaker 数据](https://docs.amazonaws.cn/sagemaker/latest/dg/data-wrangler.html)
 
 Amazon SageMaker Data Wrangler（Data Wrangler）是 Amazon SageMaker Studio Classic 的一项功能，它提供了导入、准备、转换、特征化和分析数据的 end-to-end 解决方案。您可以将 Data Wrangler 数据准备流集成到机器学习 (ML) 工作流中，以简化和精简数据预处理和特征工程，只需少量甚至无需编码。您还可以添加自己的 Python 脚本和转换，以自定义工作流。
 

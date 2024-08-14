@@ -10,7 +10,7 @@
     <title>机器学习--数据整理 | Jimmy&#39;s Blog</title>
     <meta name="author" content="Jimmy Wang" />
     <meta name="keywords" content="" />
-    <meta name="description" content="1. 实践: 使用 Amazon Data Wrangler 准备机器学习 SageMaker 数据Amazon SageMaker Data Wrangler（Data Wrangler）是 Amazon SageMaker Studio Classic 的一项功能，它提供了导入、准备、转换、特征化和分析数据的 end-to-end 解决方案。您可以将 Data Wrangler 数据准备流集成到机器学习 (ML) 工作流中，以简化和精简数据预处理和特征工程，只需少量甚至无需编码。您还可以添加" />
+    <meta name="description" content="1. 使用 Amazon Data Wrangler 准备机器学习 SageMaker 数据Amazon SageMaker Data Wrangler（Data Wrangler）是 Amazon SageMaker Studio Classic 的一项功能，它提供了导入、准备、转换、特征化和分析数据的 end-to-end 解决方案。您可以将 Data Wrangler 数据准备流集成到机器学习 (ML) 工作流中，以简化和精简数据预处理和特征工程，只需少量甚至无需编码。您还可以添加自己的 " />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
 
@@ -86,7 +86,7 @@
         
 
         
-        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E5%AE%9E%E8%B7%B5-%E4%BD%BF%E7%94%A8-Amazon-Data-Wrangler-%E5%87%86%E5%A4%87%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0-SageMaker-%E6%95%B0%E6%8D%AE"><span class="toc-text">1. 实践: 使用 Amazon Data Wrangler 准备机器学习 SageMaker 数据</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%BC%E5%85%A5"><span class="toc-text">导入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E6%B5%81"><span class="toc-text">数据流</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BD%AC%E6%8D%A2"><span class="toc-text">转换</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%9F%E6%88%90%E6%95%B0%E6%8D%AE%E8%A7%81%E8%A7%A3"><span class="toc-text">生成数据见解</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E6%9E%90"><span class="toc-text">分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%BC%E5%87%BA"><span class="toc-text">导出</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E6%80%BB%E7%BB%93%E5%92%8C%E5%AE%9E%E8%B7%B5"><span class="toc-text">2. 总结和实践</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E4%BD%BF%E7%94%A8-Amazon-Data-Wrangler-%E5%87%86%E5%A4%87%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0-SageMaker-%E6%95%B0%E6%8D%AE"><span class="toc-text">1. 使用 Amazon Data Wrangler 准备机器学习 SageMaker 数据</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%BC%E5%85%A5"><span class="toc-text">导入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E6%B5%81"><span class="toc-text">数据流</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BD%AC%E6%8D%A2"><span class="toc-text">转换</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%9F%E6%88%90%E6%95%B0%E6%8D%AE%E8%A7%81%E8%A7%A3"><span class="toc-text">生成数据见解</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%86%E6%9E%90"><span class="toc-text">分析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AF%BC%E5%87%BA"><span class="toc-text">导出</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E6%80%BB%E7%BB%93%E5%92%8C%E5%AE%9E%E8%B7%B5"><span class="toc-text">2. 总结和实践</span></a></li></ol>
         
     </div>
 </aside>
@@ -123,7 +123,7 @@
     
     <section class="article-body markdown-body">
         
-        <h1 id="1-实践-使用-Amazon-Data-Wrangler-准备机器学习-SageMaker-数据"><a href="#1-实践-使用-Amazon-Data-Wrangler-准备机器学习-SageMaker-数据" class="headerlink" title="1. 实践: 使用 Amazon Data Wrangler 准备机器学习 SageMaker 数据"></a>1. 实践: <a target="_blank" rel="noopener" href="https://docs.amazonaws.cn/sagemaker/latest/dg/data-wrangler.html">使用 Amazon Data Wrangler 准备机器学习 SageMaker 数据</a></h1><p>Amazon SageMaker Data Wrangler（Data Wrangler）是 Amazon SageMaker Studio Classic 的一项功能，它提供了导入、准备、转换、特征化和分析数据的 end-to-end 解决方案。您可以将 Data Wrangler 数据准备流集成到机器学习 (ML) 工作流中，以简化和精简数据预处理和特征工程，只需少量甚至无需编码。您还可以添加自己的 Python 脚本和转换，以自定义工作流。</p>
+        <h1 id="1-使用-Amazon-Data-Wrangler-准备机器学习-SageMaker-数据"><a href="#1-使用-Amazon-Data-Wrangler-准备机器学习-SageMaker-数据" class="headerlink" title="1. 使用 Amazon Data Wrangler 准备机器学习 SageMaker 数据"></a>1. <a target="_blank" rel="noopener" href="https://docs.amazonaws.cn/sagemaker/latest/dg/data-wrangler.html">使用 Amazon Data Wrangler 准备机器学习 SageMaker 数据</a></h1><p>Amazon SageMaker Data Wrangler（Data Wrangler）是 Amazon SageMaker Studio Classic 的一项功能，它提供了导入、准备、转换、特征化和分析数据的 end-to-end 解决方案。您可以将 Data Wrangler 数据准备流集成到机器学习 (ML) 工作流中，以简化和精简数据预处理和特征工程，只需少量甚至无需编码。您还可以添加自己的 Python 脚本和转换，以自定义工作流。</p>
 <p>Data Wrangler 可提供以下核心功能，帮助您分析和准备用于机器学习应用程序的数据。</p>
 <h2 id="导入"><a href="#导入" class="headerlink" title="导入"></a><strong>导入</strong></h2><p>连接亚马逊简单存储服务 (Amazon S3)、（Athena）、亚马逊 Redshift、Snow Amazon Athena flake 和 Databricks 并从中导入数据。</p>
 <p><img src="https://raw.githubusercontent.com/nnsay/gist/main/imgimage-20240814120236299.png" alt="image-20240814120236299"></p>

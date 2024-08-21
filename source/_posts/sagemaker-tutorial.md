@@ -1,5 +1,5 @@
 ---
-title: Sagemaker上手练习
+title: 机器学习--Sagemaker上手练习
 date: 2024-08-08 18:18:23
 tags:
   - Code

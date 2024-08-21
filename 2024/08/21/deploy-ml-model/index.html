@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>机器学习--模型部署和调用 | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="0. 介绍本文是前两篇机器学习文章的延续, 前两篇分片是:机器学习–Sagemaker 上手练习: 介绍了使用 AWS Sagemaker 进行机器学习, 并介绍如何生成一个模型机器学习–数据整理: 如何进行数据整理本文主要关注点在于模型的部署, 本文将弱化如何产生模型的过程, 因为之前的文章已经介绍过, 但是本文还是通过代码介绍了一下 AutoMLJob, 这是 SageMaker 的一个特性, 其可以自动进行很多步骤比如数据分析模型质量分析等任务, 最后选择一个最佳的算法生成模型, 本文以 " />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 6.3.0"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#0-%E4%BB%8B%E7%BB%8D"><span class="toc-text">0. 介绍</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E9%83%A8%E7%BD%B2%E5%9F%BA%E6%9C%AC%E7%9F%A5%E8%AF%86"><span class="toc-text">1. 部署基本知识</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E6%A8%A1%E5%9E%8B%E9%83%A8%E7%BD%B2%E6%AD%A5%E9%AA%A4"><span class="toc-text">2. 模型部署步骤</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E6%8E%A8%E7%90%86%E9%80%89%E9%A1%B9"><span class="toc-text">3. 推理选项</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#4-%E9%83%A8%E7%BD%B2%E6%A8%A1%E5%9E%8B"><span class="toc-text">4. 部署模型</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#5-Lambda-%E8%B0%83%E7%94%A8"><span class="toc-text">5. Lambda 调用</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            机器学习--模型部署和调用
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2024/08/21/deploy-ml-model/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2024-08-21T10:33:50.000Z" itemprop="datePublished">2024-08-21</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/Code/" rel="tag">Code</a>, <a class="article-tag-link" href="/tags/%E7%A0%94%E7%A9%B6/" rel="tag">研究</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h1 id="0-介绍"><a href="#0-介绍" class="headerlink" title="0. 介绍"></a>0. 介绍</h1><p>本文是前两篇机器学习文章的延续, 前两篇分片是:</p>
+<ul>
+<li><strong>机器学习–Sagemaker 上手练习</strong>: 介绍了使用 AWS Sagemaker 进行机器学习, 并介绍如何生成一个模型</li>
+<li><strong>机器学习–数据整理</strong>: 如何进行数据整理</li>
+</ul>
+<p>本文主要关注点在于模型的部署, 本文将弱化如何产生模型的过程, 因为之前的文章已经介绍过, 但是本文还是通过代码介绍了一下 AutoMLJob, 这是 SageMaker 的一个特性, 其可以自动进行很多步骤比如数据分析模型质量分析等任务, 最后选择一个最佳的算法生成模型, 本文以 AutoMLJob 生成的结果为例来介绍如何部署模型, 不过 AutoMLJob 不是必须, 您可以可以使用 Sagemaker 其中的其他方式构建模型, 最后主要有镜像和模型文件两个资源即可.</p>
+<h1 id="1-部署基本知识"><a href="#1-部署基本知识" class="headerlink" title="1. 部署基本知识"></a>1. 部署基本知识</h1><p>训练机器学习模型后，您可以使用 Amazon SageMaker 部署它来获取预测。Amazon SageMaker 支持以下内容 部署模型的方法，具体取决于您的用例：</p>
+<ul>
+<li>对于一次进行一个预测的持久性实时终端节点，请使用 SageMaker 实时托管服务。请参阅<a target="_blank" rel="noopener" href="https://docs.amazonaws.cn/en_us/sagemaker/latest/dg/realtime-endpoints.html">实时推理</a>。</li>
+<li>在流量高峰之间具有空闲期的工作负载，并且可以容忍寒冷 开始时，使用 Serverless Inference。请参阅<a target="_blank" rel="noopener" href="https://docs.amazonaws.cn/en_us/sagemaker/latest/dg/serverless-endpoints.html">使用 Amazon SageMaker Serverless Inference 部署模型</a>。</li>
+<li>具有高达 1GB 的大负载大小、较长的处理时间和近乎实时的延迟要求的请求， 使用 Amazon SageMaker 异步推理。请参阅<a target="_blank" rel="noopener" href="https://docs.amazonaws.cn/en_us/sagemaker/latest/dg/async-inference.html">异步推理</a>。</li>
+<li>要获取整个数据集的预测，请使用 SageMaker 批量转换</li>
+</ul>
+<h1 id="2-模型部署步骤"><a href="#2-模型部署步骤" class="headerlink" title="2. 模型部署步骤"></a>2. 模型部署步骤</h1><p>对于推理端点，常规工作流包括以下内容：</p>
+<ul>
+<li>通过指向存储在 Amazon S3 中的模型构件和容器镜像，在 SageMaker Inference 中创建模型。</li>
+<li>选择一个推理选项。有关更多信息，请参阅<a target="_blank" rel="noopener" href="https://docs.amazonaws.cn/en_us/sagemaker/latest/dg/deploy-model-get-started.html#deploy-model-options">推理选项</a>。</li>
+<li>通过选择实例类型和数量来创建 SageMaker 推理终端节点配置 您需要的实例位于终端节点后面。您可以使用 <a target="_blank" rel="noopener" href="https://docs.amazonaws.cn/sagemaker/latest/dg/inference-recommender.html">Amazon SageMaker Inference Recommender</a> 来 获取有关实例类型的建议。对于 Serverless Inference，您只需提供 根据您的模型大小，您需要的内存配置。</li>
+<li>创建 SageMaker 推理终端节点。</li>
+<li>调用您的终端节点以接收推理作为响应。</li>
+</ul>
+<p><img src="https://docs.amazonaws.cn/en_us/sagemaker/latest/dg/images/inference-workflow-flowchart.png"></p>
+<h1 id="3-推理选项"><a href="#3-推理选项" class="headerlink" title="3. 推理选项"></a>3. 推理选项</h1><p>SageMaker 提供了多个推理选项，以便您可以选择最适合您的工作负载的选项：</p>
+<ul>
+<li><p><a target="_blank" rel="noopener" href="https://docs.amazonaws.cn/sagemaker/latest/dg/realtime-endpoints.html">实时推理</a>：<em>实时 推理</em>非常适合具有低延迟或 高吞吐量要求。使用实时推理实现持久且完全 可以处理持续流量的托管端点 （REST API），由 您选择的实例类型。实时推理可支持高达 6 MB 的有效负载大小 处理时间为 60 秒。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> pandas <span class="keyword">as</span> pd</span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"></span><br><span class="line"><span class="comment"># Load the dataset</span></span><br><span class="line">df = pd.read_csv(<span class="string">&#x27;data/real-time-payload.csv&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Check for hidden characters or extra spaces in &#x27;unit_sales&#x27; column</span></span><br><span class="line">df[<span class="string">&#x27;unit_sales&#x27;</span>] = df[<span class="string">&#x27;unit_sales&#x27;</span>].apply(<span class="keyword">lambda</span> x: <span class="built_in">str</span>(x).strip() <span class="keyword">if</span> pd.notnull(x) <span class="keyword">else</span> x)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Convert &#x27;unit_sales&#x27; column to numeric, forcing errors to NaN</span></span><br><span class="line">df[<span class="string">&#x27;unit_sales&#x27;</span>] = pd.to_numeric(df[<span class="string">&#x27;unit_sales&#x27;</span>], errors=<span class="string">&#x27;coerce&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Replace null values with 0</span></span><br><span class="line">df[<span class="string">&#x27;unit_sales&#x27;</span>].fillna(<span class="number">0</span>, inplace=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Verify there are no missing values left</span></span><br><span class="line">missing_values = df[<span class="string">&#x27;unit_sales&#x27;</span>].isnull().<span class="built_in">sum</span>()</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&#x27;Total missing values in unit_sales after filling: <span class="subst">&#123;missing_values&#125;</span>&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Save the cleaned dataset</span></span><br><span class="line">df.to_csv(<span class="string">&#x27;data/default-real-time-payload.csv&#x27;</span>, index=<span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line">timestamp_suffix = strftime(<span class="string">&quot;%Y%m%d-%H%M%S&quot;</span>, gmtime())</span><br><span class="line">auto_ml_job_name = <span class="string">&quot;ts-20240807-094452&quot;</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;AutoMLJobName: &quot;</span> + auto_ml_job_name)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Create auto ml job</span></span><br><span class="line">sm.create_auto_ml_job(</span><br><span class="line">        AutoMLJobName=auto_ml_job_name,</span><br><span class="line">        InputDataConfig=[</span><br><span class="line">            &#123;</span><br><span class="line">                <span class="string">&quot;DataSource&quot;</span>: &#123;</span><br><span class="line">                    <span class="string">&quot;S3DataSource&quot;</span>: &#123;</span><br><span class="line">                        <span class="string">&quot;S3DataType&quot;</span>: <span class="string">&quot;S3Prefix&quot;</span>,</span><br><span class="line">                        <span class="string">&quot;S3Uri&quot;</span>: <span class="string">&#x27;s3://&#123;&#125;/&#123;&#125;/data/&#x27;</span>.<span class="built_in">format</span>(bucket, prefix),</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;,</span><br><span class="line">                <span class="string">&quot;TargetAttributeName&quot;</span>: <span class="string">&#x27;unit_sales&#x27;</span>,</span><br><span class="line">            &#125;</span><br><span class="line">        ],</span><br><span class="line">        OutputDataConfig=&#123;<span class="string">&quot;S3OutputPath&quot;</span>: <span class="string">&#x27;s3://&#123;&#125;/&#123;&#125;/train_output&#x27;</span>.<span class="built_in">format</span>(bucket, prefix)&#125;,</span><br><span class="line">        ProblemType=<span class="string">&#x27;Regression&#x27;</span>,</span><br><span class="line">        AutoMLJobObjective=&#123;<span class="string">&quot;MetricName&quot;</span>: <span class="string">&#x27;RMSE&#x27;</span>&#125;,</span><br><span class="line">        AutoMLJobConfig=&#123;<span class="string">&quot;CompletionCriteria&quot;</span>: &#123;<span class="string">&quot;MaxCandidates&quot;</span>: <span class="number">3</span>&#125;&#125;,</span><br><span class="line">        RoleArn=role,</span><br><span class="line">    )</span><br></pre></td></tr></table></figure>
+
+<p>等待 AutoMLJob 处理完成然后部署模型:</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 从AutoML中获取模型文件和容器信息</span></span><br><span class="line">best_candidate = sm.describe_auto_ml_job(AutoMLJobName=auto_ml_job_name)[<span class="string">&#x27;BestCandidate&#x27;</span>]</span><br><span class="line">best_candidate_containers = best_candidate[<span class="string">&#x27;InferenceContainers&#x27;</span>]</span><br><span class="line">best_candidate_name = best_candidate[<span class="string">&#x27;CandidateName&#x27;</span>]</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建模型</span></span><br><span class="line">reponse = sm.create_model(</span><br><span class="line">  ModelName = best_candidate_name,</span><br><span class="line">  ExecutionRoleArn = role,</span><br><span class="line">  Containers = best_candidate_containers</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 模型端点配置信息</span></span><br><span class="line">endpoint_config_name = <span class="string">f&quot;epc-<span class="subst">&#123;best_candidate_name&#125;</span>&quot;</span></span><br><span class="line">endpoint_name = <span class="string">f&quot;ep-<span class="subst">&#123;best_candidate_name&#125;</span>&quot;</span></span><br><span class="line">production_variants = [</span><br><span class="line">  &#123;</span><br><span class="line">      <span class="string">&quot;InstanceType&quot;</span>: <span class="string">&quot;ml.t2.large&quot;</span>,</span><br><span class="line">      <span class="string">&quot;InitialInstanceCount&quot;</span>: <span class="number">1</span>,</span><br><span class="line">      <span class="string">&quot;ModelName&quot;</span>: best_candidate_name,</span><br><span class="line">      <span class="string">&quot;VariantName&quot;</span>: <span class="string">&quot;AllTraffic&quot;</span>,</span><br><span class="line">      <span class="string">&quot;ManagedInstanceScaling&quot;</span>: &#123;</span><br><span class="line">          <span class="string">&quot;Status&quot;</span>: <span class="string">&quot;ENABLED&quot;</span>,</span><br><span class="line">          <span class="string">&quot;MinInstanceCount&quot;</span>: <span class="number">1</span>,</span><br><span class="line">          <span class="string">&quot;MaxInstanceCount&quot;</span>: <span class="number">2</span>,</span><br><span class="line">      &#125;</span><br><span class="line">    	<span class="comment"># &quot;VolumeSizeInGB&quot;: 100</span></span><br><span class="line">  &#125;</span><br><span class="line">]</span><br><span class="line"><span class="comment"># 创建模型端点配置</span></span><br><span class="line">epc_response = sm.create_endpoint_config(</span><br><span class="line">    EndpointConfigName=endpoint_config_name,</span><br><span class="line">    ProductionVariants=production_variants</span><br><span class="line">)</span><br><span class="line"><span class="comment"># 创建模型端点</span></span><br><span class="line">sm.create_endpoint(</span><br><span class="line">    EndpointName=endpoint_name,</span><br><span class="line">    EndpointConfigName=endpoint_config_name)</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>[!note]</p>
+<p>t2 等突发性能的规格不支持自动伸缩, 经济客观的规格是: ml.m5.large</p>
+</blockquote>
+<blockquote>
+<p>[!important]</p>
+<p>以上脚本均是 jupyter 脚本, 主要是说明整个部署流程, 核心是先创建 AutoMLJob, 个人觉得 AutoMLJob 是数据科学家和 DevOps 工程师的分界点, 数据科学家通过 AutoMLJob 训练模型, 而 DevOps 依赖其进行部署.</p>
+</blockquote>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://docs.amazonaws.cn/sagemaker/latest/dg/serverless-endpoints.html">无服务器推理</a>：当您有无<em>服务器推理时，无服务器推理</em>是理想的选择 间歇性或不可预测的流量模式。SageMaker 管理所有 底层基础设施，因此无需管理实例或扩展 政策。您只需为使用的内容付费，而不为空闲时间付费。它可以支持高达 4 MB 的有效负载大小 处理时间长达 60 秒。</p>
+<blockquote>
+<p>[!CAUTION]</p>
+<p>中国区不支持</p>
+</blockquote>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://docs.amazonaws.cn/sagemaker/latest/dg/batch-transform.html">批量转换</a>：<em>批量转换</em>适用于大量数据可用时的离线处理 预先，您不需要持久性终结点。您也可以使用批处理 用于预处理数据集的 transform。它可以支持 GB 大小的大型数据集 和处理时间（以天为单位）。</p>
+</li>
+<li><p><a target="_blank" rel="noopener" href="https://docs.amazonaws.cn/sagemaker/latest/dg/async-inference.html">异步推理</a>：<em>异步推理</em>是 当您想要对请求进行排队并具有较长的大型有效负载时，这是理想的选择 处理时间。异步推理可以支持高达 1 GB 的有效负载和长时间的处理 时间长达一小时。当有时，您还可以将终结点缩减为 0 无需处理任何请求。</p>
+<blockquote>
+<p>[!note]</p>
+<p>虽然异步方式不要求队列, 但是从业务逻辑上分析, 始终需要一个事件(时间)知道处理结果, 特别是处理错误时, 所以建议实际应用时增加队列.</p>
+</blockquote>
+</li>
+</ul>
+<h1 id="4-部署模型"><a href="#4-部署模型" class="headerlink" title="4. 部署模型"></a>4. 部署模型</h1><p>通过 CDK 进行部署, 前提是已经通过 AutoMLJob 训练结束, 相关代码如下:</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br><span class="line">211</span><br><span class="line">212</span><br><span class="line">213</span><br><span class="line">214</span><br><span class="line">215</span><br><span class="line">216</span><br><span class="line">217</span><br><span class="line">218</span><br><span class="line">219</span><br><span class="line">220</span><br><span class="line">221</span><br><span class="line">222</span><br><span class="line">223</span><br><span class="line">224</span><br><span class="line">225</span><br><span class="line">226</span><br><span class="line">227</span><br><span class="line">228</span><br><span class="line">229</span><br><span class="line">230</span><br><span class="line">231</span><br><span class="line">232</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123;</span><br><span class="line">  <span class="title class_">Stack</span>,</span><br><span class="line">  <span class="title class_">App</span>,</span><br><span class="line">  aws_s3 <span class="keyword">as</span> s3,</span><br><span class="line">  aws_iam <span class="keyword">as</span> iam,</span><br><span class="line">  aws_sagemaker <span class="keyword">as</span> sagemaker,</span><br><span class="line">  aws_autoscaling <span class="keyword">as</span> autoscaling,</span><br><span class="line">  aws_applicationautoscaling <span class="keyword">as</span> appscaling,</span><br><span class="line">  <span class="title class_">RemovalPolicy</span>,</span><br><span class="line">  <span class="title class_">CfnOutput</span>,</span><br><span class="line">&#125; <span class="keyword">from</span> <span class="string">&quot;aws-cdk-lib&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; <span class="title class_">CommmonStackProps</span> &#125; <span class="keyword">from</span> <span class="string">&quot;../../../@types/stack-props&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; infraConfig, mlConfig &#125; <span class="keyword">from</span> <span class="string">&quot;@albedo-inc/infra-config&quot;</span>;</span><br><span class="line"><span class="keyword">import</span> &#123;</span><br><span class="line">  <span class="title class_">AwsCustomResource</span>,</span><br><span class="line">  <span class="title class_">AwsCustomResourcePolicy</span>,</span><br><span class="line">  <span class="title class_">AwsSdkCall</span>,</span><br><span class="line">  <span class="title class_">PhysicalResourceId</span>,</span><br><span class="line">&#125; <span class="keyword">from</span> <span class="string">&quot;aws-cdk-lib/custom-resources&quot;</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> <span class="title class_">MLStack</span> <span class="keyword">extends</span> <span class="title class_ inherited__">Stack</span> &#123;</span><br><span class="line">  <span class="title function_">constructor</span>(<span class="params">scope: App, id: <span class="built_in">string</span>, props?: CommmonStackProps</span>) &#123;</span><br><span class="line">    <span class="variable language_">super</span>(scope, id, props);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> sagemakerBucket = <span class="keyword">new</span> s3.<span class="title class_">Bucket</span>(</span><br><span class="line">      <span class="variable language_">this</span>,</span><br><span class="line">      <span class="string">`<span class="subst">$&#123;props.envName&#125;</span>-SageMakerBucket`</span>,</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">removalPolicy</span>: <span class="title class_">RemovalPolicy</span>.<span class="property">DESTROY</span>,</span><br><span class="line">        <span class="attr">autoDeleteObjects</span>: <span class="literal">false</span>,</span><br><span class="line">        <span class="attr">bucketName</span>: <span class="string">`<span class="subst">$&#123;props.envName&#125;</span>-sagemaker`</span>,</span><br><span class="line">      &#125;</span><br><span class="line">    );</span><br><span class="line">    <span class="keyword">const</span> sageMakerExecutorRole = <span class="keyword">new</span> iam.<span class="title class_">Role</span>(</span><br><span class="line">      <span class="variable language_">this</span>,</span><br><span class="line">      <span class="string">`<span class="subst">$&#123;props.envName&#125;</span>-SageMakerExecutorRole`</span>,</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">roleName</span>: <span class="string">`<span class="subst">$&#123;props.envName&#125;</span>-SageMakerExecutorRole`</span>,</span><br><span class="line">        <span class="attr">assumedBy</span>: <span class="keyword">new</span> iam.<span class="title class_">ServicePrincipal</span>(<span class="string">&quot;sagemaker.amazonaws.com&quot;</span>),</span><br><span class="line">        <span class="attr">managedPolicies</span>: [</span><br><span class="line">          iam.<span class="property">ManagedPolicy</span>.<span class="title function_">fromAwsManagedPolicyName</span>(</span><br><span class="line">            <span class="string">&quot;AmazonSageMakerFullAccess&quot;</span></span><br><span class="line">          ),</span><br><span class="line">        ],</span><br><span class="line">      &#125;</span><br><span class="line">    );</span><br><span class="line">    sagemakerBucket.<span class="title function_">grantReadWrite</span>(sageMakerExecutorRole);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> sagemakerDomain = <span class="keyword">new</span> sagemaker.<span class="title class_">CfnDomain</span>(</span><br><span class="line">      <span class="variable language_">this</span>,</span><br><span class="line">      <span class="string">`<span class="subst">$&#123;props.envName&#125;</span>-SageMakerDomain`</span>,</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">authMode</span>: <span class="string">&quot;IAM&quot;</span>,</span><br><span class="line">        <span class="attr">domainName</span>: <span class="string">`<span class="subst">$&#123;props.envName&#125;</span>-SageMakerDomain`</span>,</span><br><span class="line">        <span class="attr">subnetIds</span>: infraConfig[props.<span class="property">envName</span>].<span class="property">vpc</span>.<span class="property">subnetIds</span>,</span><br><span class="line">        <span class="attr">vpcId</span>: infraConfig[props.<span class="property">envName</span>].<span class="property">vpc</span>.<span class="property">id</span>,</span><br><span class="line">        <span class="attr">appNetworkAccessType</span>: <span class="string">&quot;VpcOnly&quot;</span>,</span><br><span class="line">        <span class="attr">defaultUserSettings</span>: &#123;</span><br><span class="line">          <span class="attr">executionRole</span>: sageMakerExecutorRole.<span class="property">roleArn</span>,</span><br><span class="line">          <span class="attr">securityGroups</span>: [infraConfig[props.<span class="property">envName</span>].<span class="property">vpc</span>.<span class="property">securityId</span>],</span><br><span class="line">        &#125;,</span><br><span class="line">      &#125;</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line">    <span class="keyword">new</span> sagemaker.<span class="title class_">CfnUserProfile</span>(</span><br><span class="line">      <span class="variable language_">this</span>,</span><br><span class="line">      <span class="string">`<span class="subst">$&#123;props.envName&#125;</span>-SageMakerUserProfile`</span>,</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="attr">domainId</span>: sagemakerDomain.<span class="property">attrDomainId</span>,</span><br><span class="line">        <span class="attr">userProfileName</span>: <span class="string">`<span class="subst">$&#123;props.envName&#125;</span>-SageMakerUserProfile`</span>,</span><br><span class="line">        <span class="attr">userSettings</span>: &#123;</span><br><span class="line">          <span class="attr">executionRole</span>: sageMakerExecutorRole.<span class="property">roleArn</span>,</span><br><span class="line">        &#125;,</span><br><span class="line">      &#125;</span><br><span class="line">    );</span><br><span class="line"></span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">CfnOutput</span>(<span class="variable language_">this</span>, <span class="string">`<span class="subst">$&#123;props.envName&#125;</span>-SageMakerExecutorRoleArn`</span>, &#123;</span><br><span class="line">      <span class="attr">exportName</span>: <span class="string">`<span class="subst">$&#123;props.envName&#125;</span>-SageMakerExecutorRoleArn`</span>,</span><br><span class="line">      <span class="attr">value</span>: sageMakerExecutorRole.<span class="property">roleArn</span>,</span><br><span class="line">    &#125;);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// deploy machine learning model</span></span><br><span class="line">    <span class="keyword">const</span> autoMLJobNames = mlConfig[props.<span class="property">envName</span>].<span class="property">autoMLJobNames</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">const</span> autoMLJobName <span class="keyword">of</span> autoMLJobNames) &#123;</span><br><span class="line">      <span class="keyword">const</span> <span class="attr">awsSDKCall</span>: <span class="title class_">AwsSdkCall</span> = &#123;</span><br><span class="line">        <span class="attr">service</span>: <span class="string">&quot;SageMaker&quot;</span>,</span><br><span class="line">        <span class="attr">action</span>: <span class="string">&quot;describeAutoMLJob&quot;</span>,</span><br><span class="line">        <span class="attr">parameters</span>: &#123;</span><br><span class="line">          <span class="title class_">AutoMLJobName</span>: autoMLJobName,</span><br><span class="line">        &#125;,</span><br><span class="line">        <span class="attr">physicalResourceId</span>: <span class="title class_">PhysicalResourceId</span>.<span class="title function_">of</span>(autoMLJobName),</span><br><span class="line">        <span class="attr">outputPaths</span>: [</span><br><span class="line">          <span class="string">&quot;BestCandidate.InferenceContainers&quot;</span>,</span><br><span class="line">          <span class="string">&quot;BestCandidate.CandidateName&quot;</span>,</span><br><span class="line">        ],</span><br><span class="line">        <span class="attr">region</span>: <span class="variable language_">this</span>.<span class="property">region</span>,</span><br><span class="line">      &#125;;</span><br><span class="line">      <span class="keyword">const</span> describeAutoMLJobResource = <span class="keyword">new</span> <span class="title class_">AwsCustomResource</span>(</span><br><span class="line">        <span class="variable language_">this</span>,</span><br><span class="line">        <span class="string">`<span class="subst">$&#123;props.envName&#125;</span>-<span class="subst">$&#123;autoMLJobName&#125;</span>-DescribeAutoMLJob`</span>,</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">onCreate</span>: awsSDKCall,</span><br><span class="line">          <span class="attr">onUpdate</span>: awsSDKCall,</span><br><span class="line">          <span class="attr">policy</span>: <span class="title class_">AwsCustomResourcePolicy</span>.<span class="title function_">fromSdkCalls</span>(&#123;</span><br><span class="line">            <span class="attr">resources</span>: <span class="title class_">AwsCustomResourcePolicy</span>.<span class="property">ANY_RESOURCE</span>,</span><br><span class="line">          &#125;),</span><br><span class="line">          <span class="attr">installLatestAwsSdk</span>: <span class="literal">false</span>,</span><br><span class="line">        &#125;</span><br><span class="line">      );</span><br><span class="line">      <span class="keyword">const</span> model = <span class="keyword">new</span> sagemaker.<span class="title class_">CfnModel</span>(</span><br><span class="line">        <span class="variable language_">this</span>,</span><br><span class="line">        <span class="string">`<span class="subst">$&#123;props.envName&#125;</span>-<span class="subst">$&#123;autoMLJobName&#125;</span>-Model`</span>,</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">modelName</span>: describeAutoMLJobResource.<span class="title function_">getResponseField</span>(</span><br><span class="line">            <span class="string">&quot;BestCandidate.CandidateName&quot;</span></span><br><span class="line">          ),</span><br><span class="line">          <span class="attr">executionRoleArn</span>: sageMakerExecutorRole.<span class="property">roleArn</span>,</span><br><span class="line">          <span class="attr">containers</span>: [</span><br><span class="line">            &#123;</span><br><span class="line">              <span class="attr">image</span>: describeAutoMLJobResource.<span class="title function_">getResponseField</span>(</span><br><span class="line">                <span class="string">&quot;BestCandidate.InferenceContainers.0.Image&quot;</span></span><br><span class="line">              ),</span><br><span class="line">              <span class="attr">modelDataUrl</span>: describeAutoMLJobResource.<span class="title function_">getResponseField</span>(</span><br><span class="line">                <span class="string">&quot;BestCandidate.InferenceContainers.0.ModelDataUrl&quot;</span></span><br><span class="line">              ),</span><br><span class="line">              <span class="attr">environment</span>: &#123;</span><br><span class="line">                <span class="attr">AUTOML_SPARSE_ENCODE_RECORDIO_PROTOBUF</span>:</span><br><span class="line">                  describeAutoMLJobResource.<span class="title function_">getResponseField</span>(</span><br><span class="line">                    <span class="string">&quot;BestCandidate.InferenceContainers.0.Environment.AUTOML_SPARSE_ENCODE_RECORDIO_PROTOBUF&quot;</span></span><br><span class="line">                  ),</span><br><span class="line">                <span class="attr">AUTOML_TRANSFORM_MODE</span>:</span><br><span class="line">                  describeAutoMLJobResource.<span class="title function_">getResponseField</span>(</span><br><span class="line">                    <span class="string">&quot;BestCandidate.InferenceContainers.0.Environment.AUTOML_TRANSFORM_MODE&quot;</span></span><br><span class="line">                  ),</span><br><span class="line">                <span class="attr">SAGEMAKER_DEFAULT_INVOCATIONS_ACCEPT</span>:</span><br><span class="line">                  describeAutoMLJobResource.<span class="title function_">getResponseField</span>(</span><br><span class="line">                    <span class="string">&quot;BestCandidate.InferenceContainers.0.Environment.SAGEMAKER_DEFAULT_INVOCATIONS_ACCEPT&quot;</span></span><br><span class="line">                  ),</span><br><span class="line">                <span class="attr">SAGEMAKER_PROGRAM</span>: describeAutoMLJobResource.<span class="title function_">getResponseField</span>(</span><br><span class="line">                  <span class="string">&quot;BestCandidate.InferenceContainers.0.Environment.SAGEMAKER_PROGRAM&quot;</span></span><br><span class="line">                ),</span><br><span class="line">                <span class="attr">SAGEMAKER_SUBMIT_DIRECTORY</span>:</span><br><span class="line">                  describeAutoMLJobResource.<span class="title function_">getResponseField</span>(</span><br><span class="line">                    <span class="string">&quot;BestCandidate.InferenceContainers.0.Environment.SAGEMAKER_SUBMIT_DIRECTORY&quot;</span></span><br><span class="line">                  ),</span><br><span class="line">              &#125;,</span><br><span class="line">            &#125;,</span><br><span class="line">            &#123;</span><br><span class="line">              <span class="attr">image</span>: describeAutoMLJobResource.<span class="title function_">getResponseField</span>(</span><br><span class="line">                <span class="string">&quot;BestCandidate.InferenceContainers.1.Image&quot;</span></span><br><span class="line">              ),</span><br><span class="line">              <span class="attr">modelDataUrl</span>: describeAutoMLJobResource.<span class="title function_">getResponseField</span>(</span><br><span class="line">                <span class="string">&quot;BestCandidate.InferenceContainers.1.ModelDataUrl&quot;</span></span><br><span class="line">              ),</span><br><span class="line">              <span class="attr">environment</span>: &#123;</span><br><span class="line">                <span class="attr">MAX_CONTENT_LENGTH</span>: describeAutoMLJobResource.<span class="title function_">getResponseField</span>(</span><br><span class="line">                  <span class="string">&quot;BestCandidate.InferenceContainers.1.Environment.MAX_CONTENT_LENGTH&quot;</span></span><br><span class="line">                ),</span><br><span class="line">                <span class="attr">SAGEMAKER_DEFAULT_INVOCATIONS_ACCEPT</span>:</span><br><span class="line">                  describeAutoMLJobResource.<span class="title function_">getResponseField</span>(</span><br><span class="line">                    <span class="string">&quot;BestCandidate.InferenceContainers.1.Environment.SAGEMAKER_DEFAULT_INVOCATIONS_ACCEPT&quot;</span></span><br><span class="line">                  ),</span><br><span class="line">              &#125;,</span><br><span class="line">            &#125;,</span><br><span class="line">          ],</span><br><span class="line">        &#125;</span><br><span class="line">      );</span><br><span class="line">      <span class="keyword">const</span> endpointConfig = <span class="keyword">new</span> sagemaker.<span class="title class_">CfnEndpointConfig</span>(</span><br><span class="line">        <span class="variable language_">this</span>,</span><br><span class="line">        <span class="string">`<span class="subst">$&#123;props.envName&#125;</span>-<span class="subst">$&#123;autoMLJobName&#125;</span>-EndpointConfig`</span>,</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">endpointConfigName</span>: <span class="string">`<span class="subst">$&#123;props.envName&#125;</span>-<span class="subst">$&#123;autoMLJobName&#125;</span>-EndpointConfig`</span>,</span><br><span class="line">          <span class="attr">productionVariants</span>: [</span><br><span class="line">            &#123;</span><br><span class="line">              <span class="attr">instanceType</span>: <span class="string">&quot;ml.m5.large&quot;</span>,</span><br><span class="line">              <span class="attr">initialInstanceCount</span>: <span class="number">1</span>,</span><br><span class="line">              <span class="attr">modelName</span>: model.<span class="property">modelName</span>,</span><br><span class="line">              <span class="attr">variantName</span>: <span class="string">&quot;AllTraffic&quot;</span>,</span><br><span class="line">              <span class="attr">initialVariantWeight</span>: <span class="number">1</span>,</span><br><span class="line">            &#125;,</span><br><span class="line">          ],</span><br><span class="line">        &#125;</span><br><span class="line">      );</span><br><span class="line">      endpointConfig.<span class="title function_">addDependency</span>(model);</span><br><span class="line">      <span class="keyword">const</span> endpoint = <span class="keyword">new</span> sagemaker.<span class="title class_">CfnEndpoint</span>(</span><br><span class="line">        <span class="variable language_">this</span>,</span><br><span class="line">        <span class="string">`<span class="subst">$&#123;props.envName&#125;</span>-<span class="subst">$&#123;autoMLJobName&#125;</span>-Endpoint`</span>,</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">endpointConfigName</span>: endpointConfig.<span class="property">endpointConfigName</span>,</span><br><span class="line">          <span class="attr">endpointName</span>: <span class="string">`<span class="subst">$&#123;props.envName&#125;</span>-<span class="subst">$&#123;autoMLJobName&#125;</span>-Endpoint`</span>,</span><br><span class="line">        &#125;</span><br><span class="line">      );</span><br><span class="line">      endpoint.<span class="title function_">addDependency</span>(endpointConfig);</span><br><span class="line">      <span class="keyword">new</span> <span class="title class_">CfnOutput</span>(<span class="variable language_">this</span>, <span class="string">`<span class="subst">$&#123;props.envName&#125;</span>-<span class="subst">$&#123;autoMLJobName&#125;</span>-EndpointName`</span>, &#123;</span><br><span class="line">        <span class="attr">exportName</span>: <span class="string">`<span class="subst">$&#123;props.envName&#125;</span>-<span class="subst">$&#123;autoMLJobName&#125;</span>-EndpointName`</span>,</span><br><span class="line">        <span class="attr">value</span>: endpoint.<span class="property">endpointName</span>,</span><br><span class="line">      &#125;);</span><br><span class="line"></span><br><span class="line">      <span class="comment">// auto scaling for endpoint</span></span><br><span class="line">      <span class="keyword">const</span> scalableTarget = <span class="keyword">new</span> appscaling.<span class="title class_">CfnScalableTarget</span>(</span><br><span class="line">        <span class="variable language_">this</span>,</span><br><span class="line">        <span class="string">`<span class="subst">$&#123;props.envName&#125;</span>-<span class="subst">$&#123;autoMLJobName&#125;</span>-ScalableTarget`</span>,</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">serviceNamespace</span>: appscaling.<span class="property">ServiceNamespace</span>.<span class="property">SAGEMAKER</span>,</span><br><span class="line">          <span class="attr">scalableDimension</span>: <span class="string">&quot;sagemaker:variant:DesiredInstanceCount&quot;</span>,</span><br><span class="line">          <span class="attr">resourceId</span>: <span class="string">`endpoint/<span class="subst">$&#123;endpoint.endpointName&#125;</span>/variant/AllTraffic`</span>,</span><br><span class="line">          <span class="attr">minCapacity</span>: <span class="number">1</span>,</span><br><span class="line">          <span class="attr">maxCapacity</span>: <span class="number">2</span>,</span><br><span class="line">        &#125;</span><br><span class="line">      );</span><br><span class="line">      scalableTarget.<span class="title function_">addDependency</span>(endpoint);</span><br><span class="line">      <span class="keyword">const</span> scalingPolicy = <span class="keyword">new</span> appscaling.<span class="title class_">CfnScalingPolicy</span>(</span><br><span class="line">        <span class="variable language_">this</span>,</span><br><span class="line">        <span class="string">`<span class="subst">$&#123;props.envName&#125;</span>-<span class="subst">$&#123;autoMLJobName&#125;</span>-ScalingPolicy`</span>,</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="attr">policyName</span>: <span class="string">`<span class="subst">$&#123;props.envName&#125;</span>-<span class="subst">$&#123;autoMLJobName&#125;</span>-ScalingPolicy`</span>,</span><br><span class="line">          <span class="attr">scalingTargetId</span>: scalableTarget.<span class="property">ref</span>,</span><br><span class="line">          <span class="attr">policyType</span>: <span class="string">&quot;TargetTrackingScaling&quot;</span>,</span><br><span class="line">          <span class="attr">targetTrackingScalingPolicyConfiguration</span>: &#123;</span><br><span class="line">            <span class="attr">targetValue</span>: <span class="number">70</span>,</span><br><span class="line">            <span class="attr">predefinedMetricSpecification</span>: &#123;</span><br><span class="line">              <span class="attr">predefinedMetricType</span>: <span class="string">&quot;SageMakerVariantInvocationsPerInstance&quot;</span>,</span><br><span class="line">            &#125;,</span><br><span class="line">            <span class="attr">scaleOutCooldown</span>: <span class="number">300</span>,</span><br><span class="line">            <span class="attr">scaleInCooldown</span>: <span class="number">60</span>,</span><br><span class="line">          &#125;,</span><br><span class="line">        &#125;</span><br><span class="line">      );</span><br><span class="line">      scalingPolicy.<span class="title function_">addDependency</span>(scalableTarget);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>[!important]<br>在 appscaling.CfnScalingPolicy 的时候会出创建自定义策略来实现伸缩, 但是 endpoint 默认还有一个内置策略名字是: <strong>SageMakerEndpointInvocationScalingPolicy</strong>, 如果将<code>policyName</code>名称修改为内置策略名称则可以修改内置策略来实现伸缩.</p>
+</blockquote>
+<h1 id="5-Lambda-调用"><a href="#5-Lambda-调用" class="headerlink" title="5. Lambda 调用"></a>5. Lambda 调用</h1><ul>
+<li><p>权限设置</p>
+<p>以<code>serverless</code>框架为例, 在 serverless.ts 的 iam.role 中配置如下权限语句</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// SageMaker</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="title class_">Effect</span>: <span class="string">&#x27;Allow&#x27;</span>,</span><br><span class="line">  <span class="title class_">Action</span>: [<span class="string">&#x27;sagemaker:*&#x27;</span>],</span><br><span class="line">  <span class="title class_">Resource</span>: [<span class="string">&#x27;arn:aws-cn:sagemaker:$&#123;self:provider.region&#125;:*:endpoint/*&#x27;</span>],</span><br><span class="line">&#125;,</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>调用</p>
+<p>使用<code>@aws-sdk/client-sagemaker-runtime</code>客户端进行调用. 首先生成客户端</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">readonly</span> smClient = <span class="keyword">new</span> <span class="title class_">SageMakerRuntimeClient</span>()</span><br></pre></td></tr></table></figure>
+
+<p>然后使用客户端进行调用和调用 S3 类似:</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="title function_">invokeSegemaker</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> result = <span class="keyword">await</span> <span class="variable language_">this</span>.<span class="property">smClient</span>.<span class="title function_">send</span>(</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">InvokeEndpointCommand</span>(&#123;</span><br><span class="line">      <span class="title class_">EndpointName</span>: <span class="variable language_">this</span>.<span class="property">configService</span>.<span class="title function_">get</span>(<span class="string">&#x27;demoMLModelEndpoint&#x27;</span>),</span><br><span class="line">      <span class="title class_">ContentType</span>: <span class="string">&#x27;text/csv&#x27;</span>,</span><br><span class="line">      <span class="title class_">Body</span>: <span class="string">`product_code,product_category,product_subcategory,location_code,scaled_price,promotion_email,promotion_homepage,timestamp</span></span><br><span class="line"><span class="string">1062,Beverages,Fruit Juice Mango,110,0.878183107,0,0,2018-01-01</span></span><br><span class="line"><span class="string">1062,Beverages,Fruit Juice Mango,110,1.0,0,0,2018-01-08</span></span><br><span class="line"><span class="string">1062,Beverages,Fruit Juice Mango,110,1.005453752,0,0,2018-01-15</span></span><br><span class="line"><span class="string">1062,Beverages,Fruit Juice Mango,110,1.0,0,0,2018-01-22</span></span><br><span class="line"><span class="string">1062,Beverages,Fruit Juice Mango,110,0.887865924,0,0,2018-01-29</span></span><br><span class="line"><span class="string">1062,Beverages,Fruit Juice Mango,110,0.872730247,0,0,2018-02-05</span></span><br><span class="line"><span class="string">1062,Beverages,Fruit Juice Mango,110,0.888925241,0,0,2018-02-12`</span>,</span><br><span class="line">    &#125;)</span><br><span class="line">  )</span><br><span class="line">  <span class="keyword">return</span> &#123;</span><br><span class="line">    <span class="attr">body</span>: <span class="title class_">Buffer</span>.<span class="title function_">from</span>(result.<span class="property">Body</span>).<span class="title function_">toString</span>(),</span><br><span class="line">    <span class="attr">httpStatusCode</span>: result.<span class="property">$metadata</span>.<span class="property">httpStatusCode</span>,</span><br><span class="line">    <span class="attr">contentType</span>: result.<span class="property">ContentType</span>,</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>返回结果如下:</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">  <span class="attr">&quot;code&quot;</span><span class="punctuation">:</span> <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;message&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;error&quot;</span><span class="punctuation">:</span> <span class="literal"><span class="keyword">null</span></span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">&quot;data&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span></span><br><span class="line">    <span class="attr">&quot;body&quot;</span><span class="punctuation">:</span> <span class="string">&quot;396.341796875\n214.32861328125\n204.45921325683594\n208.49118041992188\n205.5048370361328\n214.2066650390625\n214.7940673828125\n214.4359893798828\n&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;httpStatusCode&quot;</span><span class="punctuation">:</span> <span class="number">200</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">&quot;contentType&quot;</span><span class="punctuation">:</span> <span class="string">&quot;text/csv; charset=utf-8&quot;</span></span><br><span class="line">  <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>[!important]<br>注意返回类型是 text&#x2F;csv, 可以通过换行符<code>\n</code>来分割数据, 每一行数据则是调用时所传每一行参数的预测结果</p>
+</blockquote>
+</li>
+</ul>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2024/08/14/data-wrangling-toturial/" class="article-next" title="机器学习--数据整理"><i class="icon-arrow-right"></i></a>
+
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "73af0bf14a90d042e2f89eacbca8289e",
+        distractionFreeMode: true,
+        title: "机器学习--模型部署和调用",
+        body: "https://nnsay.github.io/2024/08/21/deploy-ml-model/",
+        labels: ["研究","Code"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?1f97030bb3a44256d81e14447104bef8";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+    
+    
+      <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+      </script>
+        <!-- <script src='https://unpkg.com/mermaid@10/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script> -->
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

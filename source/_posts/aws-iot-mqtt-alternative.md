@@ -1,10 +1,10 @@
 ---
-title: aws iot mqtt alternative
+title: EMQX应用实践
 date: 2024-10-29 11:01:06
 tags:
   - Code
   - 研究
-excerpt: 使用 EMQ 代替 AWS IoT MQTT
+excerpt: 使用 EMQX 代替 AWS IoT MQTT
 ---
 
 # 1. 问题背景

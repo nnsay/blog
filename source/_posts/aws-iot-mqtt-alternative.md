@@ -16,7 +16,7 @@ AWS IoT 的 MQTT 协议有一些限制:
 - Topic 不能使用$开头
 - 默认的 IoT 证书有效期五年(但支持自签证书)
 
-同时, 市场上的一些 IoT 设备大多都是通过用户名密码方式认证客户端的而不是证书认证, 所以如果要使用 AWS IoT 就有很多不便, 所以最好是有一种更通用和开放性的 MQTT Broker, 最好也有一定的扩展性, 比如可以和现有其他厂商或者服务集成
+同时, 市场上的一些 IoT 设备大多都是通过用户名密码方式认证客户端的而不是证书认证, 所以如果要使用 AWS IoT 就有很多不便, 所以最好是有一种更通用和开放性的 MQTT Broker, 最好也有一定的扩展性, 比如可以和现有其他厂商或者服务集成.
 
 # 2. [EMQX](https://www.emqx.com/zh)介绍
 
@@ -84,9 +84,9 @@ AWS IoT 的 MQTT 协议有一些限制:
 
 ## 2.3 专业性
 
-EMQ 是[mqtt.org](https://mqtt.org/software/)推荐的云 Broker 产品.
+EMQX 是[mqtt.org](https://mqtt.org/software/)推荐云 Broker 产品.
 
-# 3. EMQ 使用和实践
+# 3. EMQX 使用和实践
 
 ## 3.1 访问控制
 
@@ -98,9 +98,9 @@ EMQ 是[mqtt.org](https://mqtt.org/software/)推荐的云 Broker 产品.
 
 强烈建议[开启授权白名单模式](https://docs.emqx.com/zh/cloud/latest/deployments/default_authz.html#%E5%BC%80%E5%90%AF%E6%8E%88%E6%9D%83%E7%99%BD%E5%90%8D%E5%8D%95%E6%A8%A1%E5%BC%8F): 点击部署左侧菜单中的**访问控制**-> **客户端授权**，在**全部用户**标签下添加一条授权信息，**主题**中输入 `#`，**主题动作**选择`发布 & 订阅`，**权限**选择`不允许`，点击**确认**开启白名单模式。
 
-## 3.2 EMQ 连接器--HTTP Server
+## 3.2 EMQX 连接器--HTTP Server
 
-该连接器可以[将 MQTT 数据发送到 HTTP 服务](https://docs.emqx.com/zh/cloud/latest/data_integration/http_server.html), 架构上看 EMQ 是一层代理将 MQTT 转 HTTP, 业务上只需要实现一个接口可以处理 HTTP 请求即可.
+该连接器可以[将 MQTT 数据发送到 HTTP 服务](https://docs.emqx.com/zh/cloud/latest/data_integration/http_server.html), 架构上看 EMQX 是一层代理将 MQTT 转 HTTP, 业务上只需要实现一个接口可以处理 HTTP 请求即可.
 
 自定义一个 HTTP 服务, 这个服务可以使用现有 API, 安全考虑可以在 HTTP 服务请求头中增加 JWT, 然后在现有 API 测进行验证, 然后配置规则, 将 EMQX 收到的消息使用 HTTP 服务发送到现有 API 服务, 进而打通数据交互.
 
@@ -157,7 +157,7 @@ export class AppController {
   async mqttReceive(@Body() body, @Headers("Authorization") token) {
     const data = Buffer.from(body).toString();
     const receiveData = { data, token };
-    const secret = Buffer.from("jimmys-emq-research-http-server");
+    const secret = Buffer.from("jimmys-emqx-research-http-server");
     const jwtResult = await jose.jwtVerify(token, secret);
     console.log({ jwtResult, receiveData });
     const parsedData = JSON.parse(data) as {
@@ -175,7 +175,7 @@ export class AppController {
 
 > [!note]
 >
-> 使用 secret 生成的 token 被配置到了 EMQ, 这里读取后验证, 需要注意要使用同一个 secret.
+> 使用 secret 生成的 token 被配置到了 EMQX, 这里读取后验证, 需要注意要使用同一个 secret.
 
 # 4. 总结
 

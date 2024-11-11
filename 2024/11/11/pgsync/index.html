@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>PostgreSQL数据同步利器--pgsync | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="1. 同步 PostgreSQL 数据同步数据是常见的需求, 例如在 sandbox 环境做了一些数据配置, 然后将这些数据配置同步到另外的环境. 复杂而稳定的同步方案通常来说是副本集; 如果不考虑实时性仅仅同步一些历史数据那可以采用 SQL 文件, 本文主要研究后者.普通的 SQL 方案即: 将源数据库导出为 SQL 文件, 然后将 SQL 文件在目标数据库执行. 小数据量的时候这种方式手动来做也还行, 但是数据库量大了后执行效率就比较低, 本文介绍一种 CLI 工具来完成手动工作, 并可通过" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 6.3.0"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E5%90%8C%E6%AD%A5-PostgreSQL-%E6%95%B0%E6%8D%AE"><span class="toc-text">1. 同步 PostgreSQL 数据</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-%E5%AE%9E%E8%B7%B5"><span class="toc-text">2. 实践</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="toc-text">2.1 初始化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-%E9%85%8D%E7%BD%AE"><span class="toc-text">2.2 配置</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3-%E6%89%A7%E8%A1%8C%E5%90%8C%E6%AD%A5"><span class="toc-text">2.3 执行同步</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E6%80%BB%E7%BB%93"><span class="toc-text">3. 总结</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            PostgreSQL数据同步利器--pgsync
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2024/11/11/pgsync/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2024-11-11T10:20:19.000Z" itemprop="datePublished">2024-11-11</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/Tips/" rel="tag">Tips</a>, <a class="article-tag-link" href="/tags/%E5%B7%A5%E5%85%B7/" rel="tag">工具</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h1 id="1-同步-PostgreSQL-数据"><a href="#1-同步-PostgreSQL-数据" class="headerlink" title="1. 同步 PostgreSQL 数据"></a>1. 同步 PostgreSQL 数据</h1><p>同步数据是常见的需求, 例如在 sandbox 环境做了一些数据配置, 然后将这些数据配置同步到另外的环境. 复杂而稳定的同步方案通常来说是副本集; 如果不考虑实时性仅仅同步一些历史数据那可以采用 SQL 文件, 本文主要研究后者.</p>
+<p>普通的 SQL 方案即: 将源数据库导出为 SQL 文件, 然后将 SQL 文件在目标数据库执行. 小数据量的时候这种方式手动来做也还行, 但是数据库量大了后执行效率就比较低, 本文介绍一种 CLI 工具来完成手动工作, 并可通过配置并发来增加执行效率, 这个工具就是: <a target="_blank" rel="noopener" href="https://github.com/ankane/pgsync">pgsync</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/ankane/pgsync">pgsync</a> 在 github 上有 2.3k 个 star, 属于高分项目. 在 mac 上安装 pgsync 如下:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">brew install pgsync</span><br></pre></td></tr></table></figure>
+
+<p>因为这个项目是 ruby 写的, 也可以通过 gem 安装:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gem install pgsync</span><br></pre></td></tr></table></figure>
+
+<h1 id="2-实践"><a href="#2-实践" class="headerlink" title="2. 实践"></a>2. 实践</h1><h2 id="2-1-初始化"><a href="#2-1-初始化" class="headerlink" title="2.1 初始化"></a>2.1 初始化</h2><p>初始化会产生一个配置模板, 然后通过编辑这个文件提供数据同步的数据库信息. 这个步骤不是必须的, 因为可以通过命令行参数提供相同的信息, 但是我建议还是创建一个, 毕竟修改命令行参数不是很方便.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pgsync --init</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-2-配置"><a href="#2-2-配置" class="headerlink" title="2.2 配置"></a>2.2 配置</h2><p>按照初始化之后的配置模板文件中的提示完成相关的配置, 配置很简单不复杂. 主要的配置项有: from&#x2F;to&#x2F;exclude, 如果需要分组可以配置: group, 如果配置的地址不是 localhost 还需要设置: to_safe: true.</p>
+<p>这里给出我的一个本地测试配置:</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># source database URL</span></span><br><span class="line"><span class="comment"># database URLs take the format of:</span></span><br><span class="line"><span class="comment">#   postgres://user:password@host:port/dbname</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># we recommend a command which outputs a database URL</span></span><br><span class="line"><span class="comment"># so sensitive information is not included in this file</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># we *highly recommend* you use sslmode=verify-full when possible</span></span><br><span class="line"><span class="comment"># see https://ankane.org/postgres-sslmode-explained for more info</span></span><br><span class="line"><span class="attr">from:</span> <span class="string">postgresql://root:1qaz2wsx@localhost:5432/solarsketch</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># destination database URL</span></span><br><span class="line"><span class="attr">to:</span> <span class="string">postgresql://root:1qaz2wsx@localhost:5432/solarsketch-debug</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># exclude tables</span></span><br><span class="line"><span class="attr">exclude:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">&quot;*&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># define groups</span></span><br><span class="line"><span class="attr">groups:</span></span><br><span class="line">  <span class="attr">demo:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">DemoPost</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">DemoUser</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># sync specific schemas</span></span><br><span class="line"><span class="comment"># schemas:</span></span><br><span class="line"><span class="comment">#   - public</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># protect sensitive information</span></span><br><span class="line"><span class="attr">data_rules:</span></span><br><span class="line">  <span class="attr">email:</span> <span class="string">unique_email</span></span><br><span class="line">  <span class="attr">phone:</span> <span class="string">unique_phone</span></span><br><span class="line">  <span class="attr">last_name:</span> <span class="string">random_letter</span></span><br><span class="line">  <span class="attr">birthday:</span> <span class="string">random_date</span></span><br><span class="line">  <span class="string">encrypted_*:</span> <span class="literal">null</span></span><br><span class="line"></span><br><span class="line"><span class="attr">to_safe:</span> <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>[!note]</p>
+<p>exclude 配置为”*“, 同步的时候我倾向使用白名单, 但是该工具似乎没有, 所以我先排除所有的表, 然后在 group 中配置自己需要的表, 使用这种方式间接实现白名单功能</p>
+</blockquote>
+<p>验证配置是否合法:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pgsync --list</span><br></pre></td></tr></table></figure>
+
+<p>如果可以正常输出 from&#x2F;to 的数据库连接信息就说明配置正确了, 如果没有将 exclude 设置为”*“则还可以看到要同步的表的名称列表.</p>
+<h2 id="2-3-执行同步"><a href="#2-3-执行同步" class="headerlink" title="2.3 执行同步"></a>2.3 执行同步</h2><p>执行同步命令格式: pgsync [tables,groups] [sql] [options]. 如果对命令不熟悉可以通过: pgsync –help 来了解如何使用.</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pgsync demo --overwrite</span><br></pre></td></tr></table></figure>
+
+<p>以上命令作用是 执行 demo 分组中的所有表的同步, 并且在数据行上使用 overwrite 策略. 行策略有三种:</p>
+<ul>
+<li>overwrite: 如果目标存在, 则使用源数据重新目标数据</li>
+<li>preserve: 如果目标存在, 则不做任何修改</li>
+<li>truncate: 默认行为, 先 truncate 目标表, 然后执行同步</li>
+</ul>
+<blockquote>
+<p>[!note]<br>如果有多个表需要同步, 默认情况顺序同步, 可以通过 –jobs 设置并行同步表的个数.</p>
+</blockquote>
+<h1 id="3-总结"><a href="#3-总结" class="headerlink" title="3. 总结"></a>3. 总结</h1><p>经过在 mac 平台的测试, 从一个远程的数据库同步到另外一个远程数据库且不做表并发, 同步速度: 740 row&#x2F;s. 个人感觉对于百万行的数据同步足以使用该工具解决, 推荐使用.</p>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2024/10/29/aws-iot-mqtt-alternative/" class="article-next" title="EMQX应用实践"><i class="icon-arrow-right"></i></a>
+
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "014a775c2c371de7a7362f8a9e003947",
+        distractionFreeMode: true,
+        title: "PostgreSQL数据同步利器--pgsync",
+        body: "https://nnsay.github.io/2024/11/11/pgsync/",
+        labels: ["Tips","工具"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?1f97030bb3a44256d81e14447104bef8";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+    
+    
+      <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+      </script>
+        <!-- <script src='https://unpkg.com/mermaid@10/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script> -->
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

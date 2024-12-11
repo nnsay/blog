@@ -11,7 +11,7 @@ date: 2019-10-21 00:37:18
   - IaaC: Terraform, CDK
   - 公有云: Aliyun, AWS
 - Github: [nnsay](https://github.com/nnsay)
-- 简历: [简历(2023-02-15 版)](/about/index/王健的简历.pdf)
+- 简历: [简历(2023-02-15)](/about/index/王健的简历.pdf)
 - 求职地址: 北京, 西安
 
 <!-- | | Description |
@@ -22,7 +22,7 @@ date: 2019-10-21 00:37:18
 | Github | [nnsay](https://github.com/nnsay) |
 | 简历 | [简历(2023-02-15 版)](/about/index/王健的简历.pdf) | -->
 
-![nnsay’s GitHub image](https://scastiel.dev/api/image/nnsay?&removeLink)
+![nnsay’s GitHub image](https://scastiel.dev/api/image/nnsay?dark&removeLink)
 
 ### 工作成就
 

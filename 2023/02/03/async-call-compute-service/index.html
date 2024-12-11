@@ -10,7 +10,7 @@
     <title>AWS/Aliyun函数计算异步调用 | Jimmy&#39;s Blog</title>
     <meta name="author" content="Jimmy Wang" />
     <meta name="keywords" content="" />
-    <meta name="description" content="0. 问题背景介绍aws和aliyun的函数计算常用的都是同步调用, 同步调用当语言本身支持CSP方式还好(不阻塞主流程, 但是可能触发阈值限流), 但是当没有异步处理同步函数调用可能会面临超时和限流的问题, 因此对于函数计算调用较多的业务应该选择更科学的调用方式–函数计算异步调用.1. 阿里云-函数计算同步调用使用限制资源调用限制：您的阿里云账号（主账号）在单个地域内默认的按量实例上限数为300.阿里云沟通: 文档的意思是主账号下面的 RAM，STS，主账号自己 等等各种账号 共享这 300个" />
+    <meta name="description" content="0. 问题背景介绍aws 和 aliyun 的函数计算常用的都是同步调用, 同步调用当语言本身支持 CSP 方式还好(不阻塞主流程, 但是可能触发阈值限流), 但是当没有异步处理同步函数调用可能会面临超时和限流的问题, 因此对于函数计算调用较多的业务应该选择更科学的调用方式–函数计算异步调用.1. 阿里云-函数计算同步调用使用限制资源调用限制：您的阿里云账号（主账号）在单个地域内默认的按量实例上限数为 300.阿里云沟通: 文档的意思是主账号下面的 RAM，STS，主账号自己 等等各种账号 共享" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
 
@@ -38,7 +38,7 @@
 
 
     <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
-<meta name="generator" content="Hexo 6.3.0"></head>
+<meta name="generator" content="Hexo 7.3.0"></head>
 <body>
 
     <main class="app">
@@ -114,7 +114,7 @@
             
 <div class="article-tag-list">
     <i class="icon-tag vm"></i>
-    <a class="article-tag-link" href="/tags/Aliyun/" rel="tag">Aliyun</a>, <a class="article-tag-link" href="/tags/CloudNative/" rel="tag">CloudNative</a>, <a class="article-tag-link" href="/tags/DevOps/" rel="tag">DevOps</a>
+    <a class="article-tag-link" href="/tags/AWS/" rel="tag">AWS</a>, <a class="article-tag-link" href="/tags/Aliyun/" rel="tag">Aliyun</a>, <a class="article-tag-link" href="/tags/CloudNative/" rel="tag">CloudNative</a>, <a class="article-tag-link" href="/tags/DevOps/" rel="tag">DevOps</a>
 </div>
 
 
@@ -123,19 +123,19 @@
     
     <section class="article-body markdown-body">
         
-        <h2 id="0-问题背景介绍"><a href="#0-问题背景介绍" class="headerlink" title="0. 问题背景介绍"></a>0. 问题背景介绍</h2><p>aws和aliyun的函数计算常用的都是同步调用, 同步调用当语言本身支持CSP方式还好(不阻塞主流程, 但是可能触发阈值限流), 但是当没有异步处理同步函数调用可能会面临超时和限流的问题, 因此对于函数计算调用较多的业务应该选择更科学的调用方式–函数计算异步调用.</p>
+        <h2 id="0-问题背景介绍"><a href="#0-问题背景介绍" class="headerlink" title="0. 问题背景介绍"></a>0. 问题背景介绍</h2><p>aws 和 aliyun 的函数计算常用的都是同步调用, 同步调用当语言本身支持 CSP 方式还好(不阻塞主流程, 但是可能触发阈值限流), 但是当没有异步处理同步函数调用可能会面临超时和限流的问题, 因此对于函数计算调用较多的业务应该选择更科学的调用方式–函数计算异步调用.</p>
 <h2 id="1-阿里云-函数计算"><a href="#1-阿里云-函数计算" class="headerlink" title="1. 阿里云-函数计算"></a>1. 阿里云-<a target="_blank" rel="noopener" href="https://help.aliyun.com/product/50980.html">函数计算</a></h2><ul>
 <li><p><a target="_blank" rel="noopener" href="https://help.aliyun.com/document_detail/52878.html">同步调用</a></p>
 <ul>
 <li><p>使用限制</p>
-<p>资源调用限制：您的阿里云账号（主账号）在单个地域内默认的按量实例上限数为300.</p>
-<p>阿里云沟通: 文档的意思是主账号下面的 RAM，STS，主账号自己 等等各种账号 共享这 300个实例。比如主账号同时占用了 200个实例，ram 和 sts 只能用 100 个实例了. 1 个实例可以配置并发度从 1 到 100，所以默认 300个实例，最大并发度是 100*300 &#x3D; 3万个. 请求 1，2，3，4，5, ……, 300 ，这300个请求如果把实例用完了，第 301 个请求就报错限流了。但是如果在第 302 个请求来的时候，请求 1 已经处理完了，这个第 302 个请求就不会报错了.</p>
-<p>目前我们阿里所有的函数实例配置都是1, 所以我们账号级别(app&#x2F;stagging)下所有产品所有服务整合其他最大并发是300.</p>
+<p>资源调用限制：您的阿里云账号（主账号）在单个地域内默认的按量实例上限数为 300.</p>
+<p>阿里云沟通: 文档的意思是主账号下面的 RAM，STS，主账号自己 等等各种账号 共享这 300 个实例。比如主账号同时占用了 200 个实例，ram 和 sts 只能用 100 个实例了. 1 个实例可以配置并发度从 1 到 100，所以默认 300 个实例，最大并发度是 100*300 &#x3D; 3 万个. 请求 1，2，3，4，5, ……, 300 ，这 300 个请求如果把实例用完了，第 301 个请求就报错限流了。但是如果在第 302 个请求来的时候，请求 1 已经处理完了，这个第 302 个请求就不会报错了.</p>
+<p>目前我们阿里所有的函数实例配置都是 1, 所以我们账号级别(app&#x2F;stagging)下所有产品所有服务整合其他最大并发是 300.</p>
 </li>
 <li><p>限制分析</p>
 <ul>
-<li>300限制不大</li>
-<li>300的限制是按服务实例的, 疗法云和科研云共享实例, m42环境本月最高到25</li>
+<li>300 限制不大</li>
+<li>300 的限制是按服务实例的, 疗法云和科研云共享实例, m42 环境本月最高到 25</li>
 </ul>
 </li>
 </ul>
@@ -144,16 +144,16 @@
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> main</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">    <span class="string">&quot;fmt&quot;</span></span><br><span class="line">    <span class="string">&quot;os&quot;</span></span><br><span class="line"></span><br><span class="line">    <span class="string">&quot;github.com/aliyun/fc-go-sdk&quot;</span></span><br><span class="line">)</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    fcClient, err := fc.NewClient(fmt.Sprintf(<span class="string">&quot;%s.cn-shanghai.fc.aliyuncs.com&quot;</span>, os.Getenv(<span class="string">&quot;ACCOUNT_ID&quot;</span>)),</span><br><span class="line">        <span class="string">&quot;2016-08-15&quot;</span>, os.Getenv(<span class="string">&quot;ACCESS_KEY_ID&quot;</span>), os.Getenv(<span class="string">&quot;ACCESS_KEY_ID_SECRET&quot;</span>))</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="built_in">panic</span>(err)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// invoke function with delay</span></span><br><span class="line">    invokeInput := fc.NewInvokeFunctionInput(&#123;ServiceName&#125;, &#123;FunctionName&#125;).WithPayload(&#123;payload&#125;)</span><br><span class="line">    invokeInput = invokeInput.WithAsyncInvocation().WithHeader(<span class="string">&quot;x-fc-async-delay&quot;</span>, <span class="string">&quot;200&quot;</span>)</span><br><span class="line">    _, err := FCClient.InvokeFunction(invokeInput)</span><br><span class="line">    <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="built_in">panic</span>(err)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <ul>
-<li><em><strong>重试次数</strong></em>: 默认三次</li>
+<li><strong><em>重试次数</em></strong>: 默认三次</li>
 </ul>
 </li>
 <li><p>代码现状</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">testFc</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="type">InvokeFunctionRequest</span> <span class="variable">invokeReq</span> <span class="operator">=</span> InvokeFunctionRequest.builder()</span><br><span class="line">                .serviceName(<span class="string">&quot;fc-debug&quot;</span>)</span><br><span class="line">                .functionName(<span class="string">&quot;fc-debug-function1&quot;</span>)</span><br><span class="line">                .body(<span class="string">&quot;&#123;&#125;&quot;</span>.getBytes())</span><br><span class="line">                .requestConfiguration(RequestConfiguration.create()</span><br><span class="line">                        .setResponseTimeout(Duration.ofMinutes(<span class="number">3</span>)))</span><br><span class="line">                .build();</span><br><span class="line">        <span class="type">String</span> <span class="variable">xFcInvocationType</span> <span class="operator">=</span> invokeReq.getXFcInvocationType();</span><br><span class="line">        log.info(<span class="string">&quot;invoke type: &#123;&#125;&quot;</span>, xFcInvocationType);</span><br><span class="line">        CompletableFuture&lt;InvokeFunctionResponse&gt; response = <span class="built_in">this</span>.fcClient.invokeFunction(invokeReq);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
 
-<p>第10行为空, 而源码:</p>
+<p>第 10 行为空, 而源码:</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 调用方式:Sync或者Async，默认值：Sync</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> Builder <span class="title function_">xFcInvocationType</span><span class="params">(String xFcInvocationType)</span> &#123;</span><br><span class="line">    <span class="built_in">this</span>.putHeaderParameter(<span class="string">&quot;X-Fc-Invocation-Type&quot;</span>, xFcInvocationType);</span><br><span class="line">    <span class="built_in">this</span>.xFcInvocationType = xFcInvocationType;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">this</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>从源码我们的现在的FC是<em><strong>同步调用</strong></em>的, 即有300的并发限制, 现有调用是同步也可以从阿里云控制台得知:<br><a target="_blank" rel="noopener" href="https://fcnext.console.aliyun.com/cn-hangzhou/services/m42-ng-fc/function-detail/m42-ptc-surf2surf/LATEST?tab=log">https://fcnext.console.aliyun.com/cn-hangzhou/services/m42-ng-fc/function-detail/m42-ptc-surf2surf/LATEST?tab=log</a><br><a target="_blank" rel="noopener" href="https://fcnext.console.aliyun.com/cn-hangzhou/services/m42-ng-fc/function-detail/m42-apply-dicom/LATEST?tab=log">https://fcnext.console.aliyun.com/cn-hangzhou/services/m42-ng-fc/function-detail/m42-apply-dicom/LATEST?tab=log</a><br>(点击任意请求ID, 在右侧弹框顶部状态栏有调用方式的显示)</p>
+<p>从源码我们的现在的 FC 是**<em>同步调用</em>**的, 即有 300 的并发限制, 现有调用是同步也可以从阿里云控制台得知:<br><a target="_blank" rel="noopener" href="https://fcnext.console.aliyun.com/cn-hangzhou/services/m42-ng-fc/function-detail/m42-ptc-surf2surf/LATEST?tab=log">https://fcnext.console.aliyun.com/cn-hangzhou/services/m42-ng-fc/function-detail/m42-ptc-surf2surf/LATEST?tab=log</a><br><a target="_blank" rel="noopener" href="https://fcnext.console.aliyun.com/cn-hangzhou/services/m42-ng-fc/function-detail/m42-apply-dicom/LATEST?tab=log">https://fcnext.console.aliyun.com/cn-hangzhou/services/m42-ng-fc/function-detail/m42-apply-dicom/LATEST?tab=log</a><br>(点击任意请求 ID, 在右侧弹框顶部状态栏有调用方式的显示)</p>
 </li>
 <li><p>同步改异步</p>
 <p>设置<code>xFcInvocationType</code>为<code>Async</code>, 如下:</p>
@@ -177,7 +177,7 @@
 <p>按照源码或者文档, 设置<code>InvocationType</code>为<code>Event</code>, 如下:</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">testAwsFc</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="type">InvokeRequest</span> <span class="variable">invokeRequest</span> <span class="operator">=</span> InvokeRequest.builder()</span><br><span class="line">            .functionName(<span class="string">&quot;fc-debug-function1&quot;</span>)</span><br><span class="line">            .logType(<span class="string">&quot;None&quot;</span>)</span><br><span class="line">            .payload(SdkBytes.fromUtf8String(<span class="string">&quot;&#123;&#125;&quot;</span>))</span><br><span class="line">            .invocationType(InvocationType.EVENT)</span><br><span class="line">            .overrideConfiguration(a-&gt; a.apiCallTimeout(Duration.ofMinutes(<span class="number">3</span>)).build()).build();</span><br><span class="line"></span><br><span class="line">        CompletableFuture&lt;InvokeResponse&gt; invoke = <span class="built_in">this</span>.lambdaClient.invoke(invokeRequest);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure></li>
 </ul>
-<h2 id="3-总结"><a href="#3-总结" class="headerlink" title="3. 总结"></a>3. 总结</h2><p>阿里云同步调用有并发限制300, aws对于同步调用的并发没有特别说明, aws默认函数并发1000. 鉴于同步并发在java进程中属于等待状态, 可能会影响性能, 不建议使用同步调用方式调用(以前nodejs版本也是同步调用, 但是语言特性上让产品没有感觉等待迟滞); 阿里云的同步调用限制300如何科研云共享服务实例, 则也有可能产品之间互有影响; 建议修改为异步调用方式.</p>
+<h2 id="3-总结"><a href="#3-总结" class="headerlink" title="3. 总结"></a>3. 总结</h2><p>阿里云同步调用有并发限制 300, aws 对于同步调用的并发没有特别说明, aws 默认函数并发 1000. 鉴于同步并发在 java 进程中属于等待状态, 可能会影响性能, 不建议使用同步调用方式调用(以前 nodejs 版本也是同步调用, 但是语言特性上让产品没有感觉等待迟滞); 阿里云的同步调用限制 300 如何科研云共享服务实例, 则也有可能产品之间互有影响; 建议修改为异步调用方式.</p>
 
         
     </section>
@@ -206,7 +206,7 @@
         distractionFreeMode: true,
         title: "AWS/Aliyun函数计算异步调用",
         body: "https://nnsay.github.io/2023/02/03/async-call-compute-service/",
-        labels: ["Aliyun","DevOps","CloudNative"]
+        labels: ["Aliyun","DevOps","CloudNative","AWS"]
     }).render('comments');
     </script>
 </div>

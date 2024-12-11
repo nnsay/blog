@@ -6,7 +6,7 @@
   <link href="https://nnsay.github.io/atom.xml" rel="self"/>
   
   <link href="https://nnsay.github.io/"/>
-  <updated>2024-12-11T08:41:37.909Z</updated>
+  <updated>2024-12-11T08:48:16.441Z</updated>
   <id>https://nnsay.github.io/</id>
   
   <author>
@@ -21,7 +21,7 @@
     <link href="https://nnsay.github.io/2024/12/11/dynamodb-import-and-export/"/>
     <id>https://nnsay.github.io/2024/12/11/dynamodb-import-and-export/</id>
     <published>2024-12-11T07:22:13.000Z</published>
-    <updated>2024-12-11T08:41:37.909Z</updated>
+    <updated>2024-12-11T08:48:16.441Z</updated>
     
     
     <summary type="html">使用导出导入功能同步 DyanmoDB 大表</summary>
@@ -40,7 +40,7 @@
     <link href="https://nnsay.github.io/2024/11/11/pgsync/"/>
     <id>https://nnsay.github.io/2024/11/11/pgsync/</id>
     <published>2024-11-11T10:20:19.000Z</published>
-    <updated>2024-12-11T08:41:37.913Z</updated>
+    <updated>2024-12-11T08:48:16.445Z</updated>
     
     
     <summary type="html">使用 pgsync 同步 PostgreSQL 数据</summary>
@@ -59,7 +59,7 @@
     <link href="https://nnsay.github.io/2024/10/29/aws-iot-mqtt-alternative/"/>
     <id>https://nnsay.github.io/2024/10/29/aws-iot-mqtt-alternative/</id>
     <published>2024-10-29T03:01:06.000Z</published>
-    <updated>2024-12-11T08:41:37.909Z</updated>
+    <updated>2024-12-11T08:48:16.441Z</updated>
     
     
     <summary type="html">使用 EMQX 代替 AWS IoT MQTT</summary>
@@ -78,7 +78,7 @@
     <link href="https://nnsay.github.io/2024/09/09/aws-iot-mqtt/"/>
     <id>https://nnsay.github.io/2024/09/09/aws-iot-mqtt/</id>
     <published>2024-09-09T09:26:57.000Z</published>
-    <updated>2024-12-11T08:41:37.909Z</updated>
+    <updated>2024-12-11T08:48:16.441Z</updated>
     
     
     <summary type="html">使用AWS IoT服务进行MQTT通信</summary>
@@ -87,6 +87,8 @@
     
     
     <category term="研究" scheme="https://nnsay.github.io/tags/%E7%A0%94%E7%A9%B6/"/>
+    
+    <category term="AWS" scheme="https://nnsay.github.io/tags/AWS/"/>
     
     <category term="Code" scheme="https://nnsay.github.io/tags/Code/"/>
     
@@ -97,7 +99,7 @@
     <link href="https://nnsay.github.io/2024/08/21/deploy-ml-model/"/>
     <id>https://nnsay.github.io/2024/08/21/deploy-ml-model/</id>
     <published>2024-08-21T10:33:50.000Z</published>
-    <updated>2024-12-11T08:41:37.909Z</updated>
+    <updated>2024-12-11T08:48:16.441Z</updated>
     
     
     <summary type="html">部署和调用机器学习模型</summary>
@@ -116,7 +118,7 @@
     <link href="https://nnsay.github.io/2024/08/14/data-wrangling-toturial/"/>
     <id>https://nnsay.github.io/2024/08/14/data-wrangling-toturial/</id>
     <published>2024-08-14T10:21:54.000Z</published>
-    <updated>2024-12-11T08:41:37.909Z</updated>
+    <updated>2024-12-11T08:48:16.441Z</updated>
     
     
     <summary type="html">使用 AWS 和开源的 Data Wrangler 工具进行数据整理</summary>
@@ -135,7 +137,7 @@
     <link href="https://nnsay.github.io/2024/08/08/sagemaker-tutorial/"/>
     <id>https://nnsay.github.io/2024/08/08/sagemaker-tutorial/</id>
     <published>2024-08-08T10:18:23.000Z</published>
-    <updated>2024-12-11T08:41:37.913Z</updated>
+    <updated>2024-12-11T08:48:16.445Z</updated>
     
     
     <summary type="html">使用SageMaker进行机器学习模型训练</summary>
@@ -144,6 +146,8 @@
     
     
     <category term="研究" scheme="https://nnsay.github.io/tags/%E7%A0%94%E7%A9%B6/"/>
+    
+    <category term="AWS" scheme="https://nnsay.github.io/tags/AWS/"/>
     
     <category term="Code" scheme="https://nnsay.github.io/tags/Code/"/>
     
@@ -154,7 +158,7 @@
     <link href="https://nnsay.github.io/2024/07/30/nodejs-unzip/"/>
     <id>https://nnsay.github.io/2024/07/30/nodejs-unzip/</id>
     <published>2024-07-30T05:43:19.000Z</published>
-    <updated>2024-12-11T08:41:37.913Z</updated>
+    <updated>2024-12-11T08:48:16.445Z</updated>
     
     
     <summary type="html">调用nodejs大文件解压解决方案</summary>
@@ -173,7 +177,7 @@
     <link href="https://nnsay.github.io/2024/06/13/skopeo/"/>
     <id>https://nnsay.github.io/2024/06/13/skopeo/</id>
     <published>2024-06-13T03:37:41.000Z</published>
-    <updated>2024-12-11T08:41:37.913Z</updated>
+    <updated>2024-12-11T08:48:16.445Z</updated>
     
     
     <summary type="html">使用skopeo同步镜像</summary>
@@ -190,7 +194,7 @@
     <link href="https://nnsay.github.io/2024/06/11/open-tofu/"/>
     <id>https://nnsay.github.io/2024/06/11/open-tofu/</id>
     <published>2024-06-11T06:54:13.000Z</published>
-    <updated>2024-12-11T08:41:37.913Z</updated>
+    <updated>2024-12-11T08:48:16.445Z</updated>
     
     
     <summary type="html">使用tofu替换terraform入门指导</summary>
@@ -207,7 +211,7 @@
     <link href="https://nnsay.github.io/2024/05/27/openai-chat-stream/"/>
     <id>https://nnsay.github.io/2024/05/27/openai-chat-stream/</id>
     <published>2024-05-27T09:57:39.000Z</published>
-    <updated>2024-12-11T08:41:37.913Z</updated>
+    <updated>2024-12-11T08:48:16.445Z</updated>
     
     
     <summary type="html">使用openai sdk产生对话流数据并在前端处理显示</summary>
@@ -226,7 +230,7 @@
     <link href="https://nnsay.github.io/2024/04/28/poetry-and-cython/"/>
     <id>https://nnsay.github.io/2024/04/28/poetry-and-cython/</id>
     <published>2024-04-28T03:22:08.000Z</published>
-    <updated>2024-12-11T08:41:37.913Z</updated>
+    <updated>2024-12-11T08:48:16.445Z</updated>
     
     
     <summary type="html">构建和安装编译后的Python包</summary>
@@ -245,7 +249,7 @@
     <link href="https://nnsay.github.io/2024/04/12/json-stream/"/>
     <id>https://nnsay.github.io/2024/04/12/json-stream/</id>
     <published>2024-04-12T07:57:22.000Z</published>
-    <updated>2024-12-11T08:41:37.909Z</updated>
+    <updated>2024-12-11T08:48:16.441Z</updated>
     
     
     <summary type="html">使用ndjson实现超大json数据流操作</summary>
@@ -264,7 +268,7 @@
     <link href="https://nnsay.github.io/2024/04/10/zx-script/"/>
     <id>https://nnsay.github.io/2024/04/10/zx-script/</id>
     <published>2024-04-10T07:27:12.000Z</published>
-    <updated>2024-12-11T08:41:37.913Z</updated>
+    <updated>2024-12-11T08:48:16.445Z</updated>
     
     
     <summary type="html">简单高效的使用JavaScript编写脚本</summary>
@@ -283,7 +287,7 @@
     <link href="https://nnsay.github.io/2024/03/27/unified-operation-tool-for-object-storage/"/>
     <id>https://nnsay.github.io/2024/03/27/unified-operation-tool-for-object-storage/</id>
     <published>2024-03-27T06:24:22.000Z</published>
-    <updated>2024-12-11T08:41:37.913Z</updated>
+    <updated>2024-12-11T08:48:16.445Z</updated>
     
     
     <summary type="html">使用AWS S3 SDK统一操作对象存储</summary>
@@ -302,7 +306,7 @@
     <link href="https://nnsay.github.io/2024/03/08/data-migration-from-dynamodb-to-postgresql/"/>
     <id>https://nnsay.github.io/2024/03/08/data-migration-from-dynamodb-to-postgresql/</id>
     <published>2024-03-08T08:36:22.000Z</published>
-    <updated>2024-12-11T08:41:37.909Z</updated>
+    <updated>2024-12-11T08:48:16.441Z</updated>
     
     
     <summary type="html">使用Typescript脚本从DynamoDB迁移数据到PostgreSQL</summary>
@@ -321,7 +325,7 @@
     <link href="https://nnsay.github.io/2024/01/17/source-code-defense/"/>
     <id>https://nnsay.github.io/2024/01/17/source-code-defense/</id>
     <published>2024-01-17T09:26:33.000Z</published>
-    <updated>2024-12-11T08:41:37.913Z</updated>
+    <updated>2024-12-11T08:48:16.445Z</updated>
     
     
     <summary type="html">How to do the source code defence?</summary>
@@ -338,7 +342,7 @@
     <link href="https://nnsay.github.io/2024/01/08/aws-dynamodb-alternative/"/>
     <id>https://nnsay.github.io/2024/01/08/aws-dynamodb-alternative/</id>
     <published>2024-01-08T10:47:06.000Z</published>
-    <updated>2024-12-11T08:41:37.909Z</updated>
+    <updated>2024-12-11T08:48:16.441Z</updated>
     
     
     <summary type="html">调研DynamoDB替换的可行性</summary>
@@ -348,6 +352,8 @@
     
     <category term="研究" scheme="https://nnsay.github.io/tags/%E7%A0%94%E7%A9%B6/"/>
     
+    <category term="AWS" scheme="https://nnsay.github.io/tags/AWS/"/>
+    
   </entry>
   
   <entry>
@@ -355,7 +361,7 @@
     <link href="https://nnsay.github.io/2024/01/05/replace-s3-with-minio/"/>
     <id>https://nnsay.github.io/2024/01/05/replace-s3-with-minio/</id>
     <published>2024-01-05T11:58:25.000Z</published>
-    <updated>2024-12-11T08:41:37.913Z</updated>
+    <updated>2024-12-11T08:48:16.445Z</updated>
     
     
     <summary type="html">使用minio替换s3的可行性</summary>
@@ -372,7 +378,7 @@
     <link href="https://nnsay.github.io/2023/12/11/zip-in-browser/"/>
     <id>https://nnsay.github.io/2023/12/11/zip-in-browser/</id>
     <published>2023-12-11T08:42:39.000Z</published>
-    <updated>2024-12-11T08:41:37.913Z</updated>
+    <updated>2024-12-11T08:48:16.445Z</updated>
     
     
     <summary type="html">使用js解压/抽取/创建zip</summary>

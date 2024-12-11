@@ -38,7 +38,7 @@
 
 
     <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
-<meta name="generator" content="Hexo 6.3.0"></head>
+<meta name="generator" content="Hexo 7.3.0"></head>
 <body>
 
     <main class="app">
@@ -86,7 +86,7 @@
         
 
         
-        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0-%E8%83%8C%E6%99%AF%E4%BB%8B%E7%BB%8D"><span class="toc-text">0. 背景介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-Issue"><span class="toc-text">1. Issue</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-SDK"><span class="toc-text">2. SDK</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-sentry-x2F-node"><span class="toc-text">2.1 @sentry&#x2F;node</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-sentry-x2F-serverless"><span class="toc-text">2.2 @sentry&#x2F;serverless</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-SDK-%E4%BD%BF%E7%94%A8%E6%8A%80%E5%B7%A7"><span class="toc-text">2.3 SDK 使用技巧</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E8%AD%A6%E6%8A%A5%E9%80%9A%E7%9F%A5"><span class="toc-text">3. 警报通知</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E5%BC%80%E5%8F%91%E8%80%85%E5%85%8D%E8%B4%B9%E5%A5%97%E9%A4%90%E9%99%90%E5%88%B6"><span class="toc-text">4. 开发者免费套餐限制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E8%87%AA%E5%AE%9A%E4%B9%89-Slack-%E9%80%9A%E7%9F%A5"><span class="toc-text">5. 自定义 Slack 通知</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#0-%E8%83%8C%E6%99%AF%E4%BB%8B%E7%BB%8D"><span class="toc-text">0. 背景介绍</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#1-Issue"><span class="toc-text">1. Issue</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-SDK"><span class="toc-text">2. SDK</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#2-1-sentry-node"><span class="toc-text">2.1 @sentry&#x2F;node</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-2-sentry-serverless"><span class="toc-text">2.2 @sentry&#x2F;serverless</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-3-SDK-%E4%BD%BF%E7%94%A8%E6%8A%80%E5%B7%A7"><span class="toc-text">2.3 SDK 使用技巧</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E8%AD%A6%E6%8A%A5%E9%80%9A%E7%9F%A5"><span class="toc-text">3. 警报通知</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E5%BC%80%E5%8F%91%E8%80%85%E5%85%8D%E8%B4%B9%E5%A5%97%E9%A4%90%E9%99%90%E5%88%B6"><span class="toc-text">4. 开发者免费套餐限制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E8%87%AA%E5%AE%9A%E4%B9%89-Slack-%E9%80%9A%E7%9F%A5"><span class="toc-text">5. 自定义 Slack 通知</span></a></li></ol>
         
     </div>
 </aside>
@@ -114,7 +114,7 @@
             
 <div class="article-tag-list">
     <i class="icon-tag vm"></i>
-    <a class="article-tag-link" href="/tags/DevOps/" rel="tag">DevOps</a>
+    <a class="article-tag-link" href="/tags/AWS/" rel="tag">AWS</a>, <a class="article-tag-link" href="/tags/DevOps/" rel="tag">DevOps</a>
 </div>
 
 
@@ -211,7 +211,7 @@
 <li>Event(事件): sentry 每捕获和发送一个异常就是一个事件, 同一类型的事件以<code>issue</code>的方式呈现</li>
 </ul>
 <h2 id="2-SDK"><a href="#2-SDK" class="headerlink" title="2. SDK"></a>2. SDK</h2><p>因为个人采用 nodejs 进行开发, 所以 SDK 上介绍两种 nodejs sentry 的 sdk: <strong>@sentry&#x2F;node</strong>和**@sentry&#x2F;serverless**.</p>
-<h3 id="2-1-sentry-x2F-node"><a href="#2-1-sentry-x2F-node" class="headerlink" title="2.1 @sentry&#x2F;node"></a>2.1 @sentry&#x2F;node</h3><ul>
+<h3 id="2-1-sentry-node"><a href="#2-1-sentry-node" class="headerlink" title="2.1 @sentry&#x2F;node"></a>2.1 @sentry&#x2F;node</h3><ul>
 <li><p>默认集成以下插件</p>
 <figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> defaultIntegrations = [</span><br><span class="line">  <span class="comment">// Common</span></span><br><span class="line">  <span class="keyword">new</span> <span class="title class_">CoreIntegrations</span>.<span class="title class_">InboundFilters</span>(),</span><br><span class="line">  <span class="keyword">new</span> <span class="title class_">CoreIntegrations</span>.<span class="title class_">FunctionToString</span>(),</span><br><span class="line">  <span class="comment">// Native Wrappers</span></span><br><span class="line">  <span class="keyword">new</span> <span class="title class_">Console</span>(),</span><br><span class="line">  <span class="keyword">new</span> <span class="title class_">Http</span>(),</span><br><span class="line">  <span class="comment">// Global Handlers</span></span><br><span class="line">  <span class="keyword">new</span> <span class="title class_">OnUncaughtException</span>(),</span><br><span class="line">  <span class="keyword">new</span> <span class="title class_">OnUnhandledRejection</span>(),</span><br><span class="line">  <span class="comment">// Event Info</span></span><br><span class="line">  <span class="keyword">new</span> <span class="title class_">ContextLines</span>(),</span><br><span class="line">  <span class="keyword">new</span> <span class="title class_">LocalVariables</span>(),</span><br><span class="line">  <span class="keyword">new</span> <span class="title class_">Context</span>(),</span><br><span class="line">  <span class="keyword">new</span> <span class="title class_">Modules</span>(),</span><br><span class="line">  <span class="keyword">new</span> <span class="title class_">RequestData</span>(),</span><br><span class="line">  <span class="comment">// Misc</span></span><br><span class="line">  <span class="keyword">new</span> <span class="title class_">LinkedErrors</span>(),</span><br><span class="line">];</span><br></pre></td></tr></table></figure>
 </li>
@@ -224,7 +224,7 @@
 </ul>
 </li>
 </ul>
-<h3 id="2-2-sentry-x2F-serverless"><a href="#2-2-sentry-x2F-serverless" class="headerlink" title="2.2 @sentry&#x2F;serverless"></a>2.2 @sentry&#x2F;serverless</h3><p>对@sentry&#x2F;node 的包装, 针对 lambda 特别提供, 具体使用如下</p>
+<h3 id="2-2-sentry-serverless"><a href="#2-2-sentry-serverless" class="headerlink" title="2.2 @sentry&#x2F;serverless"></a>2.2 @sentry&#x2F;serverless</h3><p>对@sentry&#x2F;node 的包装, 针对 lambda 特别提供, 具体使用如下</p>
 <ul>
 <li><p>初始化</p>
 <figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> <span class="title class_">Sentry</span> <span class="keyword">from</span> <span class="string">&#x27;@sentry/serverless&#x27;</span></span><br><span class="line"><span class="title class_">Sentry</span>.<span class="property">AWSLambda</span>.<span class="title function_">init</span>(&#123;</span><br><span class="line">  <span class="attr">dsn</span>: <span class="string">&#x27;https://xxxx@oyyyy.ingest.sentry.io/zzzz&#x27;</span></span><br><span class="line">  <span class="attr">release</span>: <span class="string">&#x27;research&#x27;</span>,</span><br><span class="line">	<span class="attr">integrations</span>: [<span class="keyword">new</span> <span class="title class_">CaptureConsole</span>()], <span class="comment">// 捕获console</span></span><br><span class="line">  <span class="comment">// Set tracesSampleRate to 1.0 to capture 100%</span></span><br><span class="line">  <span class="attr">tracesSampleRate</span>: <span class="number">1.0</span>,</span><br><span class="line">  <span class="attr">attachStacktrace</span>: <span class="literal">true</span>,</span><br><span class="line"></span><br><span class="line">  <span class="attr">environment</span>: process.<span class="property">env</span>.<span class="property">ENV_NAME</span> || <span class="string">&#x27;unknown&#x27;</span>,</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
@@ -369,7 +369,7 @@
         distractionFreeMode: true,
         title: "Sentry快速上手",
         body: "https://nnsay.github.io/2023/04/14/research-sentry-knowlege/",
-        labels: ["DevOps"]
+        labels: ["DevOps","AWS"]
     }).render('comments');
     </script>
 </div>

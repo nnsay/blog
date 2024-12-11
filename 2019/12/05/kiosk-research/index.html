@@ -38,7 +38,7 @@
 
 
     <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
-<meta name="generator" content="Hexo 6.3.0"></head>
+<meta name="generator" content="Hexo 7.3.0"></head>
 <body>
 
     <main class="app">
@@ -86,7 +86,7 @@
         
 
         
-        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-Requirements-of-Kiosk"><span class="toc-text">1. Requirements of Kiosk</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-Kiosk-Solution"><span class="toc-text">2. Kiosk Solution</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-commerce-windows"><span class="toc-text">2.1 commerce(windows)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-open-source-linux"><span class="toc-text">2.2 open source (linux)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-other-article"><span class="toc-text">2.3 other article</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-Ubuntu-kiosk"><span class="toc-text">3. Ubuntu kiosk</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-basic-knowledge"><span class="toc-text">3.1 basic knowledge</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-make-a-HTML-x2F-Electron-based-kiosk-snap"><span class="toc-text">3.2 make a HTML&#x2F;Electron-based kiosk snap</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-summary"><span class="toc-text">3.3 summary</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-QA"><span class="toc-text">4. QA</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-1-how-to-set-the-version-of-snapcraft-nodejs-plugin"><span class="toc-text">4.1  how to set the version of snapcraft nodejs plugin?</span></a></li></ol></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-Requirements-of-Kiosk"><span class="toc-text">1. Requirements of Kiosk</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-Kiosk-Solution"><span class="toc-text">2. Kiosk Solution</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#2-1-commerce-windows"><span class="toc-text">2.1 commerce(windows)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-2-open-source-linux"><span class="toc-text">2.2 open source (linux)</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-3-other-article"><span class="toc-text">2.3 other article</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-Ubuntu-kiosk"><span class="toc-text">3. Ubuntu kiosk</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#3-1-basic-knowledge"><span class="toc-text">3.1 basic knowledge</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-2-make-a-HTML-Electron-based-kiosk-snap"><span class="toc-text">3.2 make a HTML&#x2F;Electron-based kiosk snap</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-3-summary"><span class="toc-text">3.3 summary</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#4-QA"><span class="toc-text">4. QA</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#4-1-how-to-set-the-version-of-snapcraft-nodejs-plugin"><span class="toc-text">4.1  how to set the version of snapcraft nodejs plugin?</span></a></li></ol></li></ol>
         
     </div>
 </aside>
@@ -229,7 +229,7 @@
 </ul>
 <p><img src="/kiosk-structure.png" alt="kiosk-structure"></p>
 <p>If our descktop app base on electron, so the third option should be choosed.</p>
-<h4 id="3-2-make-a-HTML-x2F-Electron-based-kiosk-snap"><a href="#3-2-make-a-HTML-x2F-Electron-based-kiosk-snap" class="headerlink" title="3.2 make a HTML&#x2F;Electron-based kiosk snap"></a>3.2 <a target="_blank" rel="noopener" href="https://tutorials.ubuntu.com/tutorial/electron-kiosk#0">make a HTML&#x2F;Electron-based kiosk snap</a></h4><ul>
+<h4 id="3-2-make-a-HTML-Electron-based-kiosk-snap"><a href="#3-2-make-a-HTML-Electron-based-kiosk-snap" class="headerlink" title="3.2 make a HTML&#x2F;Electron-based kiosk snap"></a>3.2 <a target="_blank" rel="noopener" href="https://tutorials.ubuntu.com/tutorial/electron-kiosk#0">make a HTML&#x2F;Electron-based kiosk snap</a></h4><ul>
 <li>prepare<ul>
 <li>install mir  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo snap install --devmode mir-kiosk -y</span><br><span class="line">sudo mir-kiosk</span><br></pre></td></tr></table></figure></li>
 <li>install snacraft  <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install snapcraft -y</span><br></pre></td></tr></table></figure></li>

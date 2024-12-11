@@ -38,7 +38,7 @@
 
 
     <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
-<meta name="generator" content="Hexo 6.3.0"></head>
+<meta name="generator" content="Hexo 7.3.0"></head>
 <body>
 
     <main class="app">
@@ -114,7 +114,7 @@
             
 <div class="article-tag-list">
     <i class="icon-tag vm"></i>
-    <a class="article-tag-link" href="/tags/Code/" rel="tag">Code</a>
+    <a class="article-tag-link" href="/tags/AWS/" rel="tag">AWS</a>, <a class="article-tag-link" href="/tags/Code/" rel="tag">Code</a>
 </div>
 
 
@@ -129,6 +129,7 @@
 <h3 id="1-Basic"><a href="#1-Basic" class="headerlink" title="1. Basic"></a>1. Basic</h3><pre class="mermaid">graph LR
 S3 -->|read stream| ZIP
 ZIP -->|write stream| DownloadAPI</pre>
+
 <ul>
 <li>S3 file produce a readable stream</li>
 <li>combine multiple readable stream into one zip stream</li>
@@ -136,7 +137,7 @@ ZIP -->|write stream| DownloadAPI</pre>
 </ul>
 <h3 id="2-Research"><a href="#2-Research" class="headerlink" title="2. Research"></a>2. Research</h3><ul>
 <li><p>Does S3 support stream reading?</p>
-<p>  get the signed url to get the response stream </p>
+<p>get the signed url to get the response stream</p>
 </li>
 <li><p>How to combine multiple readable stream in one zip stream?</p>
 <ul>
@@ -202,7 +203,7 @@ ZIP -->|write stream| DownloadAPI</pre>
         distractionFreeMode: true,
         title: "s3 file zip download by stream",
         body: "https://nnsay.github.io/2020/02/06/s3-file-zip-download-by-stream/",
-        labels: ["Code"]
+        labels: ["AWS","Code"]
     }).render('comments');
     </script>
 </div>

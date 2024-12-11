@@ -101,7 +101,7 @@ feed:
 # mermaid chart
 mermaid: ## mermaid url https://github.com/knsv/mermaid
   enable: true # default true
-  version: "10" # default v8.14.0
+  version: "11" # default v8.14.0
   options: # find more api options from https://github.com/knsv/mermaid/blob/master/src/mermaidAPI.js
     #startOnload: true  // default true
     theme: dark #default/neutral/forest/dark/forest/base https://mermaid.js.org/config/theming.html

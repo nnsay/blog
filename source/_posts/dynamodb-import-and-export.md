@@ -14,7 +14,7 @@ excerpt: 使用导出导入功能同步 DyanmoDB 大表
 导出导入方案基于: DynamoDB Table 支持将数据导出 S3, 又支持从 S3 导入数据的特性. 经过实际的测试和验证, 实现同步的步骤如下:
 
 ```mermaid
-stateDiagram
+stateDiagram-v2
 	direction LR
 	state s3_sync <<choice>>
 	[*] --> S3: 导出

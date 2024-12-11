@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+
+    
+
+    
+
+    <title>DynamoDB导出导入 | Jimmy&#39;s Blog</title>
+    <meta name="author" content="Jimmy Wang" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="1. 技术背景在多环境开发时数据同步是常见的问题, 数据量小的时候可以通过写脚本来同步, 但是数量很大时脚本就不是很好的选择, 主要是脚本运行时间将会很长, 并且为了让脚本运行正常, 还需要找个稳定的环境, 不断网不休眠持续的跑脚本, 所以脚本有脚本优势但对于需要高效同步的场景却是不合适. 如果数据量很大那么怎么同步呢? 本文介绍通过 DynamoDB 的导出导入方式实现数据的同步.导出导入方案基于: DynamoDB Table 支持将数据导出 S3, 又支持从 S3 导入数据的特性. 经过实" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+
+    
+    <link rel="alternate" href="/atom.xml" title="Jimmy&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/images/favicon.ico">
+    
+
+    <style type="text/css">
+    @font-face {
+        font-family: 'icomoon';
+        src: url("/fonts/icomoon.eot?q628ml");
+        src: url("/fonts/icomoon.eot?q628ml#iefix") format('embedded-opentype'),
+             url("/fonts/icomoon.ttf?q628ml") format('truetype'),
+             url("/fonts/icomoon.woff?q628ml") format('woff'),
+             url("/fonts/icomoon.svg?q628ml#icomoon") format('svg');
+        font-weight: normal;
+        font-style: normal;
+    }
+    </style>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!--[if lt IE 9]><style type="text/css">.nav-inner {top:0;}.author-meta {position:static;top:0;}.search-form {height:36px;}</style><script type="text/javascript" src="https://unpkg.com/html5shiv@3.7.3/dist/html5shiv.min.js"></script><![endif]-->
+<meta name="generator" content="Hexo 6.3.0"></head>
+<body>
+
+    <main class="app">
+        <header id="header" class="header clearfix">
+    <div id="nav" class="nav">
+    <div class="nav-mobile">
+        <button id="open-panel" class="open-panel nav-mobile-item"><i class="icon-documents"></i></button>
+        <h1 class="nav-mobile-title nav-mobile-item">Jimmy&#39;s Blog</h1>
+        <button id="open-menus" class="open-panel nav-mobile-item"><i class="icon-library"></i></button>
+    </div>
+
+    <nav id="nav-inner" class="nav-inner">
+        
+            <a class="nav-item" href="/">
+                <span class="nav-text">Home</span>
+            </a>
+        
+            <a class="nav-item" href="/tags">
+                <span class="nav-text">Tags</span>
+            </a>
+        
+            <a class="nav-item" href="/archives">
+                <span class="nav-text">Archives</span>
+            </a>
+        
+            <a class="nav-item" href="/atom.xml">
+                <span class="nav-text">RSS</span>
+            </a>
+        
+            <a class="nav-item" href="/about">
+                <span class="nav-text">About</span>
+            </a>
+        
+    </nav>
+</div>
+
+    <aside id="aside" class="aside">
+    <div id="aside-mask" class="aside-mask"></div>
+    <div id="aside-inner" class="aside-inner">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit"><i class="icon-search-stroke"></i></button><input type="hidden" name="sitesearch" value="https://nnsay.github.io"></form>
+
+        
+        
+        
+        
+
+        
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#1-%E6%8A%80%E6%9C%AF%E8%83%8C%E6%99%AF"><span class="toc-text">1. 技术背景</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#2-DynamoDB-%E6%95%B0%E6%8D%AE%E5%AF%BC%E5%87%BA%E5%92%8C%E5%AF%BC%E5%85%A5"><span class="toc-text">2. DynamoDB 数据导出和导入</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#2-1-%E5%AF%BC%E5%87%BA"><span class="toc-text">2.1 导出</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-2-%E5%90%8C%E6%AD%A5%E6%95%B0%E6%8D%AE%E6%96%87%E4%BB%B6"><span class="toc-text">2.2 同步数据文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-3-%E5%AF%BC%E5%85%A5"><span class="toc-text">2.3 导入</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-4-%E9%AA%8C%E8%AF%81"><span class="toc-text">2.4 验证</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#3-%E6%80%BB%E7%BB%93"><span class="toc-text">3. 总结</span></a></li></ol>
+        
+    </div>
+</aside>
+
+</header>
+
+        <div id="content" class="content">
+            <div id="wrapper" class="wrapper" style="max-width: 800px">
+                <article class="article" itemscope itemprop="blogPost">
+    
+    <header class="article-header">
+        
+        <h1 itemprop="name">
+            DynamoDB导出导入
+        </h1>
+        
+        <div class="article-meta clearfix">
+            <a class="article-date" href="https://nnsay.github.io/2024/12/11/dynamodb-import-and-export/index.html">
+    
+    <i class="icon-calendar vm"></i>
+    
+    <time class="vm" datetime="2024-12-11T07:22:13.000Z" itemprop="datePublished">2024-12-11</time>
+</a>
+
+            
+<div class="article-tag-list">
+    <i class="icon-tag vm"></i>
+    <a class="article-tag-link" href="/tags/AWS/" rel="tag">AWS</a>, <a class="article-tag-link" href="/tags/%E7%A0%94%E7%A9%B6/" rel="tag">研究</a>
+</div>
+
+
+        </div>
+    </header>
+    
+    <section class="article-body markdown-body">
+        
+        <h1 id="1-技术背景"><a href="#1-技术背景" class="headerlink" title="1. 技术背景"></a>1. 技术背景</h1><p>在多环境开发时数据同步是常见的问题, 数据量小的时候可以通过写脚本来同步, 但是数量很大时脚本就不是很好的选择, 主要是脚本运行时间将会很长, 并且为了让脚本运行正常, 还需要找个稳定的环境, 不断网不休眠持续的跑脚本, 所以脚本有脚本优势但对于需要高效同步的场景却是不合适. 如果数据量很大那么怎么同步呢? 本文介绍通过 DynamoDB 的导出导入方式实现数据的同步.</p>
+<p>导出导入方案基于: DynamoDB Table 支持将数据导出 S3, 又支持从 S3 导入数据的特性. 经过实际的测试和验证, 实现同步的步骤如下:</p>
+<pre class="mermaid">stateDiagram
+    direction LR
+    state s3_sync <<choice>>
+    [*] --> S3: 导出
+    S3 --> s3_sync
+    s3_sync --> [*]: 同账号直接导入
+    s3_sync --> 目标S3: 不同账号
+    目标S3 --> [*]: 导入</pre>
+
+<p>如果想知道该方案是否适合, 请查看<a href="#summary">总结</a>.</p>
+<h1 id="2-DynamoDB-数据导出和导入"><a href="#2-DynamoDB-数据导出和导入" class="headerlink" title="2. DynamoDB 数据导出和导入"></a>2. DynamoDB 数据导出和导入</h1><p>假设有两个环境: sandbox 和 dev, 首先在 sandbox 针对一个大表做导出, 然后将导出文件同步到 dev, 最后在 dev 中做导入.</p>
+<h2 id="2-1-导出"><a href="#2-1-导出" class="headerlink" title="2.1 导出"></a>2.1 导出</h2><p>在 DynamoDB 的控制台中点击左侧菜单<code>导出到S3</code>, 选择原表, 填写导出的 s3 位置, 然后进行导出操作:</p>
+<p><img src="https://img.picgo.net/2024/12/11/005508cab3fe1d6ed178001cb7b7da05561138b47d10d8b0.png"></p>
+<blockquote>
+<p>[!note]</p>
+<ul>
+<li>注意导出的文件格式, 导入的时候格式要一致</li>
+<li>注意加密密钥类型, 建议选择默认的 Amazon S3 密码(SSE-S3), 这样导出的文件被同步到其他账号下时只要有 S3 的权限就可以解密文件而不需要和导出时相同的密码</li>
+</ul>
+</blockquote>
+<h2 id="2-2-同步数据文件"><a href="#2-2-同步数据文件" class="headerlink" title="2.2 同步数据文件"></a>2.2 同步数据文件</h2><p>理论上只需要同步导出的<code>data</code>目录下的数据文件即可, 这里为了演示同步了所有导出的文件到目标 s3, 使用的同步工具是<a target="_blank" rel="noopener" href="https://min.io/docs/minio/linux/reference/minio-mc.html">mc</a>, 具体命令如下:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mc <span class="built_in">cp</span> -r sandbox/nnsay-cn/dynamodb/ dev/nnsay-cn-dev/dynamodb/</span><br></pre></td></tr></table></figure>
+
+<h2 id="2-3-导入"><a href="#2-3-导入" class="headerlink" title="2.3 导入"></a>2.3 导入</h2><p>切换登录到 dev 的 DynamoDB 控制台, 在左侧菜单选择<code>从 S3 导入</code>, 按照引导完成配置即可, 最后的配置结果如下:</p>
+<p><img src="https://img.picgo.net/2024/12/11/image-20241211145319467273678ec15106fbf.png" alt="image-20241211145319467"></p>
+<blockquote>
+<p>[!note]</p>
+<ul>
+<li>注意之前导出的数据是 gz 压缩格式, 所以压缩格式需要选择: GZIP</li>
+<li>目标表必须是一个新表, 现有的表不行, 在点击导入后会报错</li>
+<li>需要手动指定哈希键和排序键</li>
+<li>导出结果中没有全局二级索引, 所以如果需要在第二个步骤中需要手动添加配置</li>
+</ul>
+</blockquote>
+<h2 id="2-4-验证"><a href="#2-4-验证" class="headerlink" title="2.4 验证"></a>2.4 验证</h2><p>从 dev 的 import-test 表中检查数据:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">aws dynamodb scan --table-name import-test --select <span class="string">&quot;COUNT&quot;</span></span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">    <span class="string">&quot;Count&quot;</span>: 1000,</span><br><span class="line">    <span class="string">&quot;ScannedCount&quot;</span>: 1000,</span><br><span class="line">    <span class="string">&quot;ConsumedCapacity&quot;</span>: null</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>sandbox 中原表的假数据就是 1000, 所以上面的命令返回数据是 1000 则说明导出成功.</p>
+<h1 id="3-总结"><a href="#3-总结" class="headerlink" title="3. 总结"></a>3. 总结</h1><p><a name="summary"></a><br>虽然基于导出导入可以实现大表的同步, 但是这种方案也不是十分完美, 以下事项需要注意:</p>
+<ul>
+<li>实时数据无法顾及, 导出导入方案对于热数据肯定是无能为力, 如果有热数据场景需要配合脚本或者其他方案共同施行</li>
+<li>现有目标表无法导入, 导入要去创建一个新表, 对于已经有的表则无法导入, 这点和备份恢复的行为一样, 都是需要创建新表</li>
+</ul>
+
+        
+    </section>
+</article>
+
+
+
+<a id="pagenext" href="/2024/11/11/pgsync/" class="article-next" title="PostgreSQL数据同步利器--pgsync"><i class="icon-arrow-right"></i></a>
+
+
+
+
+<div class="comments">
+    <div id="comments"></div>
+    <script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+    <script>
+    new Gitalk({
+        clientID: "f9b3c7ac0c057c6a0fa2",
+        clientSecret: "53d6285c56901c86774a7438d5550ef6a25247e4",
+        repo: "blog",
+        owner: "nnsay",
+        admin: ["nnsay"],
+        id: "bf3fcf867dcecf21cb342c86152cfd40",
+        distractionFreeMode: true,
+        title: "DynamoDB导出导入",
+        body: "https://nnsay.github.io/2024/12/11/dynamodb-import-and-export/",
+        labels: ["研究","AWS"]
+    }).render('comments');
+    </script>
+</div>
+
+
+
+            </div>
+        </div>
+        <footer class="footer">
+    Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>, Theme by <a href="https://github.com/sanonz/hexo-theme-concise" target="_blank">Concise</a>
+
+    
+    <script>
+        var _hmt = _hmt || [];
+        (function () {
+            var hm = document.createElement("script");
+            hm.src = "https://hm.baidu.com/hm.js?1f97030bb3a44256d81e14447104bef8";
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(hm, s);
+        })();
+    </script>
+    
+    
+      <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+      </script>
+        <!-- <script src='https://unpkg.com/mermaid@10/dist/mermaid.min.js'></script>
+        <script>
+          if (window.mermaid) {
+            mermaid.initialize({theme: 'forest'});
+          }
+        </script> -->
+    
+</footer>
+
+    </main>
+
+    <script type="text/javascript" src="https://unpkg.com/jquery@1.9.1/jquery.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        var nodes = {
+            nav: $('#nav'),
+            aside: $('#aside'),
+            asideInner: $('#aside-inner'),
+            navInner: $('#nav-inner')
+        };
+
+        var doing = false;
+        nodes.asideInner.on('webkitAnimationEnd mozAnimationEnd oAnimationEnd oanimationend animationend', function() {
+            if (nodes.aside.hasClass('mobile-open')) {
+                nodes.aside.removeClass('mobile-open');
+            } else {
+                nodes.aside.removeClass('mobile-close panel-show');
+            }
+            doing = false;
+        });
+        $('#open-panel, #aside-mask').on('click', function() {
+            if (doing) {
+                return;
+            }
+
+            if (nodes.aside.hasClass('panel-show')) {
+                nodes.aside.addClass('mobile-close');
+            } else {
+                nodes.aside.addClass('mobile-open panel-show');
+            }
+        });
+        $('#open-menus').on('click', function() {
+            nodes.navInner.slideToggle('normal', slideDone);
+        });
+
+        if (window.innerWidth <= 960) {
+            setTimeout(function() {
+                nodes.navInner.slideUp('normal', slideDone);
+            }, 3000);
+        }
+
+        function slideDone() {
+            if (nodes.navInner.css('display') !== 'none') {
+                nodes.navInner.css('display', '');
+            }
+        }
+
+        $(window).on('resize', function() {
+            if ($(this).width() > 960) {
+                nodes.navInner.css('display', '');
+            }
+        });
+    });
+    </script>
+    
+        
+<script src="/js/scrollspy.min.js"></script>
+
+        <script type="text/javascript">
+        $(document.body).scrollspy({target: '#aside-inner'});
+
+        $(window).on('resize', function() {
+            var hw = $('#header').width();
+            var ww = $('#wrapper').width();
+            var space = ($(this).width() - hw - ww) / 2 / 2;
+
+            var pageprev = $('#pageprev');
+            var pagenext = $('#pagenext');
+            var avg = (pageprev.width() + pagenext.width()) / 2
+
+            if(space > avg) {
+                var len = space - avg / 2;
+                var styles = {position: 'fixed', top: '50%', marginTop: - (pageprev.width() + pagenext.width()) / 4}
+                pageprev.css($.extend({left: hw + len}, styles));
+                pagenext.css($.extend({right: len}, styles));
+            } else {
+                pageprev.removeAttr('style');
+                pagenext.removeAttr('style');
+            }
+        }).trigger('resize');
+        </script>
+    
+
+</body>
+</html>

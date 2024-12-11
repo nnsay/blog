@@ -4,6 +4,7 @@ date: 2023-06-07 18:11:54
 tags:
   - Tips
   - DevOps
+  - AWS
 excerpt: 自定义 Nest 日志让 AWS Lambda 日志自动携带 awsRequestId
 ---
 

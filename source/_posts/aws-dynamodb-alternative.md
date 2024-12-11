@@ -3,6 +3,7 @@ title: AWS DynamoDB 替代方案
 date: 2024-01-08 18:47:06
 tags:
   - 研究
+  - AWS
 excerpt: 调研DynamoDB替换的可行性
 ---
 

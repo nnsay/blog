@@ -1,44 +1,52 @@
 ---
 title: s3 file zip download by stream
 date: 2020-02-07 01:46:10
-tags: 
-- Code
+tags:
+  - Code
+  - AWS
 excerpt: stream download file from AWS S3
 ---
+
 ### Change Log:
+
 - 2020-04-11: add the `Issue` part
 
 ### 1. Basic
+
 ```mermaid
 graph LR
 S3 -->|read stream| ZIP
 ZIP -->|write stream| DownloadAPI
 ```
+
 - S3 file produce a readable stream
 - combine multiple readable stream into one zip stream
 - transform writeable stream to api for download
 
-
 ### 2. Research
+
 - Does S3 support stream reading?
 
-    get the signed url to get the response stream 
+  get the signed url to get the response stream
+
 - How to combine multiple readable stream in one zip stream?
-    - combined-stream to combine multiple read stream or use the archiver `append` function with multiple times
-    - archiver
+  - combined-stream to combine multiple read stream or use the archiver `append` function with multiple times
+  - archiver
 - How to trasnform writable stream as a REST api?
-    - make zip steram to response directly
-    - set the response with stream header
+  - make zip steram to response directly
+  - set the response with stream header
 - More think
-    - performence
-    - impact on existing service
+  - performence
+  - impact on existing service
 
 ### 3. Code
+
 - source code reference
-    - [s3-zip](https://github.com/orangewise/s3-zip)
-    - [s3-files](https://github.com/orangewise/s3-files)
+  - [s3-zip](https://github.com/orangewise/s3-zip)
+  - [s3-files](https://github.com/orangewise/s3-files)
 
 stream-download-v3.ts:
+
 ```
 import http from 'http';
 import { getAWSS3 } from './src/lib/aws';
@@ -103,6 +111,7 @@ http.createServer(async (req, res) => {
 ```
 
 How to verify the result:
+
 ```
 // step1 start the server
 ts-node stream-download-v3.ts
@@ -110,6 +119,7 @@ ts-node stream-download-v3.ts
 ```
 
 ### 4. Issue
+
 - [s3.getObject(params).createReadStream() Timeouts ](https://github.com/aws/aws-sdk-js/issues/2087)
 
 you can resolve the issue by use `PassThrough` or make iteration to a serializer processing.

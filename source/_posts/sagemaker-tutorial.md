@@ -4,6 +4,7 @@ date: 2024-08-08 18:18:23
 tags:
   - Code
   - 研究
+  - AWS
 excerpt: 使用SageMaker进行机器学习模型训练
 ---
 

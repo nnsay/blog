@@ -3,6 +3,7 @@ title: Sentry快速上手
 date: 2023-04-14 17:46:40
 tags:
   - DevOps
+  - AWS
 excerpt: 快速了解并实现一套完整的应用程序异常/性能捕获和通知提醒的流程
 ---
 

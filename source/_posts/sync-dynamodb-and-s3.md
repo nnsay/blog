@@ -5,6 +5,7 @@ tags:
   - Code
   - 研究
   - DevOps
+  - AWS
 excerpt: 优雅同步DynamoDB和S3数据
 ---
 

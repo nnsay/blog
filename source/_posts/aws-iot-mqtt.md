@@ -4,6 +4,7 @@ date: 2024-09-09 17:26:57
 tags:
   - Code
   - 研究
+  - AWS
 excerpt: 使用AWS IoT服务进行MQTT通信
 ---
 

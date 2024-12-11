@@ -4,6 +4,7 @@ date: 2023-03-31 19:18:49
 tags:
   - Tips
   - DevOps
+  - AWS
 excerpt: 解决vpc lambda访问各种外部资源和服务问题
 ---
 

@@ -125,7 +125,7 @@
         
         <h1 id="1-技术背景"><a href="#1-技术背景" class="headerlink" title="1. 技术背景"></a>1. 技术背景</h1><p>在多环境开发时数据同步是常见的问题, 数据量小的时候可以通过写脚本来同步, 但是数量很大时脚本就不是很好的选择, 主要是脚本运行时间将会很长, 并且为了让脚本运行正常, 还需要找个稳定的环境, 不断网不休眠持续的跑脚本, 所以脚本有脚本优势但对于需要高效同步的场景却是不合适. 如果数据量很大那么怎么同步呢? 本文介绍通过 DynamoDB 的导出导入方式实现数据的同步.</p>
 <p>导出导入方案基于: DynamoDB Table 支持将数据导出 S3, 又支持从 S3 导入数据的特性. 经过实际的测试和验证, 实现同步的步骤如下:</p>
-<pre class="mermaid">stateDiagram
+<pre class="mermaid">stateDiagram-v2
     direction LR
     state s3_sync <<choice>>
     [*] --> S3: 导出
@@ -219,10 +219,10 @@
     
     
       <script type="module">
-        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
         mermaid.initialize({ startOnLoad: true, theme: 'dark' });
       </script>
-        <!-- <script src='https://unpkg.com/mermaid@10/dist/mermaid.min.js'></script>
+        <!-- <script src='https://unpkg.com/mermaid@11/dist/mermaid.min.js'></script>
         <script>
           if (window.mermaid) {
             mermaid.initialize({theme: 'forest'});

@@ -26,11 +26,11 @@ tofu 是 terraform 的一个开源分支, 因为在 2023 年 8 月 10 日 terraf
 
 ```yaml
 terraform {
-  backend "kubernetes" {
-  secret_suffix = "state"
-  namespace     = "nnsay-com"
-  config_path   = "~/.kube/config"
-  }
+backend "kubernetes" {
+secret_suffix = "state"
+namespace     = "nnsay-com"
+config_path   = "~/.kube/config"
+}
 }
 ```
 

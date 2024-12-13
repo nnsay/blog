@@ -173,7 +173,7 @@ export class AppController {
 }
 ```
 
-> [!note]
+> [!NOTE]
 >
 > 使用 secret 生成的 token 被配置到了 EMQX, 这里读取后验证, 需要注意要使用同一个 secret.
 

@@ -111,7 +111,7 @@ exec()
 ts-node --project=tmp/sync-dynamodb/tsconfig.json tmp/sync-dynamodb/migration.ts
 ```
 
-> [!note]
+> [!NOTE]
 > 因为脚本使用了`monorepo`的部分包, 所以在使用`ts-node`执行的时候需要添加==tsconfig.json==文件到脚本目录, tsconfig.json 参考内容如下:
 
 ```json

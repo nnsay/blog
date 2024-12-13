@@ -81,7 +81,7 @@ data_rules:
 to_safe: true
 ```
 
-> [!note]
+> [!NOTE]
 >
 > exclude 配置为"\*", 同步的时候我倾向使用白名单, 但是该工具似乎没有, 所以我先排除所有的表, 然后在 group 中配置自己需要的表, 使用这种方式间接实现白名单功能
 
@@ -107,7 +107,7 @@ pgsync demo --overwrite
 - preserve: 如果目标存在, 则不做任何修改
 - truncate: 默认行为, 先 truncate 目标表, 然后执行同步
 
-> [!note]
+> [!NOTE]
 > 如果有多个表需要同步, 默认情况顺序同步, 可以通过 --jobs 设置并行同步表的个数.
 
 # 3. 总结

@@ -115,3 +115,6 @@ deploy:
   type: git
   repo: github.com:nnsay/nnsay.github.io.git
   branch: gh-pages
+
+marked:
+  gfm: true

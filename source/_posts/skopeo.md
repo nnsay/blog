@@ -99,7 +99,7 @@ skopeo inspect docker://docker.io/nnsay/rest-nodejs:latest
 }
 ```
 
-> [!important]
+> [!IMPORTANT]
 > inspect 命令重镜像地址是否有 tag 的唯一区别是 Digest 结果不一样
 
 ## 2.4 查询镜像 Tag
@@ -130,7 +130,7 @@ inspect 命令可以检查镜像 tag, 如上面结果中的`RepoTags`, 也可以
 skopeo copy --multi-arch=all docker://docker.io/nnsay/rest-nodejs:latest docker://quay.io/nnsay/rest-nodejs:latest
 ```
 
-> [!note]
+> [!NOTE]
 >
 > - 拷贝时 quay.io 不需要提前创建镜像仓库
 > - 拷贝是可以通过`multi-arch`指定平台: system, all, or index-only
@@ -218,7 +218,7 @@ Writing manifest to image destination
 skopeo delete docker://quay.io/nnsay/rest-nodejs
 ```
 
-> [!note]
+> [!NOTE]
 >
 > - 不提供 tag 是 tag 是 latest
 > - 如果镜像有依赖删除不掉
@@ -273,7 +273,7 @@ skopeo sync --src docker --dest dir --scoped docker.io/nnsay/rest ./rest
 skopeo sync --src dir --dest docker ./rest quay.io/nnsay/rest
 ```
 
-> [!warning]
+> [!WARNING]
 >
 > - cr 同步到 local, 然后利用同步的结果重新返回同步到 cr 报错(skopeo sync --src dir --dest docker ./rest docker.io/nnsay/rest):
 >
@@ -306,7 +306,7 @@ Writing manifest to image destination
 INFO[0017] Synced 1 images from 1 sources
 ```
 
-> [!warning]
+> [!WARNING]
 > 如果镜像是多平台同步且和本地系统默认平台不一致则报错(skopeo copy docker://docker.io/nnsay/rest-nodejs:latest docker://quay.io/nnsay/rest-nodejs:latest):
 >
 > ERRO[0002] Couldn't get cpu architecture: getCPUInfo for OS darwin not implemented

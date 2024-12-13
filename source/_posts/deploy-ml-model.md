@@ -136,11 +136,11 @@ SageMaker 提供了多个推理选项，以便您可以选择最适合您的工�
 
   ```
 
-  > [!note]
+  > [!NOTE]
   >
   > t2 等突发性能的规格不支持自动伸缩, 经济客观的规格是: ml.m5.large
 
-  > [!important]
+  > [!IMPORTANT]
   >
   > 以上脚本均是 jupyter 脚本, 主要是说明整个部署流程, 核心是先创建 AutoMLJob, 个人觉得 AutoMLJob 是数据科学家和 DevOps 工程师的分界点, 数据科学家通过 AutoMLJob 训练模型, 而 DevOps 依赖其进行部署.
 
@@ -154,7 +154,7 @@ SageMaker 提供了多个推理选项，以便您可以选择最适合您的工�
 
 - [异步推理](https://docs.amazonaws.cn/sagemaker/latest/dg/async-inference.html)：*异步推理*是 当您想要对请求进行排队并具有较长的大型有效负载时，这是理想的选择 处理时间。异步推理可以支持高达 1 GB 的有效负载和长时间的处理 时间长达一小时。当有时，您还可以将终结点缩减为 0 无需处理任何请求。
 
-  > [!note]
+  > [!NOTE]
   >
   > 虽然异步方式不要求队列, 但是从业务逻辑上分析, 始终需要一个事件(时间)知道处理结果, 特别是处理错误时, 所以建议实际应用时增加队列.
 
@@ -397,7 +397,7 @@ export class MLStack extends Stack {
 }
 ```
 
-> [!important]
+> [!IMPORTANT]
 > 在 appscaling.CfnScalingPolicy 的时候会出创建自定义策略来实现伸缩, 但是 endpoint 默认还有一个内置策略名字是: **SageMakerEndpointInvocationScalingPolicy**, 如果将`policyName`名称修改为内置策略名称则可以修改内置策略来实现伸缩.
 
 # 5. Lambda 调用
@@ -464,5 +464,5 @@ export class MLStack extends Stack {
   }
   ```
 
-  > [!important]
+  > [!IMPORTANT]
   > 注意返回类型是 text/csv, 可以通过换行符`\n`来分割数据, 每一行数据则是调用时所传每一行参数的预测结果

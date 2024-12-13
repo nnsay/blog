@@ -6,8 +6,8 @@
     "build": "npm run me && hexo generate",
     "clean": "hexo clean",
     "deploy": "npm run me && hexo deploy",
-    "start": "npm run me && hexo server",
-    "lnconfig": "ln -f themes/replacement/_config.yml themes/concise/_config.yml && cat themes/replacement/footer.ejs > themes/concise/layout/_partial/footer.ejs",
+    "start": "npm run me && rm -rf public && hexo generate && hexo server",
+    "lnconfig": "rm -rf themes/concise/_config.yml && ln -f themes/replacement/_config.yml themes/concise/_config.yml && cat themes/replacement/footer.ejs > themes/concise/layout/_partial/footer.ejs",
     "me": "npm run lnconfig && cp themes/images/* themes/concise/source/images/"
   },
   "hexo": {
@@ -29,6 +29,7 @@
     "hexo-renderer-marked": "^6.3.0",
     "hexo-renderer-stylus": "^3.0.1",
     "hexo-server": "^3.0.0",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "marked-alert": "^2.1.2"
   }
 }

@@ -51,7 +51,7 @@ setup(
 )
 ```
 
-> [!tip]
+> [!TIP]
 > 其实如果不想和 poetry 集成, 只需要将将文件名称修改为 setup.py, 然后就可以通过 pip intall git+https 的方案是安装了
 
 ## 2.3 Poetry 集成
@@ -117,7 +117,7 @@ exclude = ["object_storage/**/*.py"]
 download signed url: https://nnsay-cn.None.aliyuncs.com/hello.log?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAxxxxxxxxxxxxxxxx%2F20240428%2Fcn-northwest-1%2Fs3%2Faws4_request&X-Amz-Date=20240428T024809Z&X-Amz-Expires=3600&X-Amz-SignedHeaders=host&X-Amz-Signature=85a71f9c8c988cfda1786c1b77b4d7f428b948de30db13b31039a8fcc0cca15b
 ```
 
-> [!note]
+> [!NOTE]
 > 请问忽略测试结果输出, 理论上只要可以调用成功, 就证明.so 的 python 包安装成功了
 
 # 3. 总结

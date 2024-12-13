@@ -262,9 +262,9 @@ class ObjectStorage:
     )
 ```
 
-> [!note] > [boto3 s3 文档](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html)
+> [!NOTE] > [boto3 s3 文档](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html)
 
-> [!note]
+> [!NOTE]
 > 该包已开源: Github 项目[python-object-storage](https://github.com/nnsay/python-object-storage), PyPI 包 [nnsay.object-storage](https://pypi.org/project/nnsay.object-storage/)
 
 测试验证代码如下:

@@ -36,7 +36,7 @@ stateDiagram-v2
 
 ![](https://img.picgo.net/2024/12/11/005508cab3fe1d6ed178001cb7b7da05561138b47d10d8b0.png)
 
-> [!note]
+> [!NOTE]
 >
 > - 注意导出的文件格式, 导入的时候格式要一致
 > - 注意加密密钥类型, 建议选择默认的 Amazon S3 密码(SSE-S3), 这样导出的文件被同步到其他账号下时只要有 S3 的权限就可以解密文件而不需要和导出时相同的密码
@@ -55,7 +55,7 @@ mc cp -r sandbox/nnsay-cn/dynamodb/ dev/nnsay-cn-dev/dynamodb/
 
 ![image-20241211145319467](https://img.picgo.net/2024/12/11/image-20241211145319467273678ec15106fbf.png)
 
-> [!note]
+> [!NOTE]
 >
 > - 注意之前导出的数据是 gz 压缩格式, 所以压缩格式需要选择: GZIP
 > - 目标表必须是一个新表, 现有的表不行, 在点击导入后会报错

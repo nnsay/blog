@@ -204,7 +204,7 @@ jupyter notebook
 
 <img src="https://img.picgo.net/2024/07/31/image-20240731140857680ec983e786e739ece.png" alt="image-20240731140857680" style="zoom:25%;" />
 
-> [!note]
+> [!NOTE]
 >
 > 本地 jupyter 不是很好用, 没有智能感知, 且操作不便, 只是本地开发的一种方式
 
@@ -477,7 +477,7 @@ jupyter notebook
 
   ![image-20240731182021014](https://img.picgo.net/2024/07/31/image-202407311820210148331edb96c67c2bc.png)
 
-  > [!note]
+  > [!NOTE]
   > 训练作业在 aws 中并不能删除, 经过询问这些记录不会删除任何费用
 
 **实践总结**:

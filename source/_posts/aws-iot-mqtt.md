@@ -256,7 +256,7 @@ Amazon IoT Core 保存设置了 RETAIN 标志的 MQTT 消息。这些 _保留消
 }
 ```
 
-> [!warning]
+> [!WARNING]
 > 这里仅是测试, 生产环境还应该尽量细粒度定义策略, 比如从 Resource 的 topic/topicfilter/client 上限制, 如下:
 >
 > - "arn:aws-cn:iot:cn-northwest-1:000000000000:topic/sdk/test/js"
@@ -298,7 +298,7 @@ Amazon IoT Core 保存设置了 RETAIN 标志的 MQTT 消息。这些 _保留消
 - 设备证书
 - 根证书
 
-> [!warning]
+> [!WARNING]
 >
 > 1. AWS IoT 并不存储您的私钥，因此一旦您错过下载私钥的机会，您需要重新生成证书和密钥对来确保设备的安全通信
 > 2. 创建设备(Thing)时选择选择上一步创建的安全策略, 如果忘记附加策略可以在设备关联的证书中附加安全策略
@@ -346,12 +346,12 @@ endpoint=$(aws iot describe-endpoint | jq -r '.endpointAddress')
 node aws-iot-device-sdk-js-v2/samples/node/pub_sub/dist/index.js --endpoint "$endpoint" --key certs/researchmbp-private.pem.key --cert certs/researchmbp-certificate.pem.crt --ca_file certs/AmazonRootCA1.pem --client_id sdk-nodejs-v2 --topic sdk/test/js
 ```
 
-> [!note]
+> [!NOTE]
 >
 > 1. 将设备的证书下载到本地目录, 在执行 node 命令时注意证书路径.
 > 2. 访问 AWS IoT 需要的证书有: 设备证书/私钥/根证书
 
-> [!tip]
+> [!TIP]
 >
 > 1. 获取设备数据端点: aws iot describe-endpoint | jq -r '.endpointAddress'
 > 2. 调试测试脚本: --verbosity debug
@@ -694,7 +694,7 @@ run(false).catch((err) => {
 });
 ```
 
-> [!note]
+> [!NOTE]
 > 详情代码参考 Github 仓库: [awsiot-tutorial](https://github.com/nnsay/awsiot-tutorial)
 
 ### 3.4.3 测试
@@ -710,7 +710,7 @@ AWS_IOT_ENDPOINT=$(aws iot describe-endpoint | jq -r '.endpointAddress') ts-node
 AWS_IOT_ENDPOINT=$(aws iot describe-endpoint | jq -r '.endpointAddress') ts-node device-station1.ts
 ```
 
-> [!warning]
+> [!WARNING]
 > 因为要获取 AWS IoT Endpoint 所以在每个终端中需要有访问 aws 的访问权限
 
 在三个终端分别查看上行下行数据情况即可.
@@ -821,7 +821,7 @@ AWS_IOT_ENDPOINT=$(aws iot describe-endpoint | jq -r '.endpointAddress') ts-node
 
   ![](https://img.picgo.net/2024/09/09/9fc45658f448c57e3dfd34cfd8533b79c9b49f4cc31b2169.png)
 
-> [!important]
+> [!IMPORTANT]
 > 建议在生产环境严格限制 IoT:Connect 中的 Client, 因为根据[AWS IoT MQTT 规格特性](https://docs.aws.amazon.com/zh_cn/iot/latest/developerguide/mqtt.html#mqtt-differences): 消息代理使用客户端 ID 标识每个客户。客户端 ID 作为 MQTT 负载的一部分从客户端传递到消息代理。客户端 ID 相同的两个客户端无法同时连接到消息代理。当某个客户端使用另一客户端正在使用的客户端 ID 连接到消息代理时，会接受新的客户端连接，而之前连接的客户端会断开连接
 
 ### 方案 2: 规则
@@ -831,9 +831,9 @@ AWS IoT[规则](https://docs.aws.amazon.com/zh_cn/iot/latest/developerguide/iot-
 - AWS IoT 规则引擎可以使用 SQL 查询从 MQTT 消息中提取数据。在查询中，你可以使用 principalid() 函数来获取设备的证书 ID，这个 ID 是与每个设备的证书唯一绑定的，无法被模拟。
 - 你可以将消息数据和 principalid 一起存储到 DynamoDB 或通过 Lambda 函数进一步处理
 
-> [!note] > [principal()方法](https://docs.aws.amazon.com/zh_cn/iot/latest/developerguide/iot-sql-functions.html#iot-sql-function-principal)可以返回设备用于身份验证的委托人, 当客户端使用 X.509 设备证书时返回 X.509 证书指纹即设备证书 ID
+> [!NOTE] > [principal()方法](https://docs.aws.amazon.com/zh_cn/iot/latest/developerguide/iot-sql-functions.html#iot-sql-function-principal)可以返回设备用于身份验证的委托人, 当客户端使用 X.509 设备证书时返回 X.509 证书指纹即设备证书 ID
 
-> [!important]
+> [!IMPORTANT]
 > 方案一已经验证可行
 > 方案二没有实际验证, 经过查看文档理论上也可行, 但是处理逻辑上是需要多走一步(principalid()获取证书), 实现起来比较复杂, 详情可以查看[文档](https://docs.aws.amazon.com/zh_cn/iot/latest/developerguide/iot-rules.html)
 
@@ -1055,10 +1055,10 @@ const exec = async () => {
 exec().catch((err) => console.error("catch error: ", err));
 ```
 
-> [!note]
+> [!NOTE]
 > 切换到`mqtt-username-password`分支进行查看, 直接看文件夹 mqtt-username-password 中的内容即可
 
-> [!important]
+> [!IMPORTANT]
 >
 > 1. 如果设备不支持定制开发仅支持静态配置方式访问 MQTT 建议禁用自定义 Authorizer 的签名功能
 > 2. [自定义授权对客户端有特殊要求](https://docs.aws.amazon.com/zh_cn/iot/latest/developerguide/custom-auth.html#custom-auth-mqtt): AWS IoT Core 通过使用 MQTT 和自定义身份验证连接的设备必须通过端口 443 进行连接。它们还必须通过应用层协议协商 (ALPN) TLS 扩展名，值为`mqtt`和服务器名称指示 (SNI) 扩展名及其 AWS IoT Core 数据端点的主机名

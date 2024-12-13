@@ -66,7 +66,7 @@ echo`日志目录: ${path.resolve(path.join(os.homedir(), "tmp", "output.log"))}
 echo`当前目录: ${__dirname}`;
 ```
 
-> [!note]
+> [!NOTE]
 > 第三行的引用实则未必, 但是在写脚本时候可以提供很多类型感知防止写错;
 > 另外如果脚本依赖第三方包也是需要在前面引用的.
 
@@ -100,7 +100,7 @@ home目录: /Users/wangjian
   ./example.mjs
   ```
 
-  > [!note]
+  > [!NOTE]
   >
   > 确保 shebang 已配置, zx 的 shengbang 是: `#!/usr/bin/env zx`
 

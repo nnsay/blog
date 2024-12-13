@@ -113,7 +113,7 @@ baidu:
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
   type: git
-  repo: github.com:nnsay/blog.git
+  repo: https://nnsay.github.io/blog.git
   branch: gh-pages
 
 marked:

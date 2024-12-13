@@ -3,10 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "npm run me && hexo generate",
+    "build": "npm run me && rm -rf public && hexo generate",
     "clean": "hexo clean",
     "deploy": "npm run me && hexo deploy",
-    "start": "npm run me && rm -rf public && hexo generate && hexo server",
+    "start": "npm run build && hexo server",
     "lnconfig": "rm -rf themes/concise/_config.yml && ln -f themes/replacement/_config.yml themes/concise/_config.yml && cat themes/replacement/footer.ejs > themes/concise/layout/_partial/footer.ejs",
     "me": "npm run lnconfig && cp themes/images/* themes/concise/source/images/"
   },

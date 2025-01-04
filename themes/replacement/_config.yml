@@ -3,7 +3,7 @@ menu:
   Home: /
   Tags: /tags
   Archives: /archives
-  RSS: /atom.xml
+  RSS: https://rss.beauty/rss?url=https%3A%2F%2Fnnsay.cn%2Fatom.xml
   About: /about
 
 # Content

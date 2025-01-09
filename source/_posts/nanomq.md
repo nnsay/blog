@@ -89,13 +89,13 @@ NanoMQ 有三个 [Docker Image](https://nanomq.io/docs/zh/latest/installation/do
   NanoMQ Broker is started successfully!
   ```
 
-  根据 nanomq.conf 的配置, 会监听 1883 端口实现 MQTT over TCP, 所以直接连接服务器这个端口发布消息即可.
+  根据 nanomq.conf 的配置, 会监听 1883 端口实现 MQTT over TCP, 所以直接连接服务器这个端口发布消息即可, 验证工具可以使用[MQTTX](https://mqttx.app/zh/downloads).
 
 # 3. 功能验证
 
 ## 3.1 认证
 
-保持项目现有的 etc/nanomq_pwd.conf 不变, 直接使用默认的用户名和密码:
+保持项目仓库现有的 etc/nanomq_pwd.conf 不变, 使用其默认配置的用户名和密码:
 
 ```toml
 # #====================================================================
@@ -421,10 +421,10 @@ app.listen(port, () => {
 - [HTTP 认证和鉴权](https://nanomq.io/docs/zh/latest/access-control/http.html) :white_check_mark:
 
 > [!NOTE]
-> HTTP 身份验证完整配置参考[这里](https://nanomq.io/docs/zh/latest/config-description/v014.html#http%E8%BA%AB%E4%BB%BD%E9%AA%8C%E8%AF%81), 虽然文档上说明 acl_req 的 params 没有 %P, 但是经过测试 %P 可以配置, 如此就就可以在 pub/sub 的时候进行认证逻辑的开发.
+> HTTP 身份验证完整配置参考[这里](https://nanomq.io/docs/zh/latest/config-description/v014.html#http%E8%BA%AB%E4%BB%BD%E9%AA%8C%E8%AF%81), 虽然文档上说明 acl_req 的 params 没有 %P(密码), 但是经过测试 %P 可以配置, 如此就就可以在 pub/sub 的时候进行认证逻辑的开发.
 
 # 4. 总结
 
 NanoMQ 功能丰富, 支持最基本的 TPC 链接, 也支持 TLS/SSL, 走 TLS/SSL 的情况下, 支持仅 CA 单向认证, 也支持设备证书双向认证; 其本身的配置可以通过自身定义和提供的 HTTP API 进行操作, 且支持热更新; 更惊艳的功能是 HTTP Auth, 可以自己动态实现认证和鉴权.
 
-推荐在开发验证阶段使用 NanoMQ, 其单机方式性能也很不错, 详情可见其[测试报告](https://nanomq.io/docs/zh/latest/test-report.html); 如果生产环境, NanoMQ 是 MIT License, 可以进行二次开发, 但是自己需要搭建高可用的集群已提供稳定的服务.
+推荐在开发验证阶段使用 NanoMQ, 其单机方式性能也很不错, 详情可见其[测试报告](https://nanomq.io/docs/zh/latest/test-report.html); 如果在生产环境, NanoMQ 是 MIT License, 可以进行二次开发, 但是自己需要搭建高可用的集群以提供稳定的服务.

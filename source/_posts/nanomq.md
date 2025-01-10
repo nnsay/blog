@@ -50,7 +50,7 @@ NanoMQ 有三个 [Docker Image](https://nanomq.io/docs/zh/latest/installation/do
 - NanoMQ Slim 版
 - NanoMQ 完整版
 
-但是本文不是用 Docker Image 的方式, 而是使用源码编译的方式, 因为很多细节的特性需要编译才能实现, 例如 AWS IoT Core 桥接特性. 另外经过验证源码在 macOS M2 的机器上编译不过, 所以本文以下的操作都是在 Ubuntu x86 架构的机器上进行的.
+但是本文不是用 Docker Image 的方式, 而是使用源码编译的方式, 因为很多细节的特性需要编译才能实现, 例如 AWS IoT Core 桥接特性. 作为一款用于物联网边缘的超轻量级 MQTT 消息服务器，NanoMQ 支持在各种边缘平台运行，例如支持 x86_64 和 ARM 等架构。
 
 - 前置依赖
 
@@ -80,6 +80,15 @@ NanoMQ 有三个 [Docker Image](https://nanomq.io/docs/zh/latest/installation/do
   > - -DENABLE_JWT=ON : 编译启用 HTTP Server 所需的 JWT 依赖项
   > - -DNNG_ENABLE_TLS=ON: 编译启用 TLS，依赖项：[mbedTLS](https://tls.mbed.org/)
   > - -DNNG_ENABLE_SQLITE=ON: 支持 SQLite
+
+  > [!TIP]
+  >
+  > 源码在 macOS M2 的机器上编译不过, 可以参考 [issue](https://github.com/nanomq/nanomq/issues/1970) 中的方案
+  >
+  > ```bash
+  > brew install gcc
+  > cmake -DENABLE_JWT=ON -DNNG_ENABLE_TLS=ON DNNG_ENABLE_SQLITE=ON -DCMAKE_C_COMPILER=gcc-14 ..
+  > ```
 
 - 验证结果
 
@@ -185,7 +194,7 @@ listeners.ws {
 # }
 
 webhook = {
-  url = "http://192.168.110.200:3000/mqtt"        # URL where webhooks will send HTTP requests to
+  url = "http://localhost:3000/mqtt"        # URL where webhooks will send HTTP requests to
   headers.content-type = "application/json" # HTTP header specifying request content type
   headers.authorization = "eyJhbGciOiJIUzI1NiJ9.eyJlbnZOYW1lIjoibG9jYWwifQ.oWJU9JhpdASfv_9XDHm1wZ2w7IA86N2YAr3aX8NUNEY"
   body.encoding = "plain"            # Encoding format of the payload field in HTTP body
@@ -223,7 +232,7 @@ auth {
     # acl = {include "./etc/nanomq_acl.conf"}
     http_auth = {
         auth_req {
-            url = "http://192.168.110.200:3000/mqtt/auth"
+            url = "http://localhost:3000/mqtt/auth"
             method = "POST"
             headers.content-type = "application/x-www-form-urlencoded"
             headers.authorization = "eyJhbGciOiJIUzI1NiJ9.eyJlbnZOYW1lIjoibG9jYWwifQ.oWJU9JhpdASfv_9XDHm1wZ2w7IA86N2YAr3aX8NUNEY"
@@ -231,7 +240,7 @@ auth {
         }
 
         super_req {
-            url = "http://192.168.110.200:3000/mqtt/superuser"
+            url = "http://localhost:3000/mqtt/superuser"
             method = "POST"
             headers.content-type = "application/x-www-form-urlencoded"
             headers.authorization = "eyJhbGciOiJIUzI1NiJ9.eyJlbnZOYW1lIjoibG9jYWwifQ.oWJU9JhpdASfv_9XDHm1wZ2w7IA86N2YAr3aX8NUNEY"
@@ -239,7 +248,7 @@ auth {
         }
 
         acl_req {
-            url = "http://192.168.110.200:3000/mqtt/acl"
+            url = "http://localhost:3000/mqtt/acl"
             method = "POST"
             headers.content-type = "application/x-www-form-urlencoded"
             headers.authorization = "eyJhbGciOiJIUzI1NiJ9.eyJlbnZOYW1lIjoibG9jYWwifQ.oWJU9JhpdASfv_9XDHm1wZ2w7IA86N2YAr3aX8NUNEY"
@@ -264,7 +273,7 @@ auth {
 ./build/nanomq/nanomq start --conf etc/nanomq.conf
 ```
 
-在 webhook-server 上启动写好的程序, 这里使用 typescript 编写 HTTP 服务如下:
+为了验证 HTTP Auth 和 Webhook, 编写 HTTP Sever(nano-http-server.ts)如下:
 
 ```typescript
 import express from "express";
@@ -408,6 +417,102 @@ app.listen(port, () => {
   console.log(`Http server app listening on port ${port}`);
 });
 ```
+
+如果需要测试 HTTP Auth 则启动 nano-http-server.ts 脚本, 否则请使用静态配置文件, 即在 nanomq.conf 的 `auth` 中使用 `password` 和 acl 指定配置文件并去除 `http_auth`.
+
+为了测试 走 MQTT 和 MQTTS 协议时 pub/sub 编写测试脚本(nanomq.ts)如下:
+
+```typescript
+import mqtt, { BaseMqttProtocol } from "mqtt";
+import dotenv from "dotenv";
+import fs from "fs";
+import path from "path";
+
+dotenv.config({ path: ".env.nano" });
+
+const exec = async () => {
+  const username = process.env.MQTT_USERNAME!;
+  const password = process.env.MQTT_PASSWORD!;
+  const endpoint = process.env.MQTT_ENDPOINT!;
+  const clientId = "nodejs-local-client";
+  const protocol: BaseMqttProtocol = (process.env.MQTT_PROTOCOL ||
+    "mqtts") as BaseMqttProtocol;
+  const topic = "ESS/local-demo/solar/data";
+  // const topic = `${username}/only-one`;
+  console.log({ username, clientId, endpoint, password, protocol });
+
+  const opts: mqtt.IClientOptions = {
+    hostname: endpoint,
+    protocol,
+    clientId,
+    username,
+    password,
+    clean: true,
+    keepalive: 60,
+    protocolVersion: 4, // 使用协议版本 3.1.1 (4 对应于 3.1.1)
+  };
+  switch (protocol) {
+    case "mqtt":
+      opts.port = 1883;
+      break;
+    case "mqtts":
+      // delete opts.username;
+      // delete opts.password;
+      opts.port = 8883;
+      // NOTE: 证书来自 NanoMQ 源码 etc/certs
+      opts.ca = fs.readFileSync(
+        path.join(__dirname, "certs/nanocerts/cacert.pem")
+      );
+      // opts.cert = fs.readFileSync(
+      //   path.join(__dirname, "certs/nanocerts/cert.pem")
+      // );
+      // opts.key = fs.readFileSync(
+      //   path.join(__dirname, "certs/nanocerts/key.pem")
+      // );
+      break;
+    default:
+      throw new Error("unsupported protocol");
+  }
+
+  const client = await mqtt.connectAsync(opts);
+
+  client.on("message", async (topic, message, packet) => {
+    console.log(`Received message on topic ${topic}: ${message.toString()}`);
+  });
+  const subRes = await client.subscribeAsync(topic, { qos: 1 });
+  console.log("subRes: ", subRes);
+
+  let messageCount = 0;
+  while (true) {
+    messageCount++;
+    if (messageCount > 10) {
+      break;
+    }
+    const pubRes = await client.publishAsync(
+      topic,
+      JSON.stringify({ hello: `${username}-${messageCount}` }),
+      {
+        qos: 1,
+      }
+    );
+    console.log("pubRes: ", pubRes);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+
+  await client.endAsync();
+};
+
+exec().catch((err) => {
+  console.error("catch error: ", err);
+});
+```
+
+> [!TIP]
+> 在测试 MQTTS 的时候因为用的是源码中的证书且这个证书是颁发给`Server`这个机构的, 所以 MQTT_ENDPOINT 这个地址应该填写 Server, 又为了 Server 可以被解析, 在本地 hosts 解析需要添加如下记录:
+> 127.0.0.1 Server
+
+> [!NOTE]
+> 以上脚本中使用的证书来自 NanoMQ 源码 etc/certs
 
 经过测试和验证, 测试结果如下:
 

@@ -213,6 +213,12 @@ EMQX 的内置数据库是: [Mnesia](https://elixirschool.com/zh-hans/lessons/st
 > [!NOTE]
 > 如果使用内置数据库, 则该数据库也将随着 EMQX 集群形成一个数据库集群, 数据会自动复制到多个节点保证高可用.
 
+## 4.4 [REST API](https://docs.emqx.com/zh/emqx/v5.8/admin/api.html)
+
+EMQX 提供了管理监控 REST API，这些 API 遵循 OpenAPI (Swagger) 3.0 规范。EMQX 服务启动后，您可以访问 http://localhost:18083/api-docs/index.html 来查看 API 的文档。
+
+在使用 REST API 前在 Dashboard `系统设置`中添加`API密码`, API 密码是一组 API Key + Secret Key, 可以作为调用 API 时的`basicAuth`来认证.
+
 # 5. 总结
 
 EMQX 开源版本可以对标其企业版本中 Serverless 版本的服务, Serverless 版本服务不支持 MQTT over TCP, 所以如果使用 EMQX 开源版本搭建自己的服务则可以解决这个问题更好的让 IoT 设备简单的接入数据; EMQX 开源版本和其 NanoMQ 相比有一些优势, 例如前者提供了 Dashboard 管理端, 大大方便了配置和操作; 在集群搭建方面仅 EMQX 企业版支持 Core + Replicant 节点集群, 所以 EQMX 开源版和 NanoMQ 最终的集群方式差不多, 都是部署多个服务实例通过负载均衡实现高可用, 但是前者每个服务实例还可以组成静态集群数据可互通. 总结: 如果你业务量规模不大, 但实例 NanoMQ 就可以支持, 如果还想要增加一些高可用性, 那么 EMQX 开源版是个不错的选择.

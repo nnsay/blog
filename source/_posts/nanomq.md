@@ -3,6 +3,7 @@ title: NanoMQ
 date: 2025-01-09 18:36:05
 tags:
   - DevOps
+  - 研究
 excerpt: 学习和应用轻量高性能 MQTT Broker -- NanoMQ
 ---
 

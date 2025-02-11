@@ -16,14 +16,16 @@ AI 的时代已经到来, 作为程序员应积极响技术变化, 学会使用 
 
 搭建本地模型使用的开源工具有:
 
-- [ollama](https://github.com/ollama/ollama): 获取和运行模型
+- [ollama](https://github.com/ollama/ollama): 获取和运行模型(多平台)
 - [vllm](https://github.com/vllm-project/vllm): 适用于 LLM 的高吞吐量和内存高效推理和服务引擎
 - [open-webui](https://github.com/open-webui/open-webui): 提供友好的用户界面来使用 ollama 和 OpenAI API 标准兼容的其他模型服务
 
 以上三个工具中前两个都是获取运行模型的, 之所以本文介绍两个是因为 ollama 的模型仓库模型数量有限, 如果想尝试其他的模型则可以使用 vllm, 如果只是轻度使用那么 ollama 一个服务引擎则足够了; open-webui 其实也非必要, 因为 ollama 可以在终端中运行模型也可以进行对话, 但是终端对话简单, open-webui 可以实现联网搜索/切换模型/文件上传等高级功能, 用户体验更好.
 
 > [!NOTE]
-> 本文的搭建方法需要好配置较好计算机, 本人使用的是: MacBook Pro, Apple M2 Pro 芯片, 16GB 内存.
+>
+> - 本文的搭建方法需要配置较好的计算机, 本人使用的是: MacBook Pro, Apple M2 Pro 芯片, 16GB 内存
+> - 本文搭建方法不限制计算平台, Linux/Windows 均可以, 只需要按照相关工具对应平台的安装方式安装即可
 
 # 2. 安装工具
 

@@ -6,6 +6,11 @@ tags:
 excerpt: 在本地自由且安全的使用开源大模型
 ---
 
+### 0. 更新时间
+
+- 2025-02-11: 搭建本地大模型服务
+- 2025-02-12: 更新 Continue 推荐配置
+
 # 1. 本地大模型服务
 
 AI 的时代已经到来, 作为程序员应积极响技术变化, 学会使用 AI 工具并利用其解决问题. 本地介绍如何在本地搭建大模型服务, 之所以搭建本地模型有两个原因:
@@ -165,40 +170,17 @@ open http://localhost:8080/
 ```json
 {
   "models": [
-    // {
-    //   "title": "Claude 3.5 Sonnet (Free Trial)",
-    //   "provider": "free-trial",
-    //   "model": "claude-3-5-sonnet-latest",
-    //   "systemMessage": "You are an expert software developer. You give helpful and concise responses."
-    // },
-    // {
-    //   "title": "GPT-4o (Free Trial)",
-    //   "provider": "free-trial",
-    //   "model": "gpt-4o",
-    //   "systemMessage": "You are an expert software developer. You give helpful and concise responses."
-    // },
-    // {
-    //   "title": "Llama3.1 70b (Free Trial)",
-    //   "provider": "free-trial",
-    //   "model": "llama3.1-70b",
-    //   "systemMessage": "You are an expert software developer. You give helpful and concise responses."
-    // },
-    // {
-    //   "title": "Codestral (Free Trial)",
-    //   "provider": "free-trial",
-    //   "model": "codestral-latest",
-    //   "systemMessage": "You are an expert software developer. You give helpful and concise responses."
-    // },
     {
-      "model": "AUTODETECT",
-      "title": "Autodetect",
-      "provider": "ollama"
+      "title": "deepseek-coder-2",
+      "provider": "ollama",
+      "model": "deepseek-coder-v2:latest",
+      "apiBase": "http://localhost:11434"
     }
   ],
   "tabAutocompleteModel": {
-    "title": "phi4",
+    "title": "qwen2.5-coder-7b-base",
     "provider": "ollama",
-    "model": "phi4:latest"
+    "model": "qwen2.5-coder:7b-base"
   },
   "contextProviders": [
     {
@@ -253,6 +235,9 @@ open http://localhost:8080/
   }
 }
 ```
+
+> [!NOTE]
+> 本地资源毕竟有限不要一味使用大参数模型, 在自动完成配置中`qwen2.5-coder:7b-base` 是官方推荐的本地质量和性能平衡中较好的选择, 如果计算机性能稍差也可以选择`qwen2.5-coder:1.5b-base`
 
 # 5. 总结
 

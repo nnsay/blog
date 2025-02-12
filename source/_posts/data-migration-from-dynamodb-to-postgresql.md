@@ -4,6 +4,7 @@ date: 2024-03-08 16:36:22
 tags:
   - Tips
   - DevOps
+  - Code
 excerpt: 使用Typescript脚本从DynamoDB迁移数据到PostgreSQL
 ---
 

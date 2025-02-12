@@ -5,6 +5,7 @@ tags:
   - Code
   - 研究
   - AWS
+  - AI
 excerpt: 使用SageMaker进行机器学习模型训练
 ---
 

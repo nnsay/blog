@@ -104,9 +104,6 @@ CMD ["node", "main.js"]
 以下是后端服务中实现上述流程的核心代码片段（使用 TypeScript 和 `child_process`）。代码省略了完整的 API 设计，仅展示了调用外部命令的关键步骤。
 
 ```typescript
-// 封装的异步执行命令的函数，类似 child_process.spawn
-// spawnAsync(command: string, args: string[]): Promise<void>
-
 /**
  * 步骤 1: 执行 3D 重建
  */

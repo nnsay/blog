@@ -44,7 +44,8 @@ flowchart LR
 
 这三个文件共同构成了一套基于**八叉树（Octree）和多细节层次（Level of Detail, LOD）**的高效数据结构，这正是 Potree 能够流畅处理海量点云的核心所在。
 
-> [!NOTE] > **关于 LAZ 修复**：此步骤并非总是必需的。然而，在我的实践中发现，ODM 有时生成的 LAZ 文件存在 Bounding Box 数据非法的问题，这会导致 PotreeConverter 运行失败。因此，在流程中加入了这一修复步骤，以增强整个流程的稳定性。
+> [!NOTE]
+> **关于 LAZ 修复**：此步骤并非总是必需的。然而，在我的实践中发现，ODM 有时生成的 LAZ 文件存在 Bounding Box 数据非法的问题，这会导致 PotreeConverter 运行失败。因此，在流程中加入了这一修复步骤，以增强整个流程的稳定性。
 
 # 3. 工程实现
 

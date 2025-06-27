@@ -4,6 +4,7 @@ date: 2025-05-14 16:31:58
 tags:
   - DevOps
   - 研究
+  - 3D
 excerpt: 从 3D 模型到 PCD 文件的转换与优化
 ---
 

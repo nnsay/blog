@@ -4,6 +4,7 @@ date: 2025-04-27 10:19:13
 tags:
   - DevOps
   - 研究
+  - 3D
 excerpt: 学习使用 Blender 脚本自动处理 OBJ 模型文件，包括简化、烘焙和导出等操作
 ---
 

@@ -2,9 +2,9 @@
 title: 使用 LlamaIndex 构建 RAG 应用
 date: 2025-09-15 11:08:35
 tags:
-- DevOps
-- AI
-  excerpt: 如何使用 LlamaIndex 框架，结合阿里云百炼模型服务，从零开始构建一个完整的 RAG 应用的实践指南。
+  - DevOps
+  - AI
+excerpt: 使用 LlamaIndex+阿里云百炼模从零开始构建一个完整的 RAG 应用
 ---
 
 # 声明

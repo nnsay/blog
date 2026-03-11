@@ -7,6 +7,11 @@ tags:
 excerpt: 从零搭建 AutoGLM-Phone AI 手机助理：macOS 安卓模拟器配置、ADB 环境搭建与抖音自动化实测
 ---
 
+# ChangeLog
+
+- 2026-03-10: 初始版博客发布
+- 2026-03-11: 修改模拟器配置，使用虚拟键代替模拟器边侧按键操作手机
+
 # 声明
 
 本文由 🤖AI 协作完成, 内容已过实际测试.
@@ -55,8 +60,7 @@ Review licenses that have not been accepted (y/N)? y
 [=======================================] 100% Unzipping... emulator/._NOTICE.tx
 
 # 3. 下载系统镜像（推荐使用 ARM64 的 Android 12 或更高版本）
-➜  ~ sdkmanager "system-images;android-31;google_apis;arm64-v8a"
-[====                                   ] 12% Downloading arm64-v8a-31_r11.zip..
+➜  ~ sdkmanager "system-images;android-33;google_apis;arm64-v8a"
 [=======================================] 100% Unzipping... arm64-v8a/data/misc/
 ```
 
@@ -70,15 +74,13 @@ Review licenses that have not been accepted (y/N)? y
 
 ````bash
 # 创建一个名为 google_emulator 的模拟器
-➜  ~ avdmanager create avd -n google_emulator -k "system-images;android-31;google_apis;arm64-v8a"
+➜  ~ avdmanager create avd -n google_emulator -k "system-images;android-33;google_apis;arm64-v8a" -d "pixel_5" --force
 Auto-selecting single ABI arm64-v8a     ] 25% Loading local repository...
 Do you wish to create a custom hardware profile? [no]
 
-# 配置调整: 在 ~/.android/avd/google_emulator.avd/config.ini 中，确保有如下类似的设置
+# 可选检查: 在 ~/.android/avd/google_emulator.avd/config.ini 中，确保有如下类似的设置
 ```
 hw.gpu.enabled=yes
-hw.gpu.mode=auto
-hw.mainKeys=yes
 ```
 
 # 查看模拟器列表
@@ -91,17 +93,19 @@ Available Android Virtual Devices:
   Sdcard: 512 MB
 
 # 启动模拟器
-➜  ~ emulator -avd google_emulator -screen multi-touch -skin 1080x1920
+➜  ~ emulator -avd google_emulator
 INFO         | Android emulator version 36.4.9.0 (build_id 14788078) (CL:N/A)
 INFO         | Graphics backend: gfxstream
 INFO         | Found systemPath /Users/wangjian/.local/opt/android_sdk/system-images/android-31/google_apis/arm64-v8a/
 WARNING      | Please update the emulator to one that supports the feature(s): Vulkan
-WARNING      | [FeatureControl] Bad feature name: 'AndroidEmulatorHypervisorDriver=on'
 INFO         | Increasing RAM size to 2048MB
 ````
 
 > [!NOTE]
 > 若需删除模拟器，直接删除对应的文件夹即可。通过 `avdmanager list` 可查看模拟器文件的具体存放位置。
+
+> [!TIP]
+> 查看所有支持的设备代号: avdmanager list device
 
 ### 2.1.5 测试连接
 
@@ -166,13 +170,13 @@ adb -s emulator-5554 shell ime set com.android.adbkeyboard/.AdbIME
 
 - **克隆项目**
 
-  ```
+  ```bash
   git clone https://github.com/zai-org/Open-AutoGLM.git
   ```
 
 - **安装依赖**
 
-  ```
+  ```bash
   uv venv --allow-existing --python 3.10 .venv
   uv pip install -r requirements.txt
   uv python pin 3.10
@@ -180,14 +184,14 @@ adb -s emulator-5554 shell ime set com.android.adbkeyboard/.AdbIME
 
 - **验证设备连接**
 
-  ```
+  ```bash
   adb devices
   ```
 
 - **运行模型**
 
-  ```
-  uv run python main.py --base-url https://open.bigmodel.cn/api/paas/v4 --model "autoglm-phone" --apikey $$AUTOGLM_API_KEY "回到首页"
+  ```bash
+  uv run python main.py --base-url https://open.bigmodel.cn/api/paas/v4 --model "autoglm-phone" --apikey $AUTOGLM_API_KEY "回到首页"
   ```
 
 # 3. 应用实测
@@ -217,13 +221,19 @@ uv run python main.py --base-url https://open.bigmodel.cn/api/paas/v4 --model "a
   - **进程同步延迟：** 直接通过 `emulator` 命令启动时，UI 面板与内核通信链路建立可能存在延迟。
   - **快捷键冲突：** macOS 系统的全局快捷键（如输入法切换）可能拦截了模拟器的按键输入。
 
-- **推荐方案：直接使用 ADB 命令替代物理按钮**
-  直接通过终端发送命令，稳定性更高：
-  ```bash
-  # 建议添加到 .zshrc 或 .bashrc 中
-  alias emu-home='adb -s emulator-5554 shell input keyevent 3'
-  alias emu-back='adb -s emulator-5554 shell input keyevent 4'
-  alias emu-recent='adb -s emulator-5554 shell input keyevent 187'
-  alias emu-input="adb -s emulator-5554 shell input text "
-  alias emu-del="adb -s emulator-5554 shell input keyevent 67"
-  ```
+- \*\*推荐方案：
+  - **直接使用 ADB 命令替代物理按钮**
+
+    ```bash
+    # 建议添加到 .zshrc 或 .bashrc 中
+    alias emu-home='adb -s emulator-5554 shell input keyevent 3'
+    alias emu-back='adb -s emulator-5554 shell input keyevent 4'
+    alias emu-input="adb -s emulator-5554 shell input text "
+    alias emu-del="adb -s emulator-5554 shell input keyevent 67"
+    ```
+
+- **直接使用虚拟按钮**
+  - 确保创建 avd 的时候设备参数: -d "pixel_5"
+  - 开启虚拟三键:
+    - 命令: adb shell cmd overlay enable com.android.internal.systemui.navbar.threebutton
+    - 手动: 设置->System->Gestures->System navigation-> 3-button navigation

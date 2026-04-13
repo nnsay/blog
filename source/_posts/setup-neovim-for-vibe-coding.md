@@ -4,7 +4,7 @@ date: 2026-04-13 09:26:58
 tags: 
   - AI
   - DevOps 
-excerpts: AI 编程时代的轻量 Neovim 配置记录
+excerpt: AI 编程时代的轻量 Neovim 配置记录
 ---
 
 # 声明

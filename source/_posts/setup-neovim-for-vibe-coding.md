@@ -1,9 +1,9 @@
 ---
 title: 在 AI / Vibe Coding 时代，搭一套轻量可用的 Neovim 终端 IDE
 date: 2026-04-13 09:26:58
-tags: 
+tags:
   - AI
-  - DevOps 
+  - DevOps
 excerpt: AI 编程时代的轻量 Neovim 配置记录
 ---
 
@@ -33,7 +33,6 @@ excerpt: AI 编程时代的轻量 Neovim 配置记录
 
 这篇文章记录的是我从零搭建一套可用 Neovim 环境的过程。它不是“最炫配置”，也不是“最复杂方案”，而是一套偏实用主义、适合在 AI 编程时代辅助代码审查和轻量修改的终端 IDE 配置。
 
-
 # 1. 安装与配置
 
 ## 1.1 安装 Neovim
@@ -46,7 +45,7 @@ macOS 下可以直接使用 Homebrew 安装：
 # 安装 nvim
 brew install neovim
 nvim --version
-````
+```
 
 安装完成后，建议先确认版本。较新的插件和 LSP 配置通常更适配较新的 Neovim 版本。
 
@@ -154,9 +153,9 @@ return {
 
 说明：
 
-* `dotfiles = false`：显示隐藏文件
-* `git_ignored = false`：显示被 `.gitignore` 忽略的文件
-* `<leader>e`：切换文件树
+- `dotfiles = false`：显示隐藏文件
+- `git_ignored = false`：显示被 `.gitignore` 忽略的文件
+- `<leader>e`：切换文件树
 
 ### 1.3.2 `telescope.nvim`：文件与内容搜索
 
@@ -198,10 +197,10 @@ return {
 
 常用快捷键：
 
-* `<leader>ff`：搜索文件
-* `<leader>fg`：全文搜索
-* `<leader>fb`：查看当前 buffer
-* `<leader>fh`：查看帮助标签
+- `<leader>ff`：搜索文件
+- `<leader>fg`：全文搜索
+- `<leader>fb`：查看当前 buffer
+- `<leader>fh`：查看帮助标签
 
 ### 1.3.3 `toggleterm.nvim`：终端
 
@@ -235,10 +234,9 @@ return {
 
 说明：
 
-* `Ctrl + \`：打开 / 关闭终端
-* 在终端模式中按 `Esc`：退出终端插入模式
-* `Ctrl-h` / `Ctrl-l`：在终端和其他窗口之间切换
-
+- `Ctrl + \`：打开 / 关闭终端
+- 在终端模式中按 `Esc`：退出终端插入模式
+- `Ctrl-h` / `Ctrl-l`：在终端和其他窗口之间切换
 
 ### 1.3.4 LSP：语言服务器
 
@@ -246,9 +244,9 @@ return {
 
 这里使用：
 
-* `mason.nvim`：安装和管理语言服务器
-* `mason-lspconfig.nvim`
-* `nvim-lspconfig`
+- `mason.nvim`：安装和管理语言服务器
+- `mason-lspconfig.nvim`
+- `nvim-lspconfig`
 
 ```lua
 return {
@@ -331,16 +329,16 @@ return {
 
 这套配置默认支持：
 
-* Python：`pyright`
-* TypeScript / JavaScript：`ts_ls`
-* Lua：`lua_ls`
+- Python：`pyright`
+- TypeScript / JavaScript：`ts_ls`
+- Lua：`lua_ls`
 
 如果是 Python Monorepo 项目，还需要结合 `pyrightconfig.json` 或 `pyproject.toml` 中的 `[tool.pyright]` 做额外配置，尤其是：
 
-* 根目录统一 `.venv`
-* monorepo 下的 `libs`
-* `extraPaths`
-* workspace root 识别
+- 根目录统一 `.venv`
+- monorepo 下的 `libs`
+- `extraPaths`
+- workspace root 识别
 
 ### 1.3.5 `nvim-cmp`：自动补全
 
@@ -387,10 +385,10 @@ return {
 
 常用快捷键：
 
-* `Ctrl-j`：选择下一个补全项
-* `Ctrl-k`：选择上一个补全项
-* `Ctrl-Space`：手动触发补全
-* `Enter`：确认补全
+- `Ctrl-j`：选择下一个补全项
+- `Ctrl-k`：选择上一个补全项
+- `Ctrl-Space`：手动触发补全
+- `Enter`：确认补全
 
 ### 1.3.6 `bufferline.nvim`：缓冲区标签栏
 
@@ -435,9 +433,9 @@ return {
 
 常用快捷键：
 
-* `Shift-h`：切到左边 buffer
-* `Shift-l`：切到右边 buffer
-* `<leader>bp`：选择 buffer
+- `Shift-h`：切到左边 buffer
+- `Shift-l`：切到右边 buffer
+- `<leader>bp`：选择 buffer
 
 ### 1.3.7 `conform.nvim`：格式化
 
@@ -504,14 +502,13 @@ return {
 
 说明：
 
-* 保存时自动格式化
-* 手动格式化快捷键：`<leader>fm`
-* 优先建议使用项目中已有的 formatter 配置，例如：
-
-  * `pyproject.toml`
-  * `.prettierrc`
-  * `.editorconfig`
-  * `.stylua.toml`
+- 保存时自动格式化
+- 手动格式化快捷键：`<leader>fm`
+- 优先建议使用项目中已有的 formatter 配置，例如：
+  - `pyproject.toml`
+  - `.prettierrc`
+  - `.editorconfig`
+  - `.stylua.toml`
 
 这样可以最大程度保持和项目已有规范一致。
 
@@ -576,16 +573,15 @@ return {
 
 说明：
 
-* 这里使用的是 `nvim-treesitter` 新主线配置方式
-* `tree-sitter-cli` 必须安装，否则 parser 无法正确编译
-* 如果要确认是否生效，可以在代码中执行：
+- 这里使用的是 `nvim-treesitter` 新主线配置方式
+- `tree-sitter-cli` 必须安装，否则 parser 无法正确编译
+- 如果要确认是否生效，可以在代码中执行：
 
 ```vim
 :InspectTree
 ```
 
 如果能看到对应语法树结构，说明 Tree-sitter 已经正常工作
-
 
 # 2. 常用使用技巧
 
@@ -607,18 +603,17 @@ vim.opt.mouse = 'a'
 
 ### 常见复制粘贴操作
 
-* **复制（Yank）**：Normal 模式下按 `y`
+- **复制（Yank）**：Normal 模式下按 `y`
+  - `yy`：复制整行
+  - `yw`：复制一个单词
 
-  * `yy`：复制整行
-  * `yw`：复制一个单词
-* **粘贴（Put）**：
+- **粘贴（Put）**：
+  - `p`：粘贴到光标后
+  - `P`：粘贴到光标前
 
-  * `p`：粘贴到光标后
-  * `P`：粘贴到光标前
-* **选中复制**：
-
-  * 按 `v` 进入可视模式
-  * 选中文字后按 `y`
+- **选中复制**：
+  - 按 `v` 进入可视模式
+  - 选中文字后按 `y`
 
 ## 2.2 多行编辑（Visual Block 模式）
 
@@ -662,9 +657,9 @@ Vim/Neovim 不需要像 VS Code 那样依赖多光标完成大部分批量编辑
 
 按下 `a` 后，底部会出现输入框：
 
-* 新建文件：输入文件名，例如 `main.lua`
-* 新建目录：输入目录名并以 `/` 结尾，例如 `src/`
-* 新建多级路径：例如 `lua/config/init.lua`
+- 新建文件：输入文件名，例如 `main.lua`
+- 新建目录：输入目录名并以 `/` 结尾，例如 `src/`
+- 新建多级路径：例如 `lua/config/init.lua`
 
 ### 删除文件或目录：`d`
 
@@ -678,14 +673,14 @@ Vim/Neovim 不需要像 VS Code 那样依赖多光标完成大部分批量编辑
 
 ### 其他常用操作
 
-| 快捷键  | 功能     |
-| ---- | ------ |
-| `x`  | 剪切文件   |
-| `c`  | 复制文件   |
-| `p`  | 粘贴文件   |
-| `y`  | 复制文件名  |
-| `Y`  | 复制相对路径 |
-| `gy` | 复制绝对路径 |
+| 快捷键 | 功能         |
+| ------ | ------------ |
+| `x`    | 剪切文件     |
+| `c`    | 复制文件     |
+| `p`    | 粘贴文件     |
+| `y`    | 复制文件名   |
+| `Y`    | 复制相对路径 |
+| `gy`   | 复制绝对路径 |
 
 ## 2.4 格式化
 
@@ -709,12 +704,12 @@ Vim/Neovim 不需要像 VS Code 那样依赖多光标完成大部分批量编辑
 
 LSP 接入后，最常用的跳转操作包括：
 
-* `gd`：跳转到定义
-* `gr`：查看引用
-* `K`：查看悬浮信息
-* `Ctrl-o`：跳回上一个位置
-* `Ctrl-i`：跳到下一个位置
-* `:jumps`：查看跳转历史
+- `gd`：跳转到定义
+- `gr`：查看引用
+- `K`：查看悬浮信息
+- `Ctrl-o`：跳回上一个位置
+- `Ctrl-i`：跳到下一个位置
+- `:jumps`：查看跳转历史
 
 其中 `gd` 跳到定义后，最常用的返回方式就是：
 
@@ -726,9 +721,9 @@ Ctrl-o
 
 如果你的项目是 Python Monorepo，尤其是：
 
-* 根目录统一使用 `.venv`
-* 内部有 `libs/`
-* 使用 `uv` 管理虚拟环境和依赖
+- 根目录统一使用 `.venv`
+- 内部有 `libs/`
+- 使用 `uv` 管理虚拟环境和依赖
 
 那么通常还需要额外配置 `pyrightconfig.json`，否则容易出现：
 
@@ -757,17 +752,15 @@ Ctrl-o
 
 LazyVim 已经集成了大量常用能力，包括：
 
-* 文件浏览器
-* 搜索
-* LSP
-* 格式化
-* 高亮
-* 终端
-* 各类现代化 UI
-
+- 文件浏览器
+- 搜索
+- LSP
+- 格式化
+- 高亮
+- 终端
+- 各类现代化 UI
 
 对于想少踩坑、快速上手的同学，我更推荐直接从 LazyVim 开始，再在其基础上做少量定制。
-
 
 # 5. 总结
 
@@ -775,31 +768,27 @@ LazyVim 已经集成了大量常用能力，包括：
 
 这套配置的核心能力包括：
 
-* `lazy.nvim`：插件管理
-* `nvim-tree`：文件树
-* `telescope.nvim`：搜索
-* `toggleterm.nvim`：终端
-* `mason.nvim + nvim-lspconfig`：LSP
-* `nvim-cmp`：补全
-* `conform.nvim`：格式化
-* `nvim-treesitter`：高亮与语法树
+- `lazy.nvim`：插件管理
+- `nvim-tree`：文件树
+- `telescope.nvim`：搜索
+- `toggleterm.nvim`：终端
+- `mason.nvim + nvim-lspconfig`：LSP
+- `nvim-cmp`：补全
+- `conform.nvim`：格式化
+- `nvim-treesitter`：高亮与语法树
 
   它不是唯一方案，也未必是最“高级”的方案，但足够清晰、实用，而且比较适合作为理解 Neovim 生态的入门路径。
 
   如果目标是：
-
-  * 想理解 Neovim 是怎么拼起来的
-  * 想知道每一层能力分别由什么插件提供
-  * 想搭一套尽量可控、可维护的个人配置
-
+  - 想理解 Neovim 是怎么拼起来的
+  - 想知道每一层能力分别由什么插件提供
+  - 想搭一套尽量可控、可维护的个人配置
 
   那这条路径是很合适的。
 
   如果目标只是：
-
-  * 快速拥有一套好用的开发环境
-  * 少踩坑
-  * 少折腾
+  - 快速拥有一套好用的开发环境
+  - 少踩坑
+  - 少折腾
 
   那直接从 LazyVim 开始会更轻松。
-

@@ -4,14 +4,17 @@ date: 2021-04-16 15:43:47
 tags:
 excerpt: 自定义docker login鉴权逻辑
 ---
+
 ### 1. 鉴权介绍
+
 自建docker registry比较简单, 但是docker registry的鉴权如何能和现有的系统结合就很优雅了, 我们可以自定义一些规则允许/拒绝某些账户拉取和推送或者只推送. 实现的基本思路:
+
 - 自定义一个docker registry镜像, 可以基于现有官方镜像, 在定义镜像中指定鉴权服务地址
 - 自定一个鉴权的镜像, 在这个镜像中可以包含自定义的鉴权逻辑和仓库的ACL
 - 部署上面两个服务
 
-
 ### 2. 自定义Docker Registory
+
 ```
 FROM centos:7.6.1810
 
@@ -39,7 +42,9 @@ CMD ["/bin/registry", "serve", "/etc/docker/registry/config.yml"]
 ### 3. 自定义权限镜像(重点)
 
 #### 3.1 镜像
+
 这里用到了一个开源的功能很全的基础镜像: [cesanta/docker_auth](https://github.com/cesanta/docker_auth), 为了理解镜像配置需要学习这个镜像的基本知识.
+
 ```
 FROM cesanta/docker_auth as cesanta
 FROM python:2.7.18-alpine
@@ -58,8 +63,11 @@ COPY extensions/ /extensions/
 ```
 
 #### 3.2 镜像配置
+
 上面的镜像中有两个配置config/extensions
+
 - [config配置参](https://github.com/cesanta/docker_auth/blob/main/examples/reference.yml), 如下配置配置了auth和registry通信是https的证书,token的issuer, 扩展授权方式ext_auth, 还有acl, 这些都是关键的配置
+
 ```yaml
 server: # Server settings.
   addr: ":5001"
@@ -87,7 +95,9 @@ acl:
     actions: ["pull"]
     comment: "Logged in users can pull all images."
 ```
+
 - extensions配置是基于上面的配置的ext_auth,例如是个脚本:
+
 ```sh
 read u p
 
@@ -120,15 +130,18 @@ exit $?
     ├── domain.csr
     └── domain.key
 ```
+
 ext_auth.sh是配置所需要的shell脚本, 脚本不要配置标准输出, 退出的code是0或者1. boxlogin.py的Python脚本可以自定更灵活的逻辑, 比如发送Restful请求到现有服务, 判断登录是否成功, 成功则exit(0),否则exit(1).
 
 ### 4. 部署
 
 有了镜像部署就简单了:
+
 - 部署registry并暴露一个访问地址
 - 部署auth并部署并暴露一个访问地址
 - 两个访问地址IP或者域名一致,但是auth的端口是5001
-部署完了保证两个服务各自都可以访问, 可以通过如下命令分别查看两个服务是否正常:
+  部署完了保证两个服务各自都可以访问, 可以通过如下命令分别查看两个服务是否正常:
+
 ```
 curl https://my.registory.cn/v2/
 curl https://my.registory.cn:5001/auth
@@ -136,7 +149,7 @@ curl https://my.registory.cn:5001/auth
 
 ### 5. Troubleshooting
 
-- [docker login returns 400 Bad Request](https://github.com/goharbor/harbor/issues/7159) 
-如果用了负载均衡或者代理需要注意代理的后端必须是https, 可以参考[issue](https://github.com/goharbor/harbor/issues/7159)
+- [docker login returns 400 Bad Request](https://github.com/goharbor/harbor/issues/7159)
+  如果用了负载均衡或者代理需要注意代理的后端必须是https, 可以参考[issue](https://github.com/goharbor/harbor/issues/7159)
 - [auth failure](https://github.com/cesanta/docker_auth#troubleshooting)
-可以把auth服务的日志级别调高,[显示更多日志](https://github.com/cesanta/docker_auth#troubleshooting)
+  可以把auth服务的日志级别调高,[显示更多日志](https://github.com/cesanta/docker_auth#troubleshooting)

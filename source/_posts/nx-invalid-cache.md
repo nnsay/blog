@@ -3,6 +3,7 @@ title: Nx缓存失效探究
 date: 2023-07-20 18:03:19
 tags:
   - DevOps
+  - Troubleshooting
 excerpt: 关于Nx缓存失效的Troubleshooting
 ---
 
@@ -78,11 +79,11 @@ if (this.projectGraph.dependencies[targetProjectName]) {
   this.projectGraph.dependencies[targetProjectName].forEach((d) => {
     if (
       !visited.has(
-        this.computeExternalDependencyIdentifier(targetProjectName, d.target)
+        this.computeExternalDependencyIdentifier(targetProjectName, d.target),
       )
     ) {
       partialHashes.push(
-        this.hashExternalDependency(targetProjectName, d.target, visited)
+        this.hashExternalDependency(targetProjectName, d.target, visited),
       );
     }
   });

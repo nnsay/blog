@@ -7,7 +7,7 @@ tags:
 excerpt: 使用 ds4 在 DGX Spark 单机实现 DeepSeek V4 Flash 高性能推理
 ---
 
-# 1. [ds4](https://github.com/antirez/ds4)介绍
+# 1. [ds4](https://github.com/antirez/ds4) 介绍
 
 DwarfStar 是一个专为 DeepSeek V4 Flash 优化的小型原生推理引擎，在内存非常大的机器上支持 DeepSeek V4 PRO。它有意保持狭窄：不是通用的 GGUF 运行器，也不是其他运行时的包装器：它是完全自包含的。除了以正确和快速的方式运行模型外，项目的目标是提供 DS4 特定的加载、提示渲染、工具调用、KV 状态处理（RAM 和磁盘）、服务器 API 以及集成编码代理，所有这些都可以与编码代理或提供的 CLI 接口一起工作。还有用于 GGUF 和 imatrix 生成的工具，以及用于质量和速度测试的工具。
 
@@ -15,7 +15,7 @@ DwarfStar 是一个专为 DeepSeek V4 Flash 优化的小型原生推理引擎，
 
 ## 2.1 模型权重下载
 
-源码中使用 ./download_model.sh 文件下载权重, 但是这个脚本是从 [HuggingFace](https://huggingface.co/antirez/deepseek-v4-gguf) 上下载, 这里我们通过 [modelscope](https://modelscope.cn/models/hf/antirez-deepseek-v4-gguf/summary) 下载, 本文选择 q2-imatrix 对应的模型, 大小为: 86.72GB.
+源码中使用 ./download_model.sh 文件下载权重, 但是这个脚本是从 [HuggingFace](https://huggingface.co/antirez/deepseek-v4-gguf) 上下载, 这里我们通过 [modelscope](https://modelscope.cn/models/hf/antirez-deepseek-v4-gguf/summary) 下载, 本文选择 q2-imatrix 对应的模型, 大小为 86.72GB.
 
 ```bash
 git clone https://github.com/antirez/ds4
@@ -24,7 +24,7 @@ mkdir -p gguf
 
 # 下载模型权重
 modelscope download --model hf/antirez-deepseek-v4-gguf DeepSeek-V4-Flash-IQ2XXS-w2Q2K-AProjQ8-SExpQ8-OutQ8-chat-v2-imatrix.gguf --local_dir ./gguf/
-# 创建 ds4flash.gguf 软连接, 之后运行命令可以省去 -m 参数
+# 创建 ds4flash.gguf 软链接, 之后运行命令可以省去 -m 参数
 ln -sfn ./gguf/DeepSeek-V4-Flash-IQ2XXS-w2Q2K-AProjQ8-SExpQ8-OutQ8-chat-v2-imatrix.gguf ds4flash.gguf
 # 可选, 下载 MTP 模型权重
 modelscope download --model hf/antirez-deepseek-v4-gguf DeepSeek-V4-Flash-MTP-Q4K-Q8_0-F32.gguf --local_dir ./gguf/
@@ -67,7 +67,7 @@ make cpu              # CPU-only diagnostics build
     > [!TIP]
     >
     > - ds4-server 可以通过 -m 指定模型位置, 如果没有指定, 默认是 ./ds4flash.gguf
-    > - ds4-server 可以通过 --mtp 来使用多token预测特性, 但是需要事先下载好 mtp 模型权重
+    > - ds4-server 可以通过 --mtp 来使用多token预测特性, 但是需要事先下载好 MTP 模型权重
     - 调用
 
       ```bash

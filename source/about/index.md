@@ -40,7 +40,7 @@ date: 2019-10-21 00:37:18
 
 ### 历史博客
 
-- [OSChina](https://my.oschina.net/jimmywa)
+- [OSChina](https://my.oschina.net/jimmywa?key=blog)
 
 ### 喜欢的 RSS 订阅
 

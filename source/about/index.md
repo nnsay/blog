@@ -24,7 +24,7 @@ date: 2019-10-21 00:37:18
 | Github | [nnsay](https://github.com/nnsay) |
 | 简历 | [简历(2023-02-15 版)](/about/index/王健的简历.pdf) | -->
 
-![nnsay’s GitHub image](https://scastiel.dev/api/image/nnsay?dark&removeLink)
+![nnsay’s GitHub image](https://metrics.lecoq.io/nnsay)
 
 ### 工作成就
 

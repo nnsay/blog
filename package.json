@@ -3,12 +3,12 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "npm run me && rm -rf public && hexo generate",
+    "build": "pnpm run me && rm -rf public && hexo generate",
     "clean": "hexo clean",
-    "deploy": "npm run me && hexo clean && hexo deploy",
-    "start": "npm run build && hexo server",
+    "deploy": "pnpm run me && hexo clean && hexo deploy",
+    "start": "pnpm run build && hexo server",
     "lnconfig": "rm -rf themes/concise/_config.yml && ln -f themes/replacement/_config.yml themes/concise/_config.yml && cat themes/replacement/footer.ejs > themes/concise/layout/_partial/footer.ejs && cat themes/replacement/include.js > themes/concise/scripts/include.js",
-    "me": "npm run lnconfig && cp themes/images/* themes/concise/source/images/"
+    "me": "pnpm run lnconfig && cp themes/images/* themes/concise/source/images/"
   },
   "hexo": {
     "version": "7.3.0"
@@ -34,10 +34,10 @@
     "hexo-generator-tag": "^2.0.0",
     "hexo-renderer-ejs": "^2.0.0",
     "hexo-renderer-less": "^4.0.0",
-    "hexo-renderer-marked": "^6.3.0",
+    "hexo-renderer-marked": "^7.0.1",
     "hexo-renderer-stylus": "^3.0.1",
     "hexo-server": "^3.0.0",
-    "lodash": "^4.17.21",
+    "lodash": "^4.18.1",
     "marked-alert": "^2.1.2"
   }
 }

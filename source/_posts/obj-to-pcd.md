@@ -13,7 +13,7 @@ excerpt: 从 3D 模型到 PCD 文件的转换与优化
 
 # 1. 点云文件简介
 
-本文主要讨论如何通过 OBJ 文件生成点云（PCD）文件。关于 OBJ 文件的生成，我已经在之前的[3D 重建](https://nnsay.cn/2025/03/24/3d-reconstruction/)博客中详细介绍过，因此本文将专注于 PCD 文件的生成与处理。
+本文主要讨论如何通过 OBJ 文件生成点云（PCD）文件。关于 OBJ 文件的生成，我已经在之前的[3D 重建](https://blog.nnsay.cn/2025/03/24/3d-reconstruction/)博客中详细介绍过，因此本文将专注于 PCD 文件的生成与处理。
 
 PCD（Point Cloud Data）是一种专门用于存储三维点云数据的文件格式，在多个领域有着广泛应用：
 

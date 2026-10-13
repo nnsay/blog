@@ -9,7 +9,7 @@ excerpt: 使用go编译wasm并在浏览器中调用和使用
 
 # 1. [WebAssembly](https://webassembly.org/)
 
-WebAseembly(wasm)已经出现多年了, 对于 wasm 的印象就两个: 二进制, 性能好. 最近在调研[网站数据安全防护](https://nnsay.cn/2023/09/05/frontend-security/#more), 其中一个想法就是: 将敏感的信息/算法打包成二进制文件, 然后放到浏览器执行, 如此也会一定程度上帮助网站敏感信息和算法的泄露; 如果算法可以前置到浏览器那么浏览器端也能分担一些后端计算的压力. 所以本文主要探究 wasm, 实现如下内容:
+WebAseembly(wasm)已经出现多年了, 对于 wasm 的印象就两个: 二进制, 性能好. 最近在调研[网站数据安全防护](https://blog.nnsay.cn/2023/09/05/frontend-security/#more), 其中一个想法就是: 将敏感的信息/算法打包成二进制文件, 然后放到浏览器执行, 如此也会一定程度上帮助网站敏感信息和算法的泄露; 如果算法可以前置到浏览器那么浏览器端也能分担一些后端计算的压力. 所以本文主要探究 wasm, 实现如下内容:
 
 - 使用 go 语言编译 wasm
 - 使用 JavaScript 调用和执行 wasm

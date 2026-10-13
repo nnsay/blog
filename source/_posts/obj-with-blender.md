@@ -10,7 +10,7 @@ excerpt: 学习使用 Blender 脚本自动处理 OBJ 模型文件，包括简化
 
 # 1. 使用 blender 处理 obj 文件
 
-前一篇文章讲述了如何使用无人机拍摄的图片做 [3D 重建](https://nnsay.cn/2025/03/24/3d-reconstruction/), 重建的结果是 OBJ+MTL+JPG 文件, 本文则重要聚焦如何自动化的处理 OBJ 文件及其材质.
+前一篇文章讲述了如何使用无人机拍摄的图片做 [3D 重建](https://blog.nnsay.cn/2025/03/24/3d-reconstruction/), 重建的结果是 OBJ+MTL+JPG 文件, 本文则重要聚焦如何自动化的处理 OBJ 文件及其材质.
 
 [blender](https://www.blender.org/)是一个开源的 3D 处理软件, 其还支持[python 脚本](https://docs.blender.org/api/current/index.html), 利用这个工具可以针对 [obj](https://en.wikipedia.org/wiki/Wavefront_.obj_file) 做一些业务处理, 以下是本文的重点:
 

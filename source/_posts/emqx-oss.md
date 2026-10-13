@@ -23,7 +23,7 @@ excerpt: 学习和应用开源版本EMQX
 - MQTT over TCP
 
 > [!NOTE]
-> 本文主要是研究 EQMX 开源版本, 试图自己搭建 Borker 服务, 之前的博客[EMQX 应用实践](https://nnsay.cn/2024/10/29/aws-iot-mqtt-alternative)则主要介绍其企业版本中的 Serverless 版本服务的使用; 开源版和企业版在 UI 和操作上很相似, 本文会适当滤过类似操作, 但是会提供详细操作的文档地址.
+> 本文主要是研究 EQMX 开源版本, 试图自己搭建 Borker 服务, 之前的博客[EMQX 应用实践](https://blog.nnsay.cn/2024/10/29/aws-iot-mqtt-alternative)则主要介绍其企业版本中的 Serverless 版本服务的使用; 开源版和企业版在 UI 和操作上很相似, 本文会适当滤过类似操作, 但是会提供详细操作的文档地址.
 
 # 2. 集群搭建
 
@@ -158,7 +158,7 @@ HTTP 转发也和 EMQ 的云产品类似, 是通过`HTTP 连接器`实现的, �
 
 > [!NOTE]
 >
-> - HTTP 转发需要提前开发一个接收服务, 可以参考之前博客(EMQX 应用实践)中的[3.2.3 HTTP 服务实现](https://nnsay.cn/2024/10/29/aws-iot-mqtt-alternative/#3-2-4-HTTP-%E6%9C%8D%E5%8A%A1%E5%AE%9E%E7%8E%B0)
+> - HTTP 转发需要提前开发一个接收服务, 可以参考之前博客(EMQX 应用实践)中的[3.2.3 HTTP 服务实现](https://blog.nnsay.cn/2024/10/29/aws-iot-mqtt-alternative/#3-2-4-HTTP-%E6%9C%8D%E5%8A%A1%E5%AE%9E%E7%8E%B0)
 > - 如果 HTTP 服务没有跑在和 EQMX 一样网络环境中而是在本地, 则需要注意 Host 地址是: ==host.docker.internal==
 
 # 4. 高级话题

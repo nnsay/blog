@@ -1,6 +1,7 @@
 ---
 title: 个人介绍
 date: 2019-10-21 00:37:18
+comments: false
 ---
 
 ### 个人信息
@@ -23,8 +24,6 @@ date: 2019-10-21 00:37:18
 | 技能 | Nodejs/Golang/Terraform/Aliyun/AWS |
 | Github | [nnsay](https://github.com/nnsay) |
 | 简历 | [简历(2023-02-15 版)](/about/index/王健的简历.pdf) | -->
-
-![nnsay’s GitHub image](https://metrics.lecoq.io/nnsay)
 
 ### 工作成就
 

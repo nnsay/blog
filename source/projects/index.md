@@ -7,7 +7,7 @@ comments: false
 <style>
 .projects-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+  grid-template-columns: 1fr;
   gap: 20px;
   margin: 24px 0;
 }
@@ -24,41 +24,43 @@ comments: false
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
 }
-.project-featured {
-  grid-column: 1 / -1;
-}
-/* 竖屏媒体：左媒体右文字 */
-.projects-grid .project-split {
-  flex-direction: row;
-}
-.projects-grid .project-split .project-body {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-.projects-grid .project-media-wrap {
-  flex: 0 0 auto;
-  width: 280px;
+
+/* 媒体舞台：所有作品共用同一比例，媒体按 contain 居中 */
+.projects-grid .project-stage,
+.projects-grid .carousel-viewport {
+  position: relative;
+  aspect-ratio: 4 / 3;
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
   background-color: var(--color-hover);
 }
-.projects-grid .project-media-wrap video {
+.projects-grid .carousel-viewport {
   display: block;
-  width: 100%;
+}
+.projects-grid .project-stage video {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
   height: auto;
   margin: 0;
+  object-fit: contain;
 }
-@media screen and (max-width: 600px) {
-  .projects-grid .project-split {
-    flex-direction: column;
-  }
-  .projects-grid .project-media-wrap {
-    width: 100%;
-  }
+
+/* 说明条：两种媒体共用同一样式 */
+.projects-grid .project-caption,
+.projects-grid .carousel-caption {
+  margin: 0;
+  padding: 9px 14px;
+  border-top: 1px solid var(--color-border);
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--color-secondary);
 }
-.project-body {
+
+.projects-grid .project-body {
   flex: 1;
   padding: 12px 14px 14px;
 }
@@ -72,7 +74,7 @@ comments: false
   margin: 0;
   font-size: 13px;
   line-height: 1.6;
-  color: var(--color-muted);
+  color: var(--color-secondary);
 }
 .project-link {
   display: inline-block;
@@ -81,20 +83,13 @@ comments: false
 }
 
 /* 跑马灯 */
-.projects-grid .carousel {
-  background-color: var(--color-hover);
-}
-.projects-grid .carousel-viewport {
-  position: relative;
-  overflow: hidden;
-}
 .projects-grid .carousel-track {
   display: flex;
+  height: 100%;
   transition: transform 0.4s ease;
 }
 .projects-grid .carousel-slide {
   flex: 0 0 100%;
-  aspect-ratio: 6 / 5;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -110,6 +105,9 @@ comments: false
   height: auto;
   margin: 0;
   object-fit: contain;
+  /* 截图自带浅色底，加边框让留白读作刻意的衬底而非尺寸失误 */
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
 }
 .projects-grid .carousel-btn {
   position: absolute;
@@ -141,15 +139,15 @@ comments: false
   z-index: 2;
   display: flex;
   justify-content: center;
-  gap: 8px;
 }
 .projects-grid .carousel-dot {
-  width: 8px;
-  height: 8px;
-  padding: 0;
+  width: 44px;
+  height: 44px;
+  padding: 18px;
   border: none;
   border-radius: 50%;
   background-color: var(--color-border);
+  background-clip: content-box;
   cursor: pointer;
   transition: background-color 0.25s ease, transform 0.25s ease;
 }
@@ -157,21 +155,46 @@ comments: false
   background-color: var(--color-primary);
   transform: scale(1.35);
 }
-.projects-grid .carousel-caption {
-  margin: 0;
-  padding: 9px 14px;
-  border-top: 1px solid var(--color-border);
-  font-size: 12.5px;
-  line-height: 1.6;
-  color: var(--color-muted);
+
+/* 键盘焦点可见 */
+.projects-grid :focus-visible {
+  outline: 2px solid var(--color-link);
+  outline-offset: 2px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .projects-grid .project-caption,
+  .projects-grid .carousel-caption {
+    color: #a8a8a8;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  /* 竖屏视频在窄屏改用自身比例，避免被舞台压成小图 */
+  .projects-grid .project-stage--portrait {
+    aspect-ratio: auto;
+  }
+  .projects-grid .project-stage--portrait video {
+    width: 100%;
+    max-height: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .projects-grid .project-card,
+  .projects-grid .carousel-track,
+  .projects-grid .carousel-btn,
+  .projects-grid .carousel-dot {
+    transition: none;
+  }
 }
 </style>
 
 <div class="projects-grid">
 
-  <article class="project-card project-featured">
+  <article class="project-card">
     <div class="carousel" data-carousel>
-      <div class="carousel-viewport">
+      <div class="carousel-viewport" role="region" aria-roledescription="轮播" aria-label="单词乐乐园界面截图">
         <div class="carousel-track">
           <div class="carousel-slide" data-caption="探索页 · 追踪听捕、火眼金睛、拼装怪兽三种玩法，左侧是宠物养成与能量豆进度">
             <img src="/projects/index/word-fun-1-explore.jpg" alt="单词乐乐园 探索页">
@@ -190,24 +213,26 @@ comments: false
         <button class="carousel-btn carousel-next" type="button" aria-label="下一张">›</button>
         <div class="carousel-dots"></div>
       </div>
-      <p class="carousel-caption"></p>
+      <p class="carousel-caption" aria-live="polite"></p>
     </div>
     <div class="project-body">
-      <h3 class="project-title">单词乐乐园</h3>
+      <h2 class="project-title">单词乐乐园</h2>
       <p class="project-desc">给小学孩子背单词的纯前端网站，内置两个怪兽等级，包含听力、翻译、拼写三个能力的游戏。</p>
       <a class="project-link" href="https://word-fun.nnsay.cn/" target="_blank" rel="noopener">访问网站 →</a>
     </div>
   </article>
 
-  <article class="project-card project-featured project-split">
-    <div class="project-media-wrap">
+  <article class="project-card">
+    <div class="project-stage project-stage--portrait">
       <video src="/projects/index/job-pilot-demo.mp4"
              poster="/projects/index/job-pilot-poster.jpg"
+             aria-label="job-pilot 演示录屏：在 Boss 直聘 App 上自动采集职位并完成首轮沟通"
              controls muted loop playsinline preload="metadata"></video>
     </div>
+    <p class="project-caption">演示 · 采集职位 → 简历匹配评估 → 生成打招呼消息，已沟通职位自动去重</p>
     <div class="project-body">
-      <h3 class="project-title">job-pilot · Boss 直聘自动沟通 Agent</h3>
-      <p class="project-desc">在 Boss 直聘 App 上自动采集职位、按简历匹配度评估并完成首轮沟通的 AI Agent。通过 ADB + UI Tree 驱动真实设备操作，绕开网页版对 CDP 自动化的驱动层检测；流程由 LangGraph 状态机编排，LLM 以结构化输出判定匹配并生成打招呼消息，已沟通职位自动去重。</p>
+      <h2 class="project-title">job-pilot · Boss 直聘自动沟通 Agent</h2>
+      <p class="project-desc">在 Boss 直聘 App 上自动采集职位、按简历匹配度评估并完成首轮沟通的 AI Agent。通过 ADB + UI Tree 驱动真实设备，绕开网页版对 CDP 自动化的驱动层检测；流程由 LangGraph 状态机编排，LLM 以结构化输出判定匹配并生成打招呼消息。</p>
       <a class="project-link" href="https://github.com/nnsay/job-pilot" target="_blank" rel="noopener">查看源码 →</a>
     </div>
   </article>
@@ -238,12 +263,26 @@ comments: false
       track.style.transform = 'translateX(-' + index * 100 + '%)';
       dots.forEach(function (dot, i) {
         dot.classList.toggle('active', i === index);
+        dot.setAttribute('aria-current', i === index ? 'true' : 'false');
+      });
+      // 离屏 slide 对屏幕阅读器隐藏，避免读出四张无标签截图
+      slides.forEach(function (slide, i) {
+        if (i === index) { slide.removeAttribute('aria-hidden'); }
+        else { slide.setAttribute('aria-hidden', 'true'); }
       });
       caption.textContent = slides[index].getAttribute('data-caption') || '';
     }
 
     root.querySelector('.carousel-prev').addEventListener('click', function () { go(index - 1); });
     root.querySelector('.carousel-next').addEventListener('click', function () { go(index + 1); });
+
+    // 方向键：焦点在轮播内时可用
+    root.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowLeft') { go(index - 1); }
+      else if (e.key === 'ArrowRight') { go(index + 1); }
+      else { return; }
+      e.preventDefault();
+    });
 
     var startX = null;
     root.addEventListener('touchstart', function (e) {

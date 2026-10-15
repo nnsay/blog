@@ -224,16 +224,16 @@ comments: false
 
   <article class="project-card">
     <div class="project-stage project-stage--portrait">
-      <video src="/projects/index/job-pilot-demo.mp4"
-             poster="/projects/index/job-pilot-poster.jpg"
-             aria-label="job-pilot 演示录屏：在 Boss 直聘 App 上自动采集职位并完成首轮沟通"
+      <video src="/projects/index/appilot-demo.mp4"
+             poster="/projects/index/appilot-poster.jpg"
+             aria-label="appilot 演示录屏：在 Boss 直聘 App 上自动采集职位并完成首轮沟通"
              controls muted loop playsinline preload="metadata"></video>
     </div>
     <p class="project-caption">演示 · 采集职位 → 简历匹配评估 → 生成打招呼消息，已沟通职位自动去重</p>
     <div class="project-body">
-      <h2 class="project-title">job-pilot · Boss 直聘自动沟通 Agent</h2>
+      <h2 class="project-title">appilot · Boss 直聘自动沟通 Agent</h2>
       <p class="project-desc">在 Boss 直聘 App 上自动采集职位、按简历匹配度评估并完成首轮沟通的 AI Agent。通过 ADB + UI Tree 驱动真实设备，绕开网页版对 CDP 自动化的驱动层检测；流程由 LangGraph 状态机编排，LLM 以结构化输出判定匹配并生成打招呼消息。</p>
-      <a class="project-link" href="https://github.com/nnsay/job-pilot" target="_blank" rel="noopener">查看源码 →</a>
+      <a class="project-link" href="https://github.com/nnsay/appilot" target="_blank" rel="noopener">查看源码 →</a>
     </div>
   </article>
 

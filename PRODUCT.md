@@ -48,7 +48,7 @@ web
 
 **未决 / 待处理**：
 
-- **job-pilot 仓库当前为 private**（2026-10-13 核实：`gh api` 返回 `"private": true`，匿名请求 404）。projects 页的"查看源码"链接指向 `https://github.com/nnsay/job-pilot`，对外访客会 404。产品意图是公开作品，需作者决定是转为 public 还是改链接目标。
+- **appilot 仓库当前为 private**（2026-10-13 核实：`gh api` 返回 `"private": true`，匿名请求 404）。projects 页的"查看源码"链接指向 `https://github.com/nnsay/appilot`，对外访客会 404。产品意图是公开作品，需作者决定是转为 public 还是改链接目标。
 - **作品区规模会持续增加**（用户确认），两张卡当前 UI 风格不一致（作品 1 为全宽跑马灯，作品 2 为左媒体右文字），统一方案待定。
 
 ## Brand Commitments
@@ -67,8 +67,8 @@ web
 |---|---|---|
 | 技术文章 107 篇 | `source/_posts/` | 最早可追溯多年，持续更新 |
 | 作品 1 截图 4 张 | `source/projects/index/word-fun-*.jpg` | 探索页 / 词库 / 成就 / Debug 页，均 1400px 宽 JPEG |
-| 作品 2 演示视频 | `source/projects/index/job-pilot-demo.mp4` | 480×722 竖屏，54.4 秒，无音轨 |
-| 作品 2 视频封面 | `source/projects/index/job-pilot-poster.jpg` | |
+| 作品 2 演示视频 | `source/projects/index/appilot-demo.mp4` | 480×722 竖屏，54.4 秒，无音轨 |
+| 作品 2 视频封面 | `source/projects/index/appilot-poster.jpg` | |
 | 简历 | `source/about/index/resume.pdf` | 2026-07 版 |
 | 资质证明 | `source/about/index/acp.jpg`、`award1.jpg` | 阿里云 ACP 认证、优秀员工 |
 | 医疗器械资质 | about 页 NMPA 查询链接 ×2 | 湘械注准 20212212316、20222210103 |
